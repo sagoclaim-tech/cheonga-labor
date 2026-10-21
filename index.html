@@ -196,7 +196,7 @@ details.more>summary{cursor:pointer;color:var(--accent-2);font-size:13px;padding
 /* 하단 탭 */
 nav.tabs{position:fixed;left:0;right:0;bottom:0;z-index:6;background:var(--surface);border-top:1px solid var(--line);
   padding-left:max(8px,env(safe-area-inset-left,0px));padding-right:max(8px,env(safe-area-inset-right,0px));padding-bottom:env(safe-area-inset-bottom,0px)}
-nav.tabs .in{max-width:760px;margin:0 auto;display:grid;grid-template-columns:repeat(4,1fr)}
+nav.tabs .in{max-width:760px;margin:0 auto;display:grid;grid-template-columns:repeat(5,1fr)}
 nav.tabs button{background:none;border:0;padding:10px 4px 9px;font-size:12px;color:var(--muted);cursor:pointer;display:grid;justify-items:center;gap:2px}
 nav.tabs button svg{width:22px;height:22px;stroke:currentColor;fill:none;stroke-width:1.7}
 nav.tabs button[aria-current="page"]{color:var(--accent-2);font-weight:600;box-shadow:inset 0 3px 0 var(--accent-2)}
@@ -267,6 +267,7 @@ img{max-width:100%}
     <button type="button" data-tab="summary"><svg viewBox="0 0 24 24"><path d="M4 5h16M4 12h16M4 19h10"/></svg>요약</button>
     <button type="button" data-tab="calc"><svg viewBox="0 0 24 24"><rect x="5" y="3" width="14" height="18" rx="2"/><path d="M8 7h8M8 12h2M14 12h2M8 16h2M14 16h2"/></svg>계산기</button>
     <button type="button" data-tab="grants"><svg viewBox="0 0 24 24"><path d="M3.5 5.5l4 13 4.5-11 4.5 11 4-13M2.5 10.5h19M2.5 14h19"/></svg>지원금</button>
+    <button type="button" data-tab="interp"><svg viewBox="0 0 24 24"><path d="M6 3h9l4 4v14H6z"/><path d="M14 3v5h5M9 12h7M9 16h7"/></svg>행정해석</button>
     <button type="button" data-tab="search"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="6.5"/><path d="M16 16l4.5 4.5"/></svg>검색</button>
   </div>
 </nav>
@@ -315,7 +316,9 @@ function syncHeader(){const ym=ASOF.slice(0,7);const sel=$("#month");sel.value=M
   $("#today").setAttribute("aria-pressed",MODE==="today"?"true":"false");$("#asofNote").textContent=MODE==="today"?"오늘("+ASOF+") 기준":ym.slice(0,4)+"년 "+(+ym.slice(5))+"월 1일 기준";}
 function setMonth(ym){if(ym===curYM()){MODE="today";ASOF=todayStr();}else{MODE="month";ASOF=ym+"-01";}syncHeader();render();}
 function shiftMonth(n){const o=monthOpts();let i=o.indexOf(MODE==="today"?curYM():ASOF.slice(0,7));if(i<0)i=o.length-1;i=Math.max(0,Math.min(o.length-1,i+n));setMonth(o[i]);}
-function loadData(){return fetch("data.json?t="+Date.now(),{cache:"no-store"}).then(r=>{if(!r.ok)throw new Error(r.status);return r.json();}).then(j=>{D=j;});}
+let IV=null;
+function loadInterp(){return fetch("interp.json?t="+Date.now(),{cache:"no-store"}).then(r=>r.ok?r.json():null).then(j=>{if(j&&Array.isArray(j.items))IV=j;}).catch(()=>{});}
+function loadData(){return Promise.all([fetch("data.json?t="+Date.now(),{cache:"no-store"}).then(r=>{if(!r.ok)throw new Error(r.status);return r.json();}).then(j=>{D=j;}),loadInterp()]);}
 $("#month").innerHTML=monthOpts().map(v=>`<option value="${v}">${v.slice(0,4)}년 ${+v.slice(5)}월${v===curYM()?" (현재)":v>curYM()?" (예정)":""}</option>`).join("");
 $("#month").addEventListener("change",e=>setMonth(e.target.value));
 $("#mprev").addEventListener("click",()=>shiftMonth(-1));
@@ -323,7 +326,7 @@ $("#mnext").addEventListener("click",()=>shiftMonth(1));
 $("#today").addEventListener("click",()=>{MODE="today";ASOF=todayStr();syncHeader();const b=$("#today");b.textContent="갱신 중";
   loadData().then(()=>{render();b.textContent="오늘";}).catch(e=>{b.textContent="오늘";render();});});
 
-function render(){if(!D)return;({summary:rSummary,calc:rCalc,grants:rGrants,search:rSearch,table:rSearch}[TAB]||rSummary)();}
+function render(){if(!D)return;({summary:rSummary,calc:rCalc,grants:rGrants,interp:rInterp,search:rSearch,table:rSearch}[TAB]||rSummary)();}
 
 /* ---------- 요약 ---------- */
 function rSummary(){
@@ -679,6 +682,35 @@ function rGrants(){
   app.querySelectorAll("#pbox input,#pbox select").forEach(el=>el.addEventListener("change",save));
 }
 
+/* ---------- 행정해석 ---------- */
+let ITOPIC="전체",ISORT="recent",IOPEN=null;
+const ITOPICS=["최저임금","임금","퇴직금","연차휴가","근로시간","실업급여","모성보호","지원금","대지급금","산재보상","사회보험","기타"];
+function interpMatch(x,toks){const hay=[x.title,x.q,x.a,x.no,x.basis,x.topic].join(" ").toLowerCase();return toks.every(g=>g.some(w=>hay.includes(w.toLowerCase())));}
+function rInterp(){
+  const items=(IV&&IV.items)||[];const q=store.get("iq","");
+  const hasViews=items.some(x=>typeof x.views==="number");if(!hasViews)ISORT="recent";
+  const cnt={};items.forEach(x=>cnt[x.topic]=(cnt[x.topic]||0)+1);
+  app.innerHTML=`<section class="view"><div><span class="eyebrow">고용노동부 질의회시${IV&&IV.meta&&IV.meta.updated?" · 최종 갱신 "+esc(IV.meta.updated):""}</span><h2>행정해석</h2>
+  <p class="lede">금전 기준과 관련된 최신 행정해석을 모았습니다. 매일 아침 새로 나온 회시를 확인해 추가합니다. 항목을 누르면 질의·회시 요지와 원문 링크가 보입니다.</p></div>
+  <div class="search"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="6.5"/><path d="M16 16l4.5 4.5"/></svg><input id="iq" type="search" placeholder="예: 연차수당 퇴직, 통상임금 상여금" value="${esc(q)}" autocomplete="off"></div>
+  <div class="chips">${["전체",...ITOPICS.filter(t=>cnt[t])].map(t=>`<button type="button" class="chip" data-it="${esc(t)}" aria-pressed="${ITOPIC===t}">${esc(t)} ${t==="전체"?items.length:cnt[t]}</button>`).join("")}</div>
+  ${hasViews?`<div class="chips"><button type="button" class="chip" data-is="recent" aria-pressed="${ISORT==="recent"}">최신순</button><button type="button" class="chip" data-is="views" aria-pressed="${ISORT==="views"}">조회순</button></div>`:""}
+  <div id="ilist" style="display:grid;gap:10px"></div>
+  <p class="foot">※ 행정해석은 행정기관의 법령 해석으로 법원을 기속하지 않습니다. 구체적 사안은 회시 원문과 최신 판례로 확인합니다.</p></section>`;
+  const draw=()=>{const s=sval("iq").trim();store.set("iq",s);const toks=s?s.toLowerCase().split(/\s+/).filter(Boolean).map(expand):[];
+    let list=items.filter(x=>(ITOPIC==="전체"||x.topic===ITOPIC)&&(!toks.length||interpMatch(x,toks)));
+    list.sort(ISORT==="views"?(a,b)=>(b.views||0)-(a.views||0):(a,b)=>a.date<b.date?1:a.date>b.date?-1:0);
+    const fresh=x=>x.added&&(new Date(todayStr())-new Date(x.added))/864e5<=7;
+    $("#ilist").innerHTML=`<p class="note">${list.length}건</p>`+(list.map(x=>`<details class="gcard" data-iid="${esc(x.id)}"><summary><div class="ghead"><span class="pill p-type">${esc(x.topic)}</span>${fresh(x)?'<span class="pill p-warn">새로 추가</span>':""}<span class="note">${esc(x.date)} · ${esc(x.no)}${typeof x.views==="number"?" · 조회 "+x.views.toLocaleString("ko-KR"):""}</span></div><span class="gname">${toks.length?hl(x.title,toks):esc(x.title)}</span></summary>
+      <div class="gbody"><dl><dt>질의 요지</dt><dd>${toks.length?hl(x.q,toks):esc(x.q)}</dd><dt>회시 요지</dt><dd>${toks.length?hl(x.a,toks):esc(x.a)}</dd>${x.basis?`<dt>관련 법령</dt><dd>${esc(x.basis)}</dd>`:""}</dl>
+      <div class="basis">${okSrc(x.src)?`<a href="${esc(x.src)}" target="_blank" rel="noopener">회시 원문</a> · `:""}문서번호 ${esc(x.no)} · 회시일 ${esc(x.date)}</div></div></details>`).join("")||`<p class="note">${items.length?"찾는 행정해석이 없습니다. 다른 표현으로 검색하거나 분야를 전체로 바꿔 보세요.":(IV?"행정해석 자료를 준비 중입니다. 확인된 회시부터 순차로 게시됩니다.":"행정해석 자료를 불러오지 못했습니다. 오늘 버튼을 눌러 다시 불러오세요.")}</p>`);
+    if(IOPEN){const d=$("#ilist").querySelector(`[data-iid="${CSS.escape(IOPEN)}"]`);IOPEN=null;if(d){d.open=true;setTimeout(()=>d.scrollIntoView({block:"start"}),30);}}};
+  $("#iq").addEventListener("input",draw);
+  app.querySelectorAll("[data-it]").forEach(b=>b.addEventListener("click",()=>{ITOPIC=b.dataset.it;rInterp();}));
+  app.querySelectorAll("[data-is]").forEach(b=>b.addEventListener("click",()=>{ISORT=b.dataset.is;rInterp();}));
+  draw();
+}
+
 /* ---------- 통합 검색 ---------- */
 const SYN=[["실업급여","구직급여","실업"],["대지급금","체당금"],["장례비","장의비"],["산재","산업재해","재해"],["육아휴직","육휴"],["최저임금","최저시급","최임"],["건강보험","건보"],["국민연금","연금보험"],["장기요양","요양보험"],["고용보험","고보"],["지원금","장려금","보조금"],["출산휴가","출산전후휴가"],["두루누리","사회보험료 지원"],["괴롭힘","갑질"],["질병","부상","질환"],["퇴직금","퇴직급여"],["연차","연차휴가"],["4대보험","사대보험"],["고령자","고령","정년"],["청년","청년도약"],["장애인","장애"],["휴업급여","휴업"],["상한","상한액","최고"],["하한","하한액","최저"]];
 function expand(tok){const out=new Set([tok]);SYN.forEach(g=>{if(g.some(w=>w.includes(tok)||tok.includes(w)))g.forEach(w=>out.add(w));});return [...out];}
@@ -699,6 +731,7 @@ function buildDocs(){const docs=[];const add=(type,title,text,go,val)=>docs.push
   const dg=tbl("dg_caps");if(dg)add("기준표","대지급금 연령별 상한액",dg.rows.map(r=>r[0]+" "+r[1].toLocaleString()+"원").join(", ")+" "+(dg.notes||[]).join(" "),{calc:"dg"});
   [["mw","최저임금 확인 계산기","최저임금 위반 산입범위 월 환산 209시간 수습 감액"],["ui","실업급여 계산기","구직급여 일액 상한 하한 소정급여일수 수급요건 이직사유"],["pl","육아휴직급여 계산기","육아휴직 6+6 통상임금 상한"],["mat","출산전후휴가급여 계산기","출산휴가 다태아 우선지원대상기업 상한"],["ins","4대보험료 계산기","국민연금 건강보험 장기요양 고용보험 산재보험 요율 보험료"],["sev","퇴직금 계산기","퇴직금 평균임금 상여금 연차수당 계속근로"],["al","연차일수 계산기","연차유급휴가 출근율 가산휴가"],["dg","대지급금 계산기","체당금 도산 간이 상한"]].forEach(([c,t,k])=>add("계산기",t,k,{calc:c}));
   (D.notices||[]).forEach(n=>add("제도 동향",n.date+" 동향",n.text,{notice:n.src}));
+  ((IV&&IV.items)||[]).forEach(x=>add("행정해석",x.title,`${x.no} ${x.date} ${x.topic} ${x.q} ${x.a} ${x.basis||""}`,{interp:x.id}));
   return docs;}
 function hl(text,toks){let t=esc(text);toks.flat().filter(w=>w.length>0).sort((a,b)=>b.length-a.length).forEach(w=>{const re=new RegExp("("+w.replace(/[.*+?^${}()|[\]\\]/g,"\\$&")+")","gi");t=t.replace(re,"<mark>$1</mark>");});return t.replace(/<mark>(<mark>)+/g,"<mark>").replace(/(<\/mark>)+/g,"</mark>");}
 function snippet(text,toks){const low=text.toLowerCase();let pos=-1;for(const g of toks)for(const w of g){const i=low.indexOf(w.toLowerCase());if(i>=0&&(pos<0||i<pos))pos=i;}const st=Math.max(0,pos-30);return (st>0?"…":"")+text.slice(st,st+120)+(text.length>st+120?"…":"");}
@@ -707,11 +740,12 @@ function itemDetail(id){const it=D.items[id];const e=entry(id),n=nextEntry(id);c
   ${e?`<div class="meta">근거: ${esc(e.basis||"")} · 확인 ${esc(e.checked||"")}${okSrc(e.src)?` · <a href="${esc(e.src)}" target="_blank" rel="noopener">출처</a>`:""}</div>`:""}
   ${e&&e.note?`<div class="note">※ ${esc(e.note)}</div>`:""}${hist.length>1?`<div class="hist">이력: ${hist.map(h=>`${esc(h.from)} ${showVal(it,h)}`).join(" / ")}</div>`:""}</div>`;}
 function goDoc(d){const g=d.go;
+  if(g.interp){ITOPIC="전체";IOPEN=g.interp;store.set("iq","");setTab("interp");return;}
   if(g.grant){GFILTER="all";GOPEN=g.grant;setTab("grants");return;}
   if(g.calc){CALC=g.calc;if(g.just){store.set("ui.ui_reason","just");store.set("ui.ui_just",g.just);}if(g.kind)store.set("sj.sj_kind",g.kind);setTab("calc");return;}
   if(g.notice&&okSrc(g.notice)){window.open(g.notice,"_blank","noopener");}}
 function rSearch(){
-  if(!DOCS||DOCS._d!==D||DOCS._a!==ASOF){DOCS=buildDocs();DOCS._d=D;DOCS._a=ASOF;}
+  if(!DOCS||DOCS._d!==D||DOCS._a!==ASOF||DOCS._i!==IV){DOCS=buildDocs();DOCS._d=D;DOCS._a=ASOF;DOCS._i=IV;}
   const q=store.get("q","");
   const KW=["실업급여 질병","직장 내 괴롭힘","최저임금","구직급여 상한","육아휴직","대체인력","청년","고령자","장해등급","장례비","대지급금","국민연금","두루누리","2027"];
   app.innerHTML=`<section class="view"><div><span class="eyebrow">${esc(asofText())} 기준</span><h2>통합 검색</h2><p class="lede">기준 수치, 지원금, 실업급여 이직사유, 산재 급여표, 계산기, 제도 동향을 한 번에 찾습니다. 띄어 쓴 단어는 모두 포함된 결과만 보여 주며, 장의비와 장례비처럼 같은 뜻의 단어도 함께 찾습니다.</p></div>
@@ -725,7 +759,7 @@ function rSearch(){
     const hits=DOCS.map(d=>{let score=0;for(const g of toks){let best=0;for(const w of g){const lw=w.toLowerCase();if(d.title.toLowerCase().includes(lw))best=Math.max(best,3);else if(d.hay.includes(lw))best=Math.max(best,1);}if(!best)return null;score+=best;}return {d,score};}).filter(Boolean).sort((a,b)=>b.score-a.score);
     $("#res").innerHTML=`<p class="note">검색 결과 ${hits.length}건</p>`+(hits.map((h,i)=>{const d=h.d;const it=d.go.item?D.items[d.go.item]:null;const val=it?showVal(it,entry(d.go.item)):"";
       return `<div class="hit" data-i="${i}" role="button" tabindex="0"><div class="t"><span class="tt">${hl(d.title,toks)}</span>${val?`<span class="val">${val}</span>`:""}</div>
-      <div class="ghead"><span class="pill p-type">${esc(d.type)}</span>${d.go.calc?'<span class="note">눌러서 계산기로 이동</span>':d.go.grant?'<span class="note">눌러서 지원금 상세로 이동</span>':d.go.notice?'<span class="note">눌러서 출처 열기</span>':'<span class="note">눌러서 근거 보기</span>'}</div>
+      <div class="ghead"><span class="pill p-type">${esc(d.type)}</span>${d.go.interp?'<span class="note">눌러서 행정해석으로 이동</span>':d.go.calc?'<span class="note">눌러서 계산기로 이동</span>':d.go.grant?'<span class="note">눌러서 지원금 상세로 이동</span>':d.go.notice?'<span class="note">눌러서 출처 열기</span>':'<span class="note">눌러서 근거 보기</span>'}</div>
       <div class="sn">${hl(snippet(d.text,toks),toks)}</div><div class="dx"></div></div>`;}).join("")||`<p class="note">찾는 내용이 없습니다. 다른 표현으로 검색하거나 단어 수를 줄여 보세요.</p>`);
     $("#res").querySelectorAll(".hit").forEach(el=>{const act=()=>{const d=hits[+el.dataset.i].d;if(d.go.item){const dx=el.querySelector(".dx");dx.innerHTML=dx.innerHTML?"":itemDetail(d.go.item);}else goDoc(d);};
       el.addEventListener("click",e=>{if(e.target.closest("a"))return;act();});el.addEventListener("keydown",e=>{if(e.key==="Enter")act();});});};
@@ -754,7 +788,7 @@ document.addEventListener("click",e=>{if(e.target&&e.target.id==="btnInstall"&&D
 if("serviceWorker" in navigator){window.addEventListener("load",()=>{navigator.serviceWorker.register("sw.js").catch(()=>{});});}
 /* 시작 */
 syncHeader();
-const h=(location.hash||"").replace("#","");let H0=["calc","grants","search"].includes(h)?h:h==="table"?"search":"summary";
+const h=(location.hash||"").replace("#","");let H0=["calc","grants","interp","search"].includes(h)?h:h==="table"?"search":"summary";
 try{history.replaceState({tab:"summary"},"","#summary");if(H0!=="summary")history.pushState({tab:H0},"","#"+H0);}catch(e){}TAB=H0;
 document.querySelectorAll("nav.tabs button").forEach(b=>b.setAttribute("aria-current",b.dataset.tab===TAB?"page":"false"));
 loadData().then(()=>render())

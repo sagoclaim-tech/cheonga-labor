@@ -260,8 +260,8 @@ img{max-width:100%}
 .disc ol{margin:8px 0 0;padding-left:18px;display:grid;gap:6px;line-height:1.6}
 .ff-note{font-size:10.5px;color:var(--muted);opacity:.8;margin-top:8px;line-height:1.6}
 </style>
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-3C14K6DE4T"></script>
-<script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag("js",new Date());gtag("config","G-3C14K6DE4T",{page_title:"청아앱 시작"});</script>
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-KV19SM34XJ"></script>
+<script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag("js",new Date());gtag("config","G-KV19SM34XJ",{page_title:"시작"});</script>
 </head>
 <body>
 
@@ -320,7 +320,7 @@ function srcLine(ids){const out=[];for(const id of ids){const it=D.items[id],e=e
 
 /* 탭 */
 /* 뒤로가기: 요약 외 탭에서 휴대폰 뒤로가기를 누르면 요약으로 돌아감 */
-function showTab(t){TAB=t;try{const nm={summary:"요약",calc:"계산기",grants:"지원금",interp:"행정해석",search:"검색"}[t]||t;gtag("event","page_view",{page_title:"청아앱 "+nm,page_location:location.origin+location.pathname+"#"+t});}catch(e){}document.querySelectorAll("nav.tabs button").forEach(b=>b.setAttribute("aria-current",b.dataset.tab===t?"page":"false"));render();window.scrollTo(0,0);}
+function showTab(t){TAB=t;try{const nm={summary:"요약",calc:"계산기",grants:"지원금",interp:"행정해석",search:"검색"}[t]||t;gtag("event","page_view",{page_title:""+nm,page_location:location.origin+location.pathname+"#"+t});}catch(e){}document.querySelectorAll("nav.tabs button").forEach(b=>b.setAttribute("aria-current",b.dataset.tab===t?"page":"false"));render();window.scrollTo(0,0);}
 function setTab(t){const from=TAB;try{if(t!=="summary"&&from==="summary")history.pushState({tab:t},"","#"+t);else if(t==="summary"&&from!=="summary"&&history.state&&history.state.tab){history.back();return;}else history.replaceState({tab:t},"","#"+t);}catch(e){}showTab(t);}
 window.addEventListener("popstate",e=>{const t=(e.state&&e.state.tab)||"summary";if(t!==TAB)showTab(t);});
 document.querySelectorAll("nav.tabs button").forEach(b=>b.addEventListener("click",()=>setTab(b.dataset.tab)));

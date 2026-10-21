@@ -338,12 +338,16 @@ function render(){if(!D)return;({summary:rSummary,calc:rCalc,grants:rGrants,inte
 /* ---------- 요약 ---------- */
 function rSummary(){
   const GROUPS=[{t:"최저임금",sub:"",rows:[["min_wage_hourly","시간급"],["min_wage_monthly","월 환산(209시간)"]]},
-    {t:"사회보험요율",sub:"근로자·사업주 합계",rows:[["np_rate","국민연금"],["hi_rate","건강보험"],["ltc_rate","장기요양(소득 대비)"]]},
+    {t:"4대보험 요율",sub:"",rows:[["np_rate","국민연금(노사 합계)"],["hi_rate","건강보험(노사 합계)"],["ltc_rate","장기요양(소득 대비)"],["ei_ui_worker","고용보험 실업급여(근로자)"],["ei_sp_1","고용안정·직능(사업주, 150인 미만)"],["hi_cap_upper","건강보험료 월 상한(노사 합계)"],["hi_cap_lower","건강보험료 월 하한(노사 합계)"]]},
     {t:"국민연금 기준소득월액",sub:"매년 7월 조정",rows:[["np_lower","하한"],["np_upper","상한"]]},
+    {t:"출산·육아 급여 상한",sub:"",rows:[["mat_cap","출산전후휴가(월)"],["pl_cap_1","육아휴직 1~3개월(월)"],["pl_cap_4","육아휴직 4~6개월(월)"],["pl_cap_7","육아휴직 7개월 이후(월)"],["spouse_leave_cap","배우자 출산휴가"]]},
+    {t:"구직급여 1일",sub:"",rows:[["ui_daily_max","상한액"],["ui_daily_min","하한액(8시간)"]]},
+    {t:"장애인 의무고용률",sub:"",rows:[["disabled_quota","민간 사업주"]]},
     {t:"산재 보상기준 1일",sub:"",rows:[["ia_min","최저보상기준"],["ia_max","최고보상기준"]]}];
-  const figs=GROUPS.map(g=>`<div class="fgrp"><h3>${esc(g.t)}${g.sub?`<small>${esc(g.sub)}</small>`:""}</h3>${g.rows.map(([id,lab])=>{const it=D.items[id];if(!it)return"";const e=entry(id),n=nextEntry(id);
+  const grp=g=>`<div class="fgrp"><h3>${esc(g.t)}${g.sub?`<small>${esc(g.sub)}</small>`:""}</h3>${g.rows.map(([id,lab])=>{const it=D.items[id];if(!it)return"";const e=entry(id),n=nextEntry(id);
     return `<button type="button" class="frow" data-go="${esc(id)}"><span class="k">${esc(lab)}</span><span class="v">${showVal(it,e)}</span>
-    <span class="s">${e&&/자동 반영/.test(e.note||"")&&e.checked&&(new Date(todayStr())-new Date(e.checked))/864e5<=7?`<span class="pill p-warn">자동 반영 ${esc(e.checked.slice(5))}</span> `:""}${e?(isFuture()&&e.from<ASOF?esc(e.from)+" 시행 값(이후 변경 미확정)":esc(e.from)+" 시행"):"해당 시점 자료 없음"}${n&&!isPast()&&!isFuture()?` · <span class="nx">${esc(n.from)}부터 ${showVal(it,n)}</span>`:""}</span></button>`}).join("")}</div>`).join("");
+    <span class="s">${e&&/자동 반영/.test(e.note||"")&&e.checked&&(new Date(todayStr())-new Date(e.checked))/864e5<=7?`<span class="pill p-warn">자동 반영 ${esc(e.checked.slice(5))}</span> `:""}${e?(isFuture()&&e.from<ASOF?esc(e.from)+" 시행 값(이후 변경 미확정)":esc(e.from)+" 시행"):"해당 시점 자료 없음"}${n&&!isPast()&&!isFuture()?` · <span class="nx">${esc(n.from)}부터 ${showVal(it,n)}</span>`:""}</span></button>`}).join("")}</div>`;
+  const figs=GROUPS.slice(0,4).map(grp).join("")+`<details class="more figmore" style="grid-column:1/-1"><summary>수치 더 보기(구직급여, 장애인 의무고용률, 산재 보상기준)</summary><div class="figs" style="margin-top:10px">${GROUPS.slice(4).map(grp).join("")}</div></details>`;
   const TODAY=todayStr();
   const dayBefore=d=>{const x=new Date(d+"T00:00:00Z");x.setUTCDate(x.getUTCDate()-1);return x.toISOString().slice(0,10);};
   const ST={"확정":"p-ok","입법예고":"p-warn","국회 계류":"p-no","정부안":"p-no","예산안":"p-no"};

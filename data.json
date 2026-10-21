@@ -737,6 +737,136 @@
      "note": "2026년 언론 보도도 270만원. 2026년 고시 원문 대조 필요"
     }
    ]
+  },
+  "hi_cap_upper": {
+   "group": "4대보험 요율",
+   "name": "건강보험료 상한(직장가입자 보수월액보험료, 노사 합계)",
+   "short": "건강보험료 상한",
+   "unit": "원",
+   "hist": [
+    {
+     "from": "2024-01-01",
+     "value": 8481420,
+     "basis": "월별 건강보험료액의 상한과 하한에 관한 고시(2024년 적용분)",
+     "src": "https://www.nhis.or.kr/lm/lmxsrv/law/lawChangeList.do?SEQ=39&SEQ_HISTORY=46322",
+     "checked": "2026-10-22"
+    },
+    {
+     "from": "2025-01-01",
+     "value": 9008340,
+     "basis": "보건복지부고시 제2024-289호",
+     "src": "https://www.nhis.or.kr/lm/lmxsrv/law/lawChangeList.do?SEQ=39&SEQ_HISTORY=46322",
+     "checked": "2026-10-22"
+    },
+    {
+     "from": "2026-01-01",
+     "value": 9183480,
+     "basis": "보건복지부고시 제2025-222호",
+     "src": "https://www.nhis.or.kr/lm/lmxsrv/law/lawFullContent.do?SEQ=39",
+     "checked": "2026-10-22",
+     "note": "근로자 부담분은 절반"
+    }
+   ]
+  },
+  "hi_cap_lower": {
+   "group": "4대보험 요율",
+   "name": "건강보험료 하한(직장가입자 보수월액보험료, 노사 합계)",
+   "short": "건강보험료 하한",
+   "unit": "원",
+   "hist": [
+    {
+     "from": "2026-01-01",
+     "value": 20160,
+     "basis": "보건복지부고시 제2025-222호",
+     "src": "https://www.nhis.or.kr/lm/lmxsrv/law/lawFullContent.do?SEQ=39",
+     "checked": "2026-10-22"
+    }
+   ]
+  },
+  "ei_ui_worker": {
+   "group": "4대보험 요율",
+   "name": "고용보험 실업급여 요율(근로자 부담)",
+   "short": "고용보험(근로자)",
+   "unit": "%",
+   "hist": [
+    {
+     "from": "2022-07-01",
+     "value": 0.9,
+     "basis": "고용보험 및 산업재해보상보험의 보험료징수 등에 관한 법률 시행령 제12조(실업급여 1천분의 18, 노사 각 절반)",
+     "src": "https://www.law.go.kr/법령/고용보험및산업재해보상보험의보험료징수등에관한법률시행령/제12조",
+     "checked": "2026-10-22",
+     "note": "사업주도 같은 0.9% 부담. 2027년 각 1.0% 인상안 입법예고 중"
+    }
+   ]
+  },
+  "pl_cap_1": {
+   "group": "모성보호",
+   "name": "육아휴직급여 상한(1~3개월, 월)",
+   "short": "육아휴직 1~3개월",
+   "unit": "원",
+   "hist": [
+    {
+     "from": "2024-01-01",
+     "value": 1500000,
+     "basis": "구 고용보험법 시행령 제95조(통상임금 80%, 상한 150만원, 25% 사후지급)",
+     "src": "https://www.korea.kr/news/policyNewsView.do?newsId=148921085",
+     "checked": "2026-10-22"
+    },
+    {
+     "from": "2025-01-01",
+     "value": 2500000,
+     "basis": "고용보험법 시행령 제95조",
+     "src": "https://www.law.go.kr/법령/고용보험법시행령/제95조",
+     "checked": "2026-10-22",
+     "note": "통상임금 100%"
+    }
+   ]
+  },
+  "pl_cap_4": {
+   "group": "모성보호",
+   "name": "육아휴직급여 상한(4~6개월, 월)",
+   "short": "육아휴직 4~6개월",
+   "unit": "원",
+   "hist": [
+    {
+     "from": "2024-01-01",
+     "value": 1500000,
+     "basis": "구 고용보험법 시행령 제95조(통상임금 80%, 상한 150만원, 25% 사후지급)",
+     "src": "https://www.korea.kr/news/policyNewsView.do?newsId=148921085",
+     "checked": "2026-10-22"
+    },
+    {
+     "from": "2025-01-01",
+     "value": 2000000,
+     "basis": "고용보험법 시행령 제95조",
+     "src": "https://www.law.go.kr/법령/고용보험법시행령/제95조",
+     "checked": "2026-10-22",
+     "note": "통상임금 100%"
+    }
+   ]
+  },
+  "pl_cap_7": {
+   "group": "모성보호",
+   "name": "육아휴직급여 상한(7개월 이후, 월)",
+   "short": "육아휴직 7개월~",
+   "unit": "원",
+   "hist": [
+    {
+     "from": "2024-01-01",
+     "value": 1500000,
+     "basis": "구 고용보험법 시행령 제95조(통상임금 80%, 상한 150만원, 25% 사후지급)",
+     "src": "https://www.korea.kr/news/policyNewsView.do?newsId=148921085",
+     "checked": "2026-10-22"
+    },
+    {
+     "from": "2025-01-01",
+     "value": 1600000,
+     "basis": "고용보험법 시행령 제95조",
+     "src": "https://www.law.go.kr/법령/고용보험법시행령/제95조",
+     "checked": "2026-10-22",
+     "note": "통상임금 80%"
+    }
+   ]
   }
  },
  "tables": {

@@ -351,11 +351,11 @@ function render(){if(!D)return;({summary:rSummary,calc:rCalc,grants:rGrants,inte
 function rSummary(){
   const GROUPS=[{t:"최저임금",sub:"",calc:[["mw","최저임금 위반 계산"]],rows:[["min_wage_hourly","시간급"],["min_wage_monthly","월 환산(209시간)"]]},
     {t:"4대보험 요율",sub:"",calc:[["ins","4대보험료 계산"]],rows:[["np_rate","국민연금(노사 합계)"],["hi_rate","건강보험(노사 합계)"],["ltc_rate","장기요양(소득 대비)"],["ei_ui_worker","고용보험 실업급여(근로자)"],["ei_sp_1","고용안정·직능(사업주, 150인 미만)"],["hi_cap_upper","건강보험료 월 상한(노사 합계)"],["hi_cap_lower","건강보험료 월 하한(노사 합계)"]]},
-    {t:"국민연금 기준소득월액",sub:"매년 7월 조정",calc:[["ins","4대보험료 계산"]],rows:[["np_lower","하한"],["np_upper","상한"]]},
+    {t:"국민연금 기준소득월액",sub:"매년 7월 조정",calc:[["ins","국민연금 보험료 계산"]],rows:[["np_lower","하한"],["np_upper","상한"]]},
     {t:"출산·육아 급여 상한",sub:"",calc:[["mat","출산휴가급여 계산"],["pl","육아휴직급여 계산"]],rows:[["mat_cap","출산전후휴가(월)"],["pl_cap_1","육아휴직 1~3개월(월)"],["pl_cap_4","육아휴직 4~6개월(월)"],["pl_cap_7","육아휴직 7개월 이후(월)"],["spouse_leave_cap","배우자 출산휴가"]]},
     {t:"구직급여 1일",sub:"",calc:[["ui","실업급여 계산"]],rows:[["ui_daily_max","상한액"],["ui_daily_min","하한액(8시간)"]]},
     {t:"장애인 의무고용률",sub:"",calc:[["dis","의무고용·부담금 계산"]],rows:[["disabled_quota","민간 사업주"]]},
-    {t:"산재 보상기준",sub:"",calc:[["sj","휴업급여 계산","rest"],["sj","장례비 계산","fun"]],rows:[["ia_min","최저보상기준(1일)"],["ia_max","최고보상기준(1일)"],["funeral_min","장례비 최저"],["funeral_max","장례비 최고"]]}];
+    {t:"산재 보상기준",sub:"",calc:[["sj","보험급여 계산"]],rows:[["ia_min","최저보상기준(1일)"],["ia_max","최고보상기준(1일)"],["funeral_min","장례비 최저"],["funeral_max","장례비 최고"]]}];
   const keyv=g=>{const id=g.rows[0][0],it=D.items[id];return it?showVal(it,entry(id)):"";};
   const grp=(g,ix)=>`<details class="fgrp" data-gi="${ix}"><summary><span class="ft">${esc(g.t)}</span><span class="fk">${esc(g.rows[0][1])} ${keyv(g)}${g.rows.length>1?` 외 ${g.rows.length-1}건`:""}</span><svg class="chev" viewBox="0 0 16 16" aria-hidden="true"><path d="M4 6l4 4 4-4"/></svg></summary>${g.sub?`<div class="fsub">${esc(g.sub)}</div>`:""}${g.rows.map(([id,lab])=>{const it=D.items[id];if(!it)return"";const e=entry(id),n=nextEntry(id);
     return `<button type="button" class="frow" data-go="${esc(id)}"><span class="k">${esc(lab)}</span><span class="v">${showVal(it,e)}</span>

@@ -24,6 +24,14 @@
    "unit": "원",
    "hist": [
     {
+     "from": "2023-01-01",
+     "value": 9620,
+     "basis": "2023년 적용 최저임금 고시(2022.8.5. 고용노동부 고시)",
+     "src": "https://www.korea.kr/briefing/pressReleaseView.do?newsId=156519801",
+     "checked": "2026-10-22",
+     "note": "미달 차액(소멸시효 3년) 계산용"
+    },
+    {
      "from": "2024-01-01",
      "value": 9860,
      "basis": "고용노동부고시 제2023-43호(2023.8.4.)",

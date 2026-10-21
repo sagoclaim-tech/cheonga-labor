@@ -349,7 +349,7 @@ function render(){if(!D)return;({summary:rSummary,calc:rCalc,grants:rGrants,inte
 
 /* ---------- 요약 ---------- */
 function rSummary(){
-  const GROUPS=[{t:"최저임금",sub:"",calc:[["mw","최저임금 위반 계산"]],rows:[["min_wage_hourly","시간급"],["min_wage_monthly","월 환산(209시간)"]]},
+  const GROUPS=[{t:"최저임금",sub:"",calc:[["mw","최저임금 계산"]],rows:[["min_wage_hourly","시간급"],["min_wage_monthly","월 환산(209시간)"]]},
     {t:"4대보험 요율",sub:"",calc:[["ins","4대보험료 계산"]],rows:[["np_rate","국민연금(노사 합계)"],["hi_rate","건강보험(노사 합계)"],["ltc_rate","장기요양(소득 대비)"],["ei_ui_worker","고용보험 실업급여(근로자)"],["ei_sp_1","고용안정·직능(사업주, 150인 미만)"],["hi_cap_upper","건강보험료 월 상한(노사 합계)"],["hi_cap_lower","건강보험료 월 하한(노사 합계)"]]},
     {t:"국민연금 기준소득월액",sub:"매년 7월 조정",calc:[["ins","국민연금 보험료 계산"]],rows:[["np_lower","하한"],["np_upper","상한"]]},
     {t:"출산·육아 급여 상한",sub:"",calc:[["mat","출산휴가급여 계산"],["pl","육아휴직급여 계산"]],rows:[["mat_cap","출산전후휴가(월)"],["pl_cap_1","육아휴직 1~3개월(월)"],["pl_cap_4","육아휴직 4~6개월(월)"],["pl_cap_7","육아휴직 7개월 이후(월)"],["spouse_leave_cap","배우자 출산휴가"]]},
@@ -411,7 +411,7 @@ function rSummary(){
 }
 
 /* ---------- 계산기 ---------- */
-const CALCS=[["mw","최저임금 확인"],["ui","실업급여"],["pl","육아휴직급여"],["mat","출산휴가급여"],["sj","산재보상"],["ins","4대보험료"],["sev","퇴직금"],["al","연차일수"],["dg","대지급금"],["dis","장애인 고용"]];
+const CALCS=[["mw","최저임금"],["ui","실업급여"],["pl","육아휴직급여"],["mat","출산휴가급여"],["sj","산재보상"],["ins","4대보험료"],["sev","퇴직금"],["al","연차일수"],["dg","대지급금"],["dis","장애인 고용"]];
 function rCalc(){
   app.innerHTML=`<section class="view"><div><span class="eyebrow">${esc(asofText())} 기준 적용</span><h2>계산기</h2><p class="lede">입력값은 이 기기에만 저장됩니다.</p></div>
   <div class="chips" role="tablist">${CALCS.map(([k,n])=>`<button type="button" class="chip" data-c="${k}" aria-pressed="${k===CALC}">${n}</button>`).join("")}</div>
@@ -426,7 +426,25 @@ function money(id,label,val,full){return `<div class="f${full?" full":""}">${lab
 function chk(id,text,checked){return `<div class="full"><div class="chkrow"><label class="chk"><input type="checkbox" id="${id}" ${checked?"checked":""}>${esc(text)}</label>${HELP[id]?`<button type="button" class="q" data-q="${id}" aria-expanded="false" aria-label="입력 방법">?</button>`:""}</div>${helpHtml(id)}</div>`;}
 document.addEventListener("click",e=>{const b=e.target.closest(".q");if(!b)return;const h=document.getElementById("h_"+b.dataset.q);if(!h)return;h.hidden=!h.hidden;b.setAttribute("aria-expanded",String(!h.hidden));});
 const HELP={
- mw_pay:"기본급에 매월 지급하는 정기상여금과 현금성 복리후생비(식대, 교통비 등)를 더한 금액을 입력합니다. 연장·야간·휴일근로 가산수당, 실비변상 금품, 1개월을 넘는 주기로 지급하는 임금은 제외합니다.",
+ mw_mode:"①은 임금항목별로 위반 여부를, ②는 근로시간에 따른 최저 월급을, ③은 고정 연장수당이 포함된 월급의 기본시급을, ④는 미달 기간의 차액을, ⑤는 다음 해 최저임금 대비 인상 필요액을 계산합니다.",
+ mw_base:"소정근로시간에 대해 매월 지급하는 기본급입니다.",
+ mw_fix:"직무수당, 직책수당, 자격수당 등 매월 1회 이상 정기적으로 지급하는 수당입니다.",
+ mw_bonus:"정기상여금 중 매월 지급하는 금액만 넣습니다. 분기·반기·연 단위로 지급하는 상여금은 산입하지 않습니다.",
+ mw_welf:"식대, 교통비, 숙박비 등 매월 통화로 지급하는 복리후생비입니다. 현물로 제공하는 식사나 숙소는 제외합니다.",
+ mw_excl:"연장·야간·휴일 가산수당, 연차휴가 미사용수당, 1개월 초과 주기 상여금 등 산입하지 않는 임금입니다. 판정에는 쓰지 않고 참고로만 표시합니다.",
+ mw_wk:"근로계약서상 1주 소정근로시간입니다. 주 40시간이면 209시간, 주 35시간이면 183시간으로 환산됩니다.",
+ mw_total:"포괄임금 계약 등에서 매월 고정으로 지급하는 기본급과 고정 연장·야간·휴일수당의 합계입니다.",
+ mw_bh:"주휴를 포함한 월 소정근로시간입니다. 주 40시간이면 209시간입니다.",
+ mw_ot:"계약상 매월 고정으로 인정하는 연장근로시간입니다. 1.5배로 환산합니다.",
+ mw_nt:"오후 10시부터 오전 6시 사이 근로시간입니다. 가산분 0.5배만 더합니다.",
+ mw_hd:"휴일근로 중 8시간 이내분입니다. 8시간 초과분은 2배이므로 연장근로시간에 함께 넣지 말고 별도로 조정해 주십시오.",
+ mw_dpay:"미달 기간 동안 매월 지급한 최저임금 산입 임금입니다.",
+ mw_dh:"주 40시간이면 209시간입니다.",
+ mw_from:"최저임금에 미달하게 지급한 첫 달입니다.",
+ mw_to:"최저임금에 미달하게 지급한 마지막 달입니다.",
+ mw_npay:"현재 매월 지급하는 최저임금 산입 임금입니다.",
+ mw_nh:"주 40시간이면 209시간입니다.",
+ mw_pay:"기본급에 매월 지급하는 정기상여금과 현금성 복리후생비를 더한 금액입니다.",
  mw_hours:"주 40시간 근무자는 주휴 8시간을 포함해 209시간입니다. 계산식은 (주 소정근로시간 + 주휴시간) x 365 / 7 / 12 입니다. 예: 주 35시간이면 (35 + 7) x 4.345 = 약 182.5시간",
  mw_prob:"1년 이상 근로계약을 체결한 수습근로자로서 수습 시작일부터 3개월 이내인 경우에만 90%를 적용합니다. 단순노무업무 종사자는 감액할 수 없습니다(최저임금법 제5조 제2항).",
  ui_wage:"이직일 이전 3개월간 받은 임금 총액(세전)입니다. 정기상여금과 연차수당은 직전 1년간 지급액의 3/12을 더해 입력합니다.",
@@ -486,15 +504,70 @@ function bind(root,fn,key){root.querySelectorAll("input,select").forEach(el=>{
     store.set(key+"."+el.id,el.type==="checkbox"?el.checked:el.value);fn();});
   el.addEventListener("change",fn);});fn();}
 
+function mwMonthHours(wk){const hol=wk<15?0:Math.min(8,wk/40*8);return {hol,exact:(wk+hol)*365/7/12,h:Math.round((wk+hol)*365/7/12)};}
 function cMW(root){
-  root.innerHTML=`<div class="panel"><h3>최저임금 위반 여부</h3>
-  <div class="form">${money("mw_pay","월 지급액 중 최저임금 산입 임금(원)",2200000)}${field("mw_hours","월 환산 소정근로시간(주휴 포함)",209,"number")}
-  ${field("mw_prob","수습 3개월 이내 감액 적용",0,"select",{opts:[[0,"적용 안 함"],[1,"적용(1년 이상 계약, 단순노무 제외)"]]})}</div>
+  const y=+ASOF.slice(0,4),m=ASOF.slice(5,7);
+  root.innerHTML=`<div class="panel"><h3>최저임금 계산</h3>
+  <div class="form">${field("mw_mode","계산 유형","check","select",{opts:[["check","① 위반 여부 판정(임금항목별)"],["month","② 근무형태별 최저 월급"],["incl","③ 포괄임금·고정연장 역산"],["arrear","④ 미달 차액(체불액)"],["next","⑤ 내년 대비 점검"]],full:true})}
+  <div class="full form" id="mw_p_check" style="padding:0">${money("mw_base","기본급(원)",2000000)}${money("mw_fix","매월 지급 고정수당(직무·직책 등, 원)",100000)}
+   ${money("mw_bonus","정기상여금 중 매월 지급분(원)",0)}${money("mw_welf","현금성 복리후생비(식대·교통비 등, 원)",200000)}
+   ${money("mw_excl","산입 제외 임금(가산수당·연차수당 등, 원)",0)}${field("mw_hours","월 환산 소정근로시간(주휴 포함)",209,"number")}</div>
+  <div class="full form" id="mw_p_month" style="padding:0">${field("mw_wk","1주 소정근로시간",40,"number")}</div>
+  <div class="full form" id="mw_p_incl" style="padding:0">${money("mw_total","월 지급 총액(기본급+고정 연장·야간·휴일수당, 원)",2800000,true)}
+   ${field("mw_bh","월 소정근로시간(주휴 포함)",209,"number")}${field("mw_ot","월 고정 연장근로시간",20,"number")}
+   ${field("mw_nt","월 고정 야간근로시간",0,"number")}${field("mw_hd","월 고정 휴일근로시간(8시간 이내분)",0,"number")}
+   ${chk("mw_small","상시 5인 미만 사업장(가산임금 미적용)",false)}</div>
+  <div class="full form" id="mw_p_arrear" style="padding:0">${money("mw_dpay","매월 지급한 산입 임금(원)",2000000)}${field("mw_dh","월 환산 소정근로시간(주휴 포함)",209,"number")}
+   ${field("mw_from","미달 시작 월",(y-1)+"-01","month")}${field("mw_to","미달 종료 월",y+"-"+m,"month")}</div>
+  <div class="full form" id="mw_p_next" style="padding:0">${money("mw_npay","현재 매월 지급하는 산입 임금(원)",2156880)}${field("mw_nh","월 환산 소정근로시간(주휴 포함)",209,"number")}</div>
+  ${field("mw_prob","수습 3개월 이내 감액 적용",0,"select",{opts:[[0,"적용 안 함"],[1,"적용(1년 이상 계약, 단순노무 제외)"]],full:true})}</div>
   <div class="result" id="mw_out"></div>${srcLine(["min_wage_hourly"])}</div>`;
-  bind(root,()=>{const mw=v("min_wage_hourly");const pay=num("mw_pay"),h=num("mw_hours")||209;const prob=sval("mw_prob")==="1";const floor=mw*(prob?0.9:1);const hr=pay/h;const ok=hr>=floor-0.0001;
-    $("#mw_out").innerHTML=`<div class="ghead"><span class="big">${won(hr)}</span><span class="pill ${ok?"p-ok":"p-warn"}">${ok?"최저임금 이상":"최저임금 미달"}</span></div>
-    <dl class="kv"><dt>적용 최저임금(시간급)</dt><dd>${won(floor)}</dd><dt>월 환산 최저임금(${fmt(h)}시간)</dt><dd>${won(floor*h)}</dd><dt>부족액(월)</dt><dd>${ok?"0원":won(floor*h-pay)}</dd></dl>
-    <p class="note">※ 산입범위: 정기상여금·현금성 복리후생비는 2024년부터 전액 산입됩니다. 연장·야간·휴일 가산임금, 실비 변상적 금품, 1개월 초과 주기 지급 임금 등은 제외합니다.</p>`},"mw");}
+  bind(root,()=>{const mode=sval("mw_mode")||"check";
+    ["check","month","incl","arrear","next"].forEach(k=>{const el=$("#mw_p_"+k);if(el)el.style.display=k===mode?"":"none";});
+    const mw=v("min_wage_hourly");const prob=sval("mw_prob")==="1";const rate=prob?0.9:1;const floor=mw*rate;const out=$("#mw_out");
+    const probNote=prob?`<p class="note">※ 수습 감액(90%) 적용 중입니다. 1년 이상 근로계약, 수습 시작일부터 3개월 이내, 단순노무업무가 아닌 경우에만 가능합니다(최저임금법 제5조 제2항).</p>`:"";
+    if(mode==="check"){const inc=num("mw_base")+num("mw_fix")+num("mw_bonus")+num("mw_welf");const h=num("mw_hours")||209;const hr=inc/h;const ok=hr>=floor-0.0001;
+      out.innerHTML=`<div class="ghead"><span class="big">${won(hr)}</span><span class="pill ${ok?"p-ok":"p-warn"}">${ok?"최저임금 이상":"최저임금 미달"}</span></div>
+      <dl class="kv"><dt>최저임금 산입 임금(월)</dt><dd>${won(inc)}</dd><dt>산입 제외 임금(참고)</dt><dd>${won(num("mw_excl"))}</dd>
+      <dt>비교대상 시간급(${fmt(h)}시간)</dt><dd>${won(hr)}</dd><dt>적용 최저임금(시간급)</dt><dd>${won(floor)}</dd>
+      <dt>월 환산 최저임금</dt><dd>${won(floor*h)}</dd><dt>월 부족액</dt><dd><b>${ok?"0원":won(floor*h-inc)}</b></dd></dl>
+      <p class="note">※ 산입범위(최저임금법 제6조 제4항): 매월 1회 이상 정기적으로 지급하는 임금은 산입합니다. 정기상여금과 현금성 복리후생비는 2024년부터 전액 산입합니다. 연장·야간·휴일 가산임금, 연차휴가 미사용수당, 1개월을 넘는 주기로 지급하는 상여금, 현물 복리후생은 제외합니다.</p>${probNote}`;}
+    else if(mode==="month"){const wk=num("mw_wk");const r=mwMonthHours(wk);
+      out.innerHTML=`<div class="ghead"><span class="big">${won(floor*r.h)}</span><span class="pill p-now">최저 월급</span></div>
+      <dl class="kv"><dt>1주 소정근로시간</dt><dd>${fmt(wk)}시간</dd><dt>주휴시간</dt><dd>${wk<15?"없음(주 15시간 미만)":fmt(Math.round(r.hol*100)/100)+"시간"}</dd>
+      <dt>월 환산시간</dt><dd>${fmt(r.h)}시간(산식 ${fmt(Math.round(r.exact*100)/100)})</dd><dt>적용 최저임금(시간급)</dt><dd>${won(floor)}</dd>
+      <dt>최저 월급(산입 임금 기준)</dt><dd><b>${won(floor*r.h)}</b></dd><dt>최저 주급</dt><dd>${won(floor*(wk+r.hol))}</dd></dl>
+      <p class="note">※ 월 환산시간 = (1주 소정근로시간 + 주휴시간) x 365 / 7 / 12, 소수점 이하 반올림(주 40시간은 209시간). 주휴시간은 주 40시간 기준 8시간이고, 단시간근로자는 통상근로자 대비 비율로 계산합니다. 주 15시간 미만은 주휴가 없습니다(근로기준법 제18조 제3항, 제55조).</p>${probNote}`;}
+    else if(mode==="incl"){const small=$("#mw_small")&&$("#mw_small").checked;const bh=num("mw_bh")||209,ot=num("mw_ot"),nt=num("mw_nt"),hd=num("mw_hd");
+      const k=small?1:1.5,kn=small?0:0.5;const den=bh+ot*k+nt*kn+hd*k;const hr=num("mw_total")/(den||1);const ok=hr>=floor-0.0001;
+      const need=floor*den;
+      out.innerHTML=`<div class="ghead"><span class="big">${won(hr)}</span><span class="pill ${ok?"p-ok":"p-warn"}">${ok?"기본시급 최저임금 이상":"기본시급 최저임금 미달"}</span></div>
+      <dl class="kv"><dt>환산 총시간</dt><dd>${fmt(Math.round(den*100)/100)}시간</dd><dt>역산 기본시급</dt><dd>${won(hr)}</dd>
+      <dt>역산 기본급(소정근로분)</dt><dd>${won(hr*bh)}</dd><dt>고정 연장·야간·휴일수당</dt><dd>${won(num("mw_total")-hr*bh)}</dd>
+      <dt>최저임금 충족에 필요한 월 총액</dt><dd><b>${won(need)}</b></dd><dt>월 부족액</dt><dd><b>${ok?"0원":won(need-num("mw_total"))}</b></dd></dl>
+      <p class="note">※ 환산 총시간 = 소정근로시간 + 연장 x ${k} + 야간 x ${kn} + 휴일(8시간 이내) x ${k}. 연장근로가 야간에 이루어진 시간은 연장과 야간 양쪽에 넣습니다. 가산수당은 최저임금 산입에서 제외되므로 역산한 기본시급으로 비교합니다. 월 총액에는 기본급과 고정 가산수당만 넣고, 별도 산입 수당이 있으면 ①에서 판정합니다.${small?" 상시 5인 미만 사업장은 가산임금 규정(근로기준법 제56조)이 적용되지 않습니다.":""}</p>${probNote}`;}
+    else if(mode==="arrear"){const pay=num("mw_dpay"),h=num("mw_dh")||209;let f=sval("mw_from"),t=sval("mw_to");
+      if(!/^\d{4}-\d{2}$/.test(f)||!/^\d{4}-\d{2}$/.test(t)||f>t){out.innerHTML=`<p class="note">※ 시작 월과 종료 월을 확인해 주십시오.</p>`;return;}
+      const lim=new Date();lim.setFullYear(lim.getFullYear()-3);const limYM=lim.toISOString().slice(0,7);
+      const by={};let sum=0,old=0,cnt=0,miss=0;let [yy,mm]=f.split("-").map(Number);
+      while(cnt<240){const ym=yy+"-"+String(mm).padStart(2,"0");if(ym>t)break;const e=entry("min_wage_hourly",ym+"-01");
+        if(!e){miss++;}else{const gap=Math.max(0,e.value*rate*h-pay);const Y=String(yy);by[Y]=by[Y]||{mw:e.value*rate,n:0,amt:0};by[Y].n++;by[Y].amt+=gap;sum+=gap;if(ym<limYM)old+=gap;}
+        cnt++;mm++;if(mm>12){mm=1;yy++;}}
+      out.innerHTML=`<div class="ghead"><span class="big">${won(sum)}</span><span class="pill ${sum?"p-warn":"p-ok"}">${sum?"미달 차액 합계":"미달 없음"}</span></div>
+      <div class="tw"><table><thead><tr><th>연도</th><th>최저임금</th><th>월 최저액</th><th>개월</th><th>차액</th></tr></thead><tbody>
+      ${Object.keys(by).map(Y=>`<tr><td>${Y}</td><td class="n">${won(by[Y].mw)}</td><td class="n">${won(by[Y].mw*h)}</td><td class="n">${by[Y].n}</td><td class="n">${won(by[Y].amt)}</td></tr>`).join("")}</tbody></table></div>
+      <dl class="kv">${old?`<dt>소멸시효 3년 경과 가능분(${limYM} 이전)</dt><dd>${won(old)}</dd><dt>시효 경과분 제외 시</dt><dd><b>${won(sum-old)}</b></dd>`:""}</dl>
+      ${miss?`<p class="note">※ ${miss}개월은 해당 연도 최저임금이 수록되어 있지 않아 계산에서 뺐습니다.</p>`:""}
+      <p class="note">※ 매월 같은 금액을 지급했다고 보고 연도별 최저임금으로 계산합니다. 임금이 바뀐 경우 구간을 나누어 계산해 합산합니다. 임금채권 소멸시효는 3년이며(근로기준법 제49조), 각 정기지급일부터 진행하므로 지급일 기준으로 최종 확인이 필요합니다. 지연이자(퇴직 등 사유 발생 후 연 20%)는 포함하지 않았습니다.</p>${probNote}`;}
+    else{const pay=num("mw_npay"),h=num("mw_nh")||209;const ny=(y+1)+"-01-01";const cur=entry("min_wage_hourly");const nx=entry("min_wage_hourly",ny);
+      if(!nx||!cur||nx.from===cur.from){out.innerHTML=`<p class="note">※ ${y+1}년 최저임금이 아직 결정·고시되지 않았거나 수록되지 않았습니다. 매년 8월 5일까지 고시됩니다.</p>`;return;}
+      const nf=nx.value*rate;const need=Math.max(0,nf*h-pay);
+      out.innerHTML=`<div class="ghead"><span class="big">${won(need)}</span><span class="pill ${need?"p-warn":"p-ok"}">${need?(y+1)+"년 월 인상 필요액":(y+1)+"년 기준 충족"}</span></div>
+      <dl class="kv"><dt>${y}년 최저임금</dt><dd>${won(cur.value*rate)}</dd><dt>${y+1}년 최저임금</dt><dd>${won(nf)}(${fmt(Math.round((nx.value/cur.value-1)*1000)/10)}% 인상)</dd>
+      <dt>현재 비교대상 시간급</dt><dd>${won(pay/h)}</dd><dt>${y+1}년 월 환산 최저임금(${fmt(h)}시간)</dt><dd>${won(nf*h)}</dd>
+      <dt>월 인상 필요액</dt><dd><b>${won(need)}</b></dd><dt>연간 추가 부담(12개월)</dt><dd>${won(need*12)}</dd></dl>
+      <p class="note">※ ${esc(nx.basis||"")}. 연간 추가 부담에는 4대보험 사업주 부담분과 퇴직금 증가분이 포함되지 않았습니다.</p>${probNote}`;}
+  },"mw");}
 
 function cUI(root){
   const t=tbl("ui_days"),R=D.ui_rules||{reasons:[],just:[],basic:[],grave:[]};
@@ -792,7 +865,7 @@ function buildDocs(){const docs=[];const add=(type,title,text,go,val)=>docs.push
   add("계산기","산재 휴업급여 계산","휴업급여 평균임금 70% 90% 저소득 최저임금액 최저보상기준 최고보상기준 부분휴업 요양",{calc:"sj",kind:"rest"});
   const pl=tbl("pl_caps");if(pl)add("기준표","육아휴직급여 기간별 상한",pl.bands.map(b=>b.label+" 상한 "+b.cap.toLocaleString()+"원").join(", ")+" 6+6 부모육아휴직제 특례 "+pl.basis,{calc:"pl"});
   const dg=tbl("dg_caps");if(dg)add("기준표","대지급금 연령별 상한액",dg.rows.map(r=>r[0]+" "+r[1].toLocaleString()+"원").join(", ")+" "+(dg.notes||[]).join(" "),{calc:"dg"});
-  [["mw","최저임금 확인 계산기","최저임금 위반 산입범위 월 환산 209시간 수습 감액"],["ui","실업급여 계산기","구직급여 일액 상한 하한 소정급여일수 수급요건 이직사유"],["pl","육아휴직급여 계산기","육아휴직 6+6 통상임금 상한"],["mat","출산전후휴가급여 계산기","출산휴가 다태아 우선지원대상기업 상한"],["ins","4대보험료 계산기","국민연금 건강보험 장기요양 고용보험 산재보험 요율 보험료"],["sev","퇴직금 계산기","퇴직금 평균임금 상여금 연차수당 계속근로"],["al","연차일수 계산기","연차유급휴가 출근율 가산휴가"],["dg","대지급금 계산기","체당금 도산 간이 상한"]].forEach(([c,t,k])=>add("계산기",t,k,{calc:c}));
+  [["mw","최저임금 계산기","최저임금 위반 산입범위 월 환산 209시간 수습 감액 포괄임금 고정연장 역산 단시간 주휴 미달 차액 체불 소멸시효 내년 인상"],["ui","실업급여 계산기","구직급여 일액 상한 하한 소정급여일수 수급요건 이직사유"],["pl","육아휴직급여 계산기","육아휴직 6+6 통상임금 상한"],["mat","출산전후휴가급여 계산기","출산휴가 다태아 우선지원대상기업 상한"],["ins","4대보험료 계산기","국민연금 건강보험 장기요양 고용보험 산재보험 요율 보험료"],["sev","퇴직금 계산기","퇴직금 평균임금 상여금 연차수당 계속근로"],["al","연차일수 계산기","연차유급휴가 출근율 가산휴가"],["dg","대지급금 계산기","체당금 도산 간이 상한"],["dis","장애인 고용 계산기","장애인 의무고용 부담금 부담기초액 고용장려금 중증 2배"]].forEach(([c,t,k])=>add("계산기",t,k,{calc:c}));
   (D.notices||[]).forEach(n=>add("제도 동향",n.date+" 동향",n.text,{notice:n.src}));
   ((IV&&IV.items)||[]).forEach(x=>add("행정해석",x.title,`${x.no} ${x.date} ${x.topic} ${(x.orig||[]).map(o=>o.t).join(" ")||(x.q+" "+x.a)} ${x.basis||""}`,{interp:x.id}));
   return docs;}

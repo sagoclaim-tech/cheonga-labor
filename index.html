@@ -319,8 +319,8 @@ function render(){if(!D)return;({summary:rSummary,calc:rCalc,grants:rGrants,sear
 function rSummary(){
   const GROUPS=[{t:"최저임금",sub:"",rows:[["min_wage_hourly","시간급"],["min_wage_monthly","월 환산(209시간)"]]},
     {t:"사회보험요율",sub:"근로자·사업주 합계",rows:[["np_rate","국민연금"],["hi_rate","건강보험"],["ltc_rate","장기요양(소득 대비)"]]},
-    {t:"구직급여 1일",sub:"",rows:[["ui_daily_max","상한액"],["ui_daily_min","하한액(8시간)"]]},
-    {t:"산재 보상기준 1일",sub:"",rows:[["ia_max","최고보상기준"],["ia_min","최저보상기준"]]}];
+    {t:"국민연금 기준소득월액",sub:"매년 7월 조정",rows:[["np_lower","하한"],["np_upper","상한"]]},
+    {t:"산재 보상기준 1일",sub:"",rows:[["ia_min","최저보상기준"],["ia_max","최고보상기준"]]}];
   const figs=GROUPS.map(g=>`<div class="fgrp"><h3>${esc(g.t)}${g.sub?`<small>${esc(g.sub)}</small>`:""}</h3>${g.rows.map(([id,lab])=>{const it=D.items[id];if(!it)return"";const e=entry(id),n=nextEntry(id);
     return `<button type="button" class="frow" data-go="${esc(id)}"><span class="k">${esc(lab)}</span><span class="v">${showVal(it,e)}</span>
     <span class="s">${e?esc(e.from)+" 시행":"해당 시점 자료 없음"}${n&&!isPast()?` · <span class="nx">${esc(n.from)}부터 ${showVal(it,n)}</span>`:""}</span></button>`}).join("")}</div>`).join("");

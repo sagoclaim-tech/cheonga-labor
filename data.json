@@ -24,6 +24,22 @@
    "unit": "원",
    "hist": [
     {
+     "from": "2024-01-01",
+     "value": 9860,
+     "basis": "2024년 적용 최저임금 고용노동부 고시",
+     "src": "https://shiftee.io/ko/blog/article/2024-minimum-wage-calculation-and-complete-overview-of-changes",
+     "checked": "2026-10-21",
+     "note": "전년 대비 2.5% 인상"
+    },
+    {
+     "from": "2025-01-01",
+     "value": 10030,
+     "basis": "2025년 적용 최저임금 고용노동부 고시",
+     "src": "https://news.bloombergtax.com/payroll/s-koreas-2025-minimum-wage-set-at-10-030-won-hour-up-by-1-7",
+     "checked": "2026-10-21",
+     "note": "전년 대비 1.7% 인상"
+    },
+    {
      "from": "2026-01-01",
      "value": 10320,
      "basis": "고용노동부고시 제2025-47호(2025.8.5. 고시)",
@@ -47,6 +63,20 @@
    "short": "최저임금(월 209시간)",
    "unit": "원",
    "hist": [
+    {
+     "from": "2024-01-01",
+     "value": 2060740,
+     "basis": "2024년 적용 최저임금 고시(209시간 환산)",
+     "src": "https://shiftee.io/ko/blog/article/2024-minimum-wage-calculation-and-complete-overview-of-changes",
+     "checked": "2026-10-21"
+    },
+    {
+     "from": "2025-01-01",
+     "value": 2096270,
+     "basis": "2025년 적용 최저임금 고시(209시간 환산)",
+     "src": "https://news.bloombergtax.com/payroll/s-koreas-2025-minimum-wage-set-at-10-030-won-hour-up-by-1-7",
+     "checked": "2026-10-21"
+    },
     {
      "from": "2026-01-01",
      "value": 2156880,
@@ -94,6 +124,20 @@
    "unit": "원",
    "hist": [
     {
+     "from": "2024-01-01",
+     "value": 63104,
+     "basis": "고용보험법 제46조: 최저임금 9,860원 x 80% x 8시간",
+     "src": "",
+     "checked": "2026-10-21"
+    },
+    {
+     "from": "2025-01-01",
+     "value": 64192,
+     "basis": "고용보험법 제46조: 최저임금 10,030원 x 80% x 8시간",
+     "src": "",
+     "checked": "2026-10-21"
+    },
+    {
      "from": "2026-01-01",
      "value": 66048,
      "basis": "고용보험법 제46조: 최저임금 x 80% x 1일 소정근로시간",
@@ -116,6 +160,13 @@
    "unit": "원",
    "hist": [
     {
+     "from": "2024-01-01",
+     "value": 2100000,
+     "basis": "고용노동부고시 제2023-83호(90일 630만원, 다태아 120일 840만원)",
+     "src": "https://www.moel.go.kr/info/lawinfo/instruction/view.do?bbs_seq=20231202327",
+     "checked": "2026-10-21"
+    },
+    {
      "from": "2026-01-01",
      "value": 2200000,
      "basis": "고용노동부고시 제2026-67호(출산전후휴가급여 등 상한액)",
@@ -127,9 +178,25 @@
   },
   "spouse_leave_cap": {
    "group": "모성보호",
-   "name": "배우자 출산휴가급여 상한(20일)",
+   "name": "배우자 출산휴가급여 상한",
    "unit": "원",
    "hist": [
+    {
+     "from": "2024-01-01",
+     "value": 401910,
+     "basis": "고용노동부고시 제2023-84호",
+     "src": "https://www.moel.go.kr/info/lawinfo/instruction/view.do?bbs_seq=20231202328",
+     "checked": "2026-10-21",
+     "note": "휴가 10일 중 최초 5일분 급여 상한, 우선지원대상기업만 지원"
+    },
+    {
+     "from": "2025-02-23",
+     "value": 1607650,
+     "basis": "고용노동부고시 제2025-14호",
+     "src": "https://www.moel.go.kr/info/lawinfo/instruction/view.do?bbs_seq=20250201331",
+     "checked": "2026-10-21",
+     "note": "휴가 20일 전체 급여 상한으로 개편"
+    },
     {
      "from": "2026-01-01",
      "value": 1684210,
@@ -147,6 +214,20 @@
    "unit": "원",
    "hist": [
     {
+     "from": "2024-01-01",
+     "value": 253354,
+     "basis": "고용노동부고시 제2023-74호(2023.12.27.)",
+     "src": "https://www.moel.go.kr/info/lawinfo/instruction/view.do?bbs_seq=20231202085",
+     "checked": "2026-10-21"
+    },
+    {
+     "from": "2025-01-01",
+     "value": 258132,
+     "basis": "고용노동부고시 제2024-65호(2024.12.30.)",
+     "src": "https://www.moel.go.kr/info/lawinfo/instruction/view.do?bbs_seq=20241201926",
+     "checked": "2026-10-21"
+    },
+    {
      "from": "2026-01-01",
      "value": 268299,
      "basis": "고용노동부고시 제2025-84호",
@@ -163,6 +244,20 @@
    "unit": "원",
    "hist": [
     {
+     "from": "2024-01-01",
+     "value": 78880,
+     "basis": "고용노동부고시 제2023-74호(최저임금액 적용)",
+     "src": "https://www.moel.go.kr/info/lawinfo/instruction/view.do?bbs_seq=20231202085",
+     "checked": "2026-10-21"
+    },
+    {
+     "from": "2025-01-01",
+     "value": 80240,
+     "basis": "고용노동부고시 제2024-65호(최저임금액 적용)",
+     "src": "https://www.moel.go.kr/info/lawinfo/instruction/view.do?bbs_seq=20241201926",
+     "checked": "2026-10-21"
+    },
+    {
      "from": "2026-01-01",
      "value": 82560,
      "basis": "고용노동부고시 제2025-84호, 산재보험법 제36조 제7항",
@@ -178,12 +273,26 @@
    "unit": "원",
    "hist": [
     {
+     "from": "2024-01-01",
+     "value": 18125360,
+     "basis": "고용노동부고시 제2023-79호",
+     "src": "https://www.moel.go.kr/info/lawinfo/instruction/view.do?bbs_seq=20231202089",
+     "checked": "2026-10-21"
+    },
+    {
+     "from": "2025-01-01",
+     "value": 18685600,
+     "basis": "고용노동부고시 제2024-66호",
+     "src": "https://www.moel.go.kr/info/lawinfo/instruction/view.do?bbs_seq=20241201927",
+     "checked": "2026-10-21"
+    },
+    {
      "from": "2026-01-01",
      "value": 19279760,
      "basis": "산재보험법 제71조, 시행령 제66조, 고용노동부 고시",
      "src": "https://k-labor.co.kr/inc/down.asp?TB_NAME=TB_BOARD&idx=1440&f_field=filename1&f_dir=TB_BOARD",
      "checked": "2026-10-21",
-     "note": "원칙 평균임금 120일분. 공식 고시 원문 대조 필요(2차 자료 확인)"
+     "note": "원칙 평균임금 120일분. 2026년 고시 원문 대조 필요(2차 자료 확인)"
     }
    ]
   },
@@ -193,12 +302,26 @@
    "unit": "원",
    "hist": [
     {
+     "from": "2024-01-01",
+     "value": 13053080,
+     "basis": "고용노동부고시 제2023-79호",
+     "src": "https://www.moel.go.kr/info/lawinfo/instruction/view.do?bbs_seq=20231202089",
+     "checked": "2026-10-21"
+    },
+    {
+     "from": "2025-01-01",
+     "value": 13451380,
+     "basis": "고용노동부고시 제2024-66호",
+     "src": "https://www.moel.go.kr/info/lawinfo/instruction/view.do?bbs_seq=20241201927",
+     "checked": "2026-10-21"
+    },
+    {
      "from": "2026-01-01",
      "value": 13943000,
      "basis": "산재보험법 제71조, 고용노동부 고시",
      "src": "https://k-labor.co.kr/inc/down.asp?TB_NAME=TB_BOARD&idx=1440&f_field=filename1&f_dir=TB_BOARD",
      "checked": "2026-10-21",
-     "note": "공식 고시 원문 대조 필요(2차 자료 확인)"
+     "note": "원칙 평균임금 120일분. 2026년 고시 원문 대조 필요(2차 자료 확인)"
     }
    ]
   },
@@ -208,12 +331,20 @@
    "unit": "원",
    "hist": [
     {
+     "from": "2021-01-01",
+     "value": 44760,
+     "basis": "고용노동부고시 제2020-152호",
+     "src": "https://www.moel.go.kr/info/lawinfo/instruction/view.do?bbs_seq=20201201875",
+     "checked": "2026-10-21",
+     "note": "가족·기타간병인 41,170원, 2025.12.31.까지 적용"
+    },
+    {
      "from": "2026-01-01",
      "value": 53060,
-     "basis": "근로복지공단 고시",
-     "src": "https://k-labor.co.kr/inc/down.asp?TB_NAME=TB_BOARD&idx=1440&f_field=filename1&f_dir=TB_BOARD",
+     "basis": "고용노동부고시 제2025-95호",
+     "src": "https://www.moel.go.kr/info/lawinfo/instruction/view.do?bbs_seq=20251201809",
      "checked": "2026-10-21",
-     "note": "가족·기타간병인 46,250원. 2차 자료 확인"
+     "note": "가족·기타간병인 46,250원"
     }
    ]
   },
@@ -223,12 +354,20 @@
    "unit": "원",
    "hist": [
     {
+     "from": "2021-01-01",
+     "value": 29840,
+     "basis": "고용노동부고시 제2020-152호",
+     "src": "https://www.moel.go.kr/info/lawinfo/instruction/view.do?bbs_seq=20201201875",
+     "checked": "2026-10-21",
+     "note": "가족·기타간병인 27,450원, 2025.12.31.까지 적용"
+    },
+    {
      "from": "2026-01-01",
      "value": 35370,
-     "basis": "근로복지공단 고시",
-     "src": "https://k-labor.co.kr/inc/down.asp?TB_NAME=TB_BOARD&idx=1440&f_field=filename1&f_dir=TB_BOARD",
+     "basis": "고용노동부고시 제2025-95호",
+     "src": "https://www.moel.go.kr/info/lawinfo/instruction/view.do?bbs_seq=20251201809",
      "checked": "2026-10-21",
-     "note": "가족·기타간병인 30,830원. 2차 자료 확인"
+     "note": "가족·기타간병인 30,830원"
     }
    ]
   },
@@ -269,10 +408,24 @@
    "unit": "원",
    "hist": [
     {
+     "from": "2023-07-01",
+     "value": 5900000,
+     "basis": "보건복지부 고시(2023.7.~2024.6.)",
+     "src": "https://www.fnnews.com/news/202406111734541543",
+     "checked": "2026-10-21"
+    },
+    {
+     "from": "2024-07-01",
+     "value": 6170000,
+     "basis": "보건복지부 고시(2024.7.~2025.6.)",
+     "src": "https://www.fnnews.com/news/202406111734541543",
+     "checked": "2026-10-21"
+    },
+    {
      "from": "2025-07-01",
      "value": 6370000,
-     "basis": "보건복지부 고시",
-     "src": "https://www.khan.co.kr/article/202606090740001",
+     "basis": "보건복지부 고시(2025.7.~2026.6.)",
+     "src": "https://www.kukinews.com/article/view/kuk202506290025",
      "checked": "2026-10-21"
     },
     {
@@ -290,10 +443,24 @@
    "unit": "원",
    "hist": [
     {
+     "from": "2023-07-01",
+     "value": 370000,
+     "basis": "보건복지부 고시(2023.7.~2024.6.)",
+     "src": "https://www.fnnews.com/news/202406111734541543",
+     "checked": "2026-10-21"
+    },
+    {
+     "from": "2024-07-01",
+     "value": 390000,
+     "basis": "보건복지부 고시(2024.7.~2025.6.)",
+     "src": "https://www.fnnews.com/news/202406111734541543",
+     "checked": "2026-10-21"
+    },
+    {
      "from": "2025-07-01",
      "value": 400000,
-     "basis": "보건복지부 고시",
-     "src": "https://www.khan.co.kr/article/202606090740001",
+     "basis": "보건복지부 고시(2025.7.~2026.6.)",
+     "src": "https://www.kukinews.com/article/view/kuk202506290025",
      "checked": "2026-10-21"
     },
     {
@@ -312,11 +479,19 @@
    "unit": "%",
    "hist": [
     {
+     "from": "2023-01-01",
+     "value": 7.09,
+     "basis": "건강보험정책심의위원회 결정(2023~2025년 7.09%)",
+     "src": "https://www.dailypharm.com/user/news/13475",
+     "checked": "2026-10-21"
+    },
+    {
      "from": "2025-01-01",
      "value": 7.09,
-     "basis": "건강보험정책심의위원회 결정",
-     "src": "https://www.segye.com/newsView/20260904509116",
-     "checked": "2026-10-21"
+     "basis": "건강보험정책심의위원회 결정(동결)",
+     "src": "https://www.dailypharm.com/user/news/13475",
+     "checked": "2026-10-21",
+     "note": ""
     },
     {
      "from": "2026-01-01",
@@ -341,6 +516,27 @@
    "short": "장기요양 요율",
    "unit": "%",
    "hist": [
+    {
+     "from": "2023-01-01",
+     "value": 0.9082,
+     "basis": "장기요양위원회 의결",
+     "src": "https://www.nocutnews.co.kr/news/6038046",
+     "checked": "2026-10-21"
+    },
+    {
+     "from": "2024-01-01",
+     "value": 0.9182,
+     "basis": "장기요양위원회 의결(건강보험료 대비 12.95%)",
+     "src": "https://www.nocutnews.co.kr/news/6038046",
+     "checked": "2026-10-21"
+    },
+    {
+     "from": "2025-01-01",
+     "value": 0.9182,
+     "basis": "장기요양위원회 의결(동결, 건강보험료 대비 12.95%)",
+     "src": "https://www.hankyung.com/article/2025110437651",
+     "checked": "2026-10-21"
+    },
     {
      "from": "2026-01-01",
      "value": 0.9448,
@@ -429,6 +625,14 @@
    "unit": "%",
    "hist": [
     {
+     "from": "2024-01-01",
+     "value": 1.47,
+     "basis": "고용노동부 고시(산재보험료율), 출퇴근재해 1천분의 0.6(고시 제2024-1호)",
+     "src": "https://www.heraldk.com/article/2025123016313362622",
+     "checked": "2026-10-21",
+     "note": "2024년부터 1.47% 유지"
+    },
+    {
      "from": "2026-01-01",
      "value": 1.47,
      "basis": "고용노동부 고시(2025.12.31.), 2년 연속 동결",
@@ -443,6 +647,14 @@
    "name": "고용유지지원금 1일 상한액",
    "unit": "원",
    "hist": [
+    {
+     "from": "2024-01-01",
+     "value": 66000,
+     "basis": "고용노동부고시 제2025-1호 등: 급여기초임금일액 상한(11만원)의 60%",
+     "src": "https://www.moel.go.kr/info/lawinfo/instruction/view.do?bbs_seq=20250100054",
+     "checked": "2026-10-21",
+     "note": "2024년 금액은 산식에 따른 계산값"
+    },
     {
      "from": "2026-01-01",
      "value": 68100,
@@ -459,10 +671,24 @@
    "unit": "원",
    "hist": [
     {
+     "from": "2024-01-01",
+     "value": 1100000,
+     "basis": "고용장려금 지급 규정(2024.1.14.까지)",
+     "src": "https://www.moel.go.kr/info/lawinfo/instruction/view.do?bbs_seq=20240101080",
+     "checked": "2026-10-21"
+    },
+    {
+     "from": "2024-01-15",
+     "value": 1150000,
+     "basis": "고용노동부고시 제2024-5호",
+     "src": "https://www.moel.go.kr/info/lawinfo/instruction/view.do?bbs_seq=20240101080",
+     "checked": "2026-10-21"
+    },
+    {
      "from": "2025-01-01",
      "value": 1210000,
-     "basis": "2025년 고용장려금 사업공고",
-     "src": "https://www.moel.go.kr/news/notice/noticeView.do?bbs_seq=20251201775",
+     "basis": "고용노동부고시 제2024-95호",
+     "src": "https://www.moel.go.kr/info/lawinfo/instruction/view.do?bbs_seq=20250100001",
      "checked": "2026-10-21"
     },
     {
@@ -568,6 +794,30 @@
   },
   "pl_caps": {
    "versions": [
+    {
+     "from": "2024-01-01",
+     "bands": [
+      {
+       "from": 1,
+       "to": 18,
+       "rate": 0.8,
+       "cap": 1500000,
+       "label": "통상임금 80%"
+      }
+     ],
+     "min": 700000,
+     "sixsix": [
+      2000000,
+      2500000,
+      3000000,
+      3500000,
+      4000000,
+      4500000
+     ],
+     "basis": "구 고용보험법 시행령 제95조: 통상임금 80%(상한 150만원, 하한 70만원), 25%는 복직 후 6개월 이상 근무 시 사후지급. 6+6 특례(2024.1.1. 시행) 첫 6개월 상한 200만~450만원",
+     "src": "https://www.newsis.com/view/NISX20231218_0002562231",
+     "checked": "2026-10-21"
+    },
     {
      "from": "2025-01-01",
      "bands": [

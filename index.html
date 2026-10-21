@@ -354,7 +354,7 @@ function rSummary(){
     {t:"국민연금 기준소득월액",sub:"매년 7월 조정",calc:[["ins","4대보험료 계산"]],rows:[["np_lower","하한"],["np_upper","상한"]]},
     {t:"출산·육아 급여 상한",sub:"",calc:[["mat","출산휴가급여 계산"],["pl","육아휴직급여 계산"]],rows:[["mat_cap","출산전후휴가(월)"],["pl_cap_1","육아휴직 1~3개월(월)"],["pl_cap_4","육아휴직 4~6개월(월)"],["pl_cap_7","육아휴직 7개월 이후(월)"],["spouse_leave_cap","배우자 출산휴가"]]},
     {t:"구직급여 1일",sub:"",calc:[["ui","실업급여 계산"]],rows:[["ui_daily_max","상한액"],["ui_daily_min","하한액(8시간)"]]},
-    {t:"장애인 의무고용률",sub:"",rows:[["disabled_quota","민간 사업주"]]},
+    {t:"장애인 의무고용률",sub:"",calc:[["dis","의무고용·부담금 계산"]],rows:[["disabled_quota","민간 사업주"]]},
     {t:"산재 보상기준",sub:"",calc:[["sj","휴업급여 계산","rest"],["sj","장례비 계산","fun"]],rows:[["ia_min","최저보상기준(1일)"],["ia_max","최고보상기준(1일)"],["funeral_min","장례비 최저"],["funeral_max","장례비 최고"]]}];
   const keyv=g=>{const id=g.rows[0][0],it=D.items[id];return it?showVal(it,entry(id)):"";};
   const grp=(g,ix)=>`<details class="fgrp" data-gi="${ix}"><summary><span class="ft">${esc(g.t)}</span><span class="fk">${esc(g.rows[0][1])} ${keyv(g)}${g.rows.length>1?` 외 ${g.rows.length-1}건`:""}</span><svg class="chev" viewBox="0 0 16 16" aria-hidden="true"><path d="M4 6l4 4 4-4"/></svg></summary>${g.sub?`<div class="fsub">${esc(g.sub)}</div>`:""}${g.rows.map(([id,lab])=>{const it=D.items[id];if(!it)return"";const e=entry(id),n=nextEntry(id);
@@ -410,13 +410,13 @@ function rSummary(){
 }
 
 /* ---------- 계산기 ---------- */
-const CALCS=[["mw","최저임금 확인"],["ui","실업급여"],["pl","육아휴직급여"],["mat","출산휴가급여"],["sj","산재보상"],["ins","4대보험료"],["sev","퇴직금"],["al","연차일수"],["dg","대지급금"]];
+const CALCS=[["mw","최저임금 확인"],["ui","실업급여"],["pl","육아휴직급여"],["mat","출산휴가급여"],["sj","산재보상"],["ins","4대보험료"],["sev","퇴직금"],["al","연차일수"],["dg","대지급금"],["dis","장애인 고용"]];
 function rCalc(){
   app.innerHTML=`<section class="view"><div><span class="eyebrow">${esc(asofText())} 기준 적용</span><h2>계산기</h2><p class="lede">입력값은 이 기기에만 저장됩니다.</p></div>
   <div class="chips" role="tablist">${CALCS.map(([k,n])=>`<button type="button" class="chip" data-c="${k}" aria-pressed="${k===CALC}">${n}</button>`).join("")}</div>
   <div id="cbody"></div></section>`;
   app.querySelectorAll("[data-c]").forEach(b=>b.addEventListener("click",()=>{CALC=b.dataset.c;rCalc();}));
-  ({mw:cMW,ui:cUI,pl:cPL,mat:cMAT,sj:cSJ,ins:cINS,sev:cSEV,al:cAL,dg:cDG}[CALC])($("#cbody"));
+  ({mw:cMW,ui:cUI,pl:cPL,mat:cMAT,sj:cSJ,dis:cDIS,ins:cINS,sev:cSEV,al:cAL,dg:cDG}[CALC])($("#cbody"));
 }
 function labHtml(id,label){const h=HELP[id];return `<div class="lab"><label for="${id}">${label}</label>${h?`<button type="button" class="q" data-q="${id}" aria-expanded="false" aria-label="${esc(label)} 입력 방법">?</button>`:""}</div>`;}
 function helpHtml(id){const h=HELP[id];return h?`<div class="help" id="h_${id}" hidden>${esc(h)}</div>`:"";}
@@ -469,6 +469,10 @@ const HELP={
  p_ind:"주된 업종을 고릅니다. 여러 업종을 운영하면 근로자 수가 많은 업종을 기준으로 합니다(고용보험법 시행령 제12조).",
  p_emp:"전년도 매월 말일 근로자 수 합계를 조업개월수로 나눈 수입니다. 월 소정근로시간 60시간 이상 단시간근로자는 0.5명, 60시간 미만은 제외합니다.",
  p_ins:"현재 고용보험 피보험자 수입니다(대표자 제외).",
+ dis_emp:"매월 16일 이상 임금을 지급한 근로자의 월평균 수입니다. 소정근로시간 월 60시간 미만인 근로자는 제외합니다(중증장애인은 포함). 연간 부담금은 매월 인원으로 따로 계산해 합산합니다.",
+ dis_mild:"중증이 아닌 장애인 근로자 수입니다.",
+ dis_severe:"월 소정근로시간 60시간 이상인 중증장애인은 1명을 2명으로 인정합니다.",
+ dis_sev_short:"월 소정근로시간 60시간 미만인 중증장애인은 1명으로 셉니다.",
  p_size:"자동 판정은 업종별 상시근로자 수 기준(고용보험법 시행령 제12조)입니다. 그 기준을 넘더라도 중소기업기본법상 중소기업이면 우선지원대상기업으로 보므로 직접 선택합니다. 중견기업은 일부 지원금(워라밸일자리장려금, 유연근무, 고령자 계속고용장려금 등)의 지원 대상입니다.",
  p_region:"수도권은 서울, 인천, 경기입니다. 인천 강화·옹진, 경기 가평·연천은 청년일자리도약장려금에서 비수도권으로 봅니다."
 };
@@ -658,6 +662,29 @@ function cAL(root){
     else{const base=sval("al_rate")==="1"?15:0;const add=Math.floor((yrs-1)/2);days=base?Math.min(base+add,25):0;txt=base?`근속 ${yrs}년차 경과: 15일 + 가산 ${add}일 (최대 25일)`:"출근율 80% 미만: 1개월 개근 시 1일씩 발생";}
     $("#al_out").innerHTML=`<div class="ghead"><span class="big">${days}일</span><span class="pill p-now">근속 ${months}개월</span></div><p class="note">${esc(txt)}</p>
     <p class="note">※ 상시 5인 이상 사업장에 적용합니다. 1년 미만 기간에 발생한 연차는 입사일부터 1년간 사용할 수 있으며, 1년간 80% 이상 출근 후 퇴직(1년 근로 다음 날 퇴직)하면 15일분이 추가 발생한다는 것이 판례·행정해석의 입장입니다.</p>`},"al");}
+
+function cDIS(root){
+  const t=tbl("dis_levy");
+  root.innerHTML=`<div class="panel"><h3>장애인 의무고용 인원과 고용부담금</h3>
+  <div class="form">${field("dis_emp","상시근로자 수(월평균)",120,"number")}${field("dis_mild","장애인 근로자 수(경증)",1,"number")}
+  ${field("dis_severe","중증장애인 수(월 소정근로 60시간 이상)",0,"number")}${field("dis_sev_short","중증장애인 수(월 60시간 미만)",0,"number")}</div>
+  <div class="result" id="dis_out"></div>
+  ${srcLine(["disabled_quota"])}${t?`<div class="basis">※ 부담기초액: ${esc(t.basis)} <a href="${esc(t.src)}" target="_blank" rel="noopener">장애인고용공단</a> (확인 ${esc(t.checked)})</div>`:""}</div>`;
+  bind(root,()=>{const rate=v("disabled_quota")/100;const emp=Math.max(0,Math.floor(num("dis_emp")));
+    const must=Math.floor(emp*rate+1e-9);const incBase=Math.ceil(emp*rate-1e-9);
+    const counted=num("dis_mild")+num("dis_severe")*2+num("dis_sev_short");
+    const short=Math.max(0,must-counted);const ratio=must?counted/must:1;
+    let tier=null,levy=0;
+    if(t&&short>0){tier=counted<=0?t.tiers[4]:t.tiers.find(x=>x[0]>0&&ratio>=x[0])||t.tiers[3];levy=short*tier[1];}
+    const over=Math.max(0,counted-incBase);
+    const target=emp>=100?"부담금 신고·납부 대상(상시 100인 이상)":emp>=50?"고용의무 대상(50인 이상), 부담금은 100인 미만이라 납부 의무 없음":"고용의무 대상 아님(50인 미만)";
+    $("#dis_out").innerHTML=`<div class="ghead"><span class="big">${must}명</span><span class="pill p-now">의무고용 인원</span><span class="pill ${short?"p-warn":"p-ok"}">${short?"미달 "+short+"명":"의무 충족"}</span></div>
+    <dl class="kv"><dt>적용 의무고용률(민간)</dt><dd>${fmt(rate*100)}%</dd><dt>대상 구분</dt><dd style="text-align:right;font-family:inherit">${target}</dd>
+    <dt>인정 장애인 수(중증 60시간 이상 2배)</dt><dd>${fmt(counted)}명</dd>
+    ${emp>=100&&short?`<dt>고용 수준(${esc(tier?tier[2]:"")})</dt><dd>${tier?won(tier[1]):"-"} / 1명</dd><dt>월 부담금(추정)</dt><dd><b>${won(levy)}</b></dd><dt>연간 부담금(12개월 동일 가정)</dt><dd><b>${won(levy*12)}</b></dd>`:""}
+    <dt>고용장려금 기준 인원(올림)</dt><dd>${incBase}명</dd><dt>장려금 대상 초과 인원(추정)</dt><dd>${over}명</dd></dl>
+    ${t?"":`<p class="note">※ 조회 시점의 부담기초액이 수록되어 있지 않습니다.</p>`}
+    <p class="note">※ 의무고용 인원은 상시근로자 수 x 의무고용률의 소수점 이하를 버리고, 장려금 기준 인원은 올립니다. 중증장애인은 월 소정근로시간 60시간 이상이면 2명으로 인정합니다(장애인고용촉진법 제28조의3). 실제 부담금은 매월 인원으로 산정해 합산하므로 월별 인원이 다르면 달라집니다. 장려금은 최저임금 이상 지급, 다른 지원금 중복 여부 등 요건 확인이 필요합니다.</p>`},"dis");}
 
 function cDG(root){
   const t=tbl("dg_caps");

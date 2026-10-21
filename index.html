@@ -296,17 +296,18 @@ document.querySelectorAll("nav.tabs button").forEach(b=>b.addEventListener("clic
 /* 조회 기준: 월 단위 선택(해당 월 1일 기준), 오늘 버튼은 현 시점 기준으로 데이터를 다시 불러옴 */
 let MODE="today";
 /* 조회 가능 시점: 과거는 2024·2025·2026년 1월, 그리고 현재 월. 미래 월은 두지 않음 */
-const PAST_POINTS=["2024-01","2025-01","2026-01"];
+const PAST_POINTS=["2024-01","2025-01","2026-01"],FUTURE_POINTS=["2027-01"];
 function curYM(){return todayStr().slice(0,7);}
-function monthOpts(){const c=curYM();return [...new Set([...PAST_POINTS.filter(v=>v<c),c])];}
+function monthOpts(){const c=curYM();return [...new Set([...PAST_POINTS.filter(v=>v<c),c,...FUTURE_POINTS.filter(v=>v>c)])];}
 function isPast(){return MODE==="month"&&ASOF.slice(0,7)<curYM();}
+function isFuture(){return MODE==="month"&&ASOF.slice(0,7)>curYM();}
 function asofText(){return MODE==="today"?ASOF+" 현재":ASOF.slice(0,4)+"년 "+(+ASOF.slice(5,7))+"월 1일";}
 function syncHeader(){const ym=ASOF.slice(0,7);const sel=$("#month");sel.value=MODE==="today"?curYM():ym;$("#mprev").disabled=sel.selectedIndex<=0;$("#mnext").disabled=sel.selectedIndex>=sel.options.length-1;
   $("#today").setAttribute("aria-pressed",MODE==="today"?"true":"false");$("#asofNote").textContent=MODE==="today"?"오늘("+ASOF+") 기준":ym.slice(0,4)+"년 "+(+ym.slice(5))+"월 1일 기준";}
-function setMonth(ym){if(ym>=curYM()){MODE="today";ASOF=todayStr();}else{MODE="month";ASOF=ym+"-01";}syncHeader();render();}
+function setMonth(ym){if(ym===curYM()){MODE="today";ASOF=todayStr();}else{MODE="month";ASOF=ym+"-01";}syncHeader();render();}
 function shiftMonth(n){const o=monthOpts();let i=o.indexOf(MODE==="today"?curYM():ASOF.slice(0,7));if(i<0)i=o.length-1;i=Math.max(0,Math.min(o.length-1,i+n));setMonth(o[i]);}
 function loadData(){return fetch("data.json?t="+Date.now(),{cache:"no-store"}).then(r=>{if(!r.ok)throw new Error(r.status);return r.json();}).then(j=>{D=j;});}
-$("#month").innerHTML=monthOpts().map(v=>`<option value="${v}">${v.slice(0,4)}년 ${+v.slice(5)}월${v===curYM()?" (현재)":""}</option>`).join("");
+$("#month").innerHTML=monthOpts().map(v=>`<option value="${v}">${v.slice(0,4)}년 ${+v.slice(5)}월${v===curYM()?" (현재)":v>curYM()?" (예정)":""}</option>`).join("");
 $("#month").addEventListener("change",e=>setMonth(e.target.value));
 $("#mprev").addEventListener("click",()=>shiftMonth(-1));
 $("#mnext").addEventListener("click",()=>shiftMonth(1));
@@ -323,7 +324,7 @@ function rSummary(){
     {t:"산재 보상기준 1일",sub:"",rows:[["ia_min","최저보상기준"],["ia_max","최고보상기준"]]}];
   const figs=GROUPS.map(g=>`<div class="fgrp"><h3>${esc(g.t)}${g.sub?`<small>${esc(g.sub)}</small>`:""}</h3>${g.rows.map(([id,lab])=>{const it=D.items[id];if(!it)return"";const e=entry(id),n=nextEntry(id);
     return `<button type="button" class="frow" data-go="${esc(id)}"><span class="k">${esc(lab)}</span><span class="v">${showVal(it,e)}</span>
-    <span class="s">${e?esc(e.from)+" 시행":"해당 시점 자료 없음"}${n&&!isPast()?` · <span class="nx">${esc(n.from)}부터 ${showVal(it,n)}</span>`:""}</span></button>`}).join("")}</div>`).join("");
+    <span class="s">${e?(isFuture()&&e.from<ASOF?esc(e.from)+" 시행 값(이후 변경 미확정)":esc(e.from)+" 시행"):"해당 시점 자료 없음"}${n&&!isPast()&&!isFuture()?` · <span class="nx">${esc(n.from)}부터 ${showVal(it,n)}</span>`:""}</span></button>`}).join("")}</div>`).join("");
   const up=[];for(const [id,it] of Object.entries(D.items)){for(const e of it.hist){if(e.from>ASOF)up.push({id,it,e});}}
   up.sort((a,b)=>a.e.from<b.e.from?-1:1);
   const recent=[];for(const [id,it] of Object.entries(D.items)){for(const e of it.hist){const d=(new Date(ASOF)-new Date(e.from))/864e5;if(d>=0&&d<=120)recent.push({id,it,e});}}
@@ -331,10 +332,10 @@ function rSummary(){
   app.innerHTML=`<section class="view">
   <div><span class="eyebrow">${esc(asofText())} 기준 현행</span><h2>주요 기준금액과 요율</h2><p class="lede">수치를 누르면 근거와 변경 이력을 볼 수 있습니다. 조회 월을 바꾸면 그달 1일에 시행 중인 값으로, 오늘을 누르면 현 시점 최신 데이터로 다시 불러옵니다.</p></div>
   <div class="figs">${figs}</div>
-  ${isPast()?`<div class="panel"><h3>과거 시점 조회 중</h3><p class="note">${esc(asofText())}에 시행 중이던 기준입니다. 이후 변경 이력은 검색 탭의 각 항목에서 확인할 수 있으며, 오늘을 누르면 현재 기준으로 돌아갑니다.</p></div>`:`<div class="panel"><div class="ghead"><h3>시행 예정 변경</h3><span class="pill p-next">${up.length}건</span></div>
+  ${isFuture()?`<div class="panel"><h3>시행 예정 시점 조회 중</h3><p class="note">${esc(asofText())}에 시행될 것으로 확정된 기준입니다. "이후 변경 미확정"으로 표시된 항목은 아직 해당 연도 고시가 나오지 않아 현행 값을 보여 줍니다(예: 산재 보상기준은 통상 12월 말, 국민연금 기준소득월액은 7월에 조정). 오늘을 누르면 현재 기준으로 돌아갑니다.</p></div>`:isPast()?`<div class="panel"><h3>과거 시점 조회 중</h3><p class="note">${esc(asofText())}에 시행 중이던 기준입니다. 이후 변경 이력은 검색 탭의 각 항목에서 확인할 수 있으며, 오늘을 누르면 현재 기준으로 돌아갑니다.</p></div>`:`<div class="panel"><div class="ghead"><h3>시행 예정 변경</h3><span class="pill p-next">${up.length}건</span></div>
     <div class="list">${up.length?up.map(x=>`<div class="row"><span class="date">${esc(x.e.from)}</span><div><b>${esc(x.it.name)}</b> ${showVal(x.it,entry(x.id))} 에서 <b>${showVal(x.it,x.e)}</b>${x.e.note?`<div class="note">${esc(x.e.note)}</div>`:""}</div></div>`).join(""):`<p class="note">기준일 이후 예정된 변경이 없습니다.</p>`}</div></div>`}
-  ${!isPast()&&recent.length?`<div class="panel"><h3>최근 120일 내 시행된 변경</h3><div class="list">${recent.map(x=>`<div class="row"><span class="date">${esc(x.e.from)}</span><div><b>${esc(x.it.name)}</b> ${showVal(x.it,x.e)}${x.e.note?`<div class="note">${esc(x.e.note)}</div>`:""}</div></div>`).join("")}</div></div>`:""}
-  ${!isPast()&&(D.notices||[]).length?`<div class="panel"><h3>입법·제도 동향 메모</h3><div class="list">${D.notices.map(n=>`<div class="row"><span class="date">${esc(n.date)}</span><div>${esc(n.text)}${n.src?` <a href="${esc(n.src)}" target="_blank" rel="noopener">출처</a>`:""}</div></div>`).join("")}</div></div>`:""}
+  ${!isPast()&&!isFuture()&&recent.length?`<div class="panel"><h3>최근 120일 내 시행된 변경</h3><div class="list">${recent.map(x=>`<div class="row"><span class="date">${esc(x.e.from)}</span><div><b>${esc(x.it.name)}</b> ${showVal(x.it,x.e)}${x.e.note?`<div class="note">${esc(x.e.note)}</div>`:""}</div></div>`).join("")}</div></div>`:""}
+  ${!isPast()&&!isFuture()&&(D.notices||[]).length?`<div class="panel"><h3>입법·제도 동향 메모</h3><div class="list">${D.notices.map(n=>`<div class="row"><span class="date">${esc(n.date)}</span><div>${esc(n.text)}${n.src?` <a href="${esc(n.src)}" target="_blank" rel="noopener">출처</a>`:""}</div></div>`).join("")}</div></div>`:""}
   ${installPanel()}
   <section class="firm">
    <div class="firm-bar"></div>

@@ -81,6 +81,15 @@ h3{font-size:16px;margin:0;font-weight:600}
 .figs{display:grid;grid-template-columns:minmax(0,1fr);gap:10px}
 @media (min-width:620px){.figs{grid-template-columns:repeat(2,minmax(0,1fr))}}
 .fgrp{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:12px 14px;display:grid;gap:2px;min-width:0;align-content:start}
+details.fgrp>summary{list-style:none;cursor:pointer;display:grid;grid-template-columns:1fr auto;gap:2px 10px;align-items:center}
+details.fgrp>summary::-webkit-details-marker{display:none}
+.fgrp .ft{font-size:15px;font-weight:700;color:var(--accent)}
+.fgrp .fk{grid-column:1;font-size:12.5px;color:var(--muted);font-family:var(--f-num);font-variant-numeric:tabular-nums}
+.fgrp .chev{grid-column:2;grid-row:1/3;width:18px;height:18px;stroke:var(--muted);fill:none;stroke-width:2;transition:transform .15s}
+details.fgrp[open] .chev{transform:rotate(180deg)}
+details.fgrp[open]>summary{margin-bottom:6px}
+details.fgrp[open] .fk{display:none}
+.fsub{font-size:11px;color:var(--muted);margin-bottom:2px}
 .fgrp h3{font-size:13px;color:var(--accent);margin:0 0 4px;display:flex;justify-content:space-between;gap:8px;align-items:baseline}
 .fgrp h3 small{font-weight:500;color:var(--muted);font-size:11px}
 .frow{display:grid;grid-template-columns:auto 1fr;gap:2px 12px;align-items:baseline;background:none;border:0;border-top:1px dashed var(--line);padding:8px 0 6px;text-align:left;cursor:pointer;width:100%}
@@ -344,10 +353,12 @@ function rSummary(){
     {t:"구직급여 1일",sub:"",rows:[["ui_daily_max","상한액"],["ui_daily_min","하한액(8시간)"]]},
     {t:"장애인 의무고용률",sub:"",rows:[["disabled_quota","민간 사업주"]]},
     {t:"산재 보상기준 1일",sub:"",rows:[["ia_min","최저보상기준"],["ia_max","최고보상기준"]]}];
-  const grp=g=>`<div class="fgrp"><h3>${esc(g.t)}${g.sub?`<small>${esc(g.sub)}</small>`:""}</h3>${g.rows.map(([id,lab])=>{const it=D.items[id];if(!it)return"";const e=entry(id),n=nextEntry(id);
+  const OPEN=store.get("figOpen",{});
+  const keyv=g=>{const id=g.rows[0][0],it=D.items[id];return it?showVal(it,entry(id)):"";};
+  const grp=(g,ix)=>`<details class="fgrp" data-gi="${ix}" ${OPEN[ix]?"open":""}><summary><span class="ft">${esc(g.t)}</span><span class="fk">${esc(g.rows[0][1])} ${keyv(g)}${g.rows.length>1?` 외 ${g.rows.length-1}건`:""}</span><svg class="chev" viewBox="0 0 16 16" aria-hidden="true"><path d="M4 6l4 4 4-4"/></svg></summary>${g.sub?`<div class="fsub">${esc(g.sub)}</div>`:""}${g.rows.map(([id,lab])=>{const it=D.items[id];if(!it)return"";const e=entry(id),n=nextEntry(id);
     return `<button type="button" class="frow" data-go="${esc(id)}"><span class="k">${esc(lab)}</span><span class="v">${showVal(it,e)}</span>
-    <span class="s">${e&&/자동 반영/.test(e.note||"")&&e.checked&&(new Date(todayStr())-new Date(e.checked))/864e5<=7?`<span class="pill p-warn">자동 반영 ${esc(e.checked.slice(5))}</span> `:""}${e?(isFuture()&&e.from<ASOF?esc(e.from)+" 시행 값(이후 변경 미확정)":esc(e.from)+" 시행"):"해당 시점 자료 없음"}${n&&!isPast()&&!isFuture()?` · <span class="nx">${esc(n.from)}부터 ${showVal(it,n)}</span>`:""}</span></button>`}).join("")}</div>`;
-  const figs=GROUPS.slice(0,4).map(grp).join("")+`<details class="more figmore" style="grid-column:1/-1"><summary>수치 더 보기(구직급여, 장애인 의무고용률, 산재 보상기준)</summary><div class="figs" style="margin-top:10px">${GROUPS.slice(4).map(grp).join("")}</div></details>`;
+    <span class="s">${e&&/자동 반영/.test(e.note||"")&&e.checked&&(new Date(todayStr())-new Date(e.checked))/864e5<=7?`<span class="pill p-warn">자동 반영 ${esc(e.checked.slice(5))}</span> `:""}${e?(isFuture()&&e.from<ASOF?esc(e.from)+" 시행 값(이후 변경 미확정)":esc(e.from)+" 시행"):"해당 시점 자료 없음"}${n&&!isPast()&&!isFuture()?` · <span class="nx">${esc(n.from)}부터 ${showVal(it,n)}</span>`:""}</span></button>`}).join("")}</details>`;
+  const figs=GROUPS.map(grp).join("");
   const TODAY=todayStr();
   const dayBefore=d=>{const x=new Date(d+"T00:00:00Z");x.setUTCDate(x.getUTCDate()-1);return x.toISOString().slice(0,10);};
   const ST={"확정":"p-ok","입법예고":"p-warn","국회 계류":"p-no","정부안":"p-no","예산안":"p-no"};
@@ -393,6 +404,7 @@ function rSummary(){
   </section>
   </section>`;
   app.querySelectorAll("[data-go]").forEach(b=>b.addEventListener("click",()=>{store.set("q",D.items[b.dataset.go].name);setTab("search");}));
+  app.querySelectorAll("details.fgrp").forEach(d=>d.addEventListener("toggle",()=>{const o=store.get("figOpen",{});o[d.dataset.gi]=d.open;store.set("figOpen",o);}));
 }
 
 /* ---------- 계산기 ---------- */

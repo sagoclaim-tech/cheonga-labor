@@ -291,7 +291,7 @@ function showVal(it,e){if(!e)return"-";if(typeof e.value==="number"){return it.u
 /* 출처 허용 범위: 법제처, 정책브리핑, 고용노동부, 그 밖의 공공기관. 언론·민간 사이트 링크는 표시하지 않음 */
 const OK_SRC=/^https?:\/\/([a-z0-9-]+\.)*(law\.go\.kr|lawmaking\.go\.kr|korea\.kr|moel\.go\.kr|work24\.go\.kr|ei\.go\.kr|comwel\.or\.kr|nhis\.or\.kr|nps\.or\.kr|kead\.or\.kr|bokjiro\.go\.kr|mohw\.go\.kr|minimumwage\.go\.kr|assembly\.go\.kr|4insure\.or\.kr|kosha\.or\.kr)([\/?#]|$)/i;
 function okSrc(u){return OK_SRC.test(String(u||""));}
-function srcLabel(u){u=String(u||"");return /lawmaking\.go\.kr/.test(u)?"입법예고":/law\.go\.kr/.test(u)?"법령 원문":/likms\.assembly|assembly\.go\.kr/.test(u)?"국회 의안":/moel\.go\.kr/.test(u)?"고용노동부":/korea\.kr/.test(u)?"정책브리핑":"출처";}
+function srcLabel(u){u=String(u||"");return /lawmaking\.go\.kr/.test(u)?"입법예고":/law\.go\.kr\/(행정규칙|%ED%96%89%EC%A0%95%EA%B7%9C%EC%B9%99)/i.test(u)?"고시 원문":/law\.go\.kr\/(법령별표서식|%EB%B2%95%EB%A0%B9%EB%B3%84%ED%91%9C)/i.test(u)?"별표 원문":/law\.go\.kr/.test(u)?"법령 원문":/likms\.assembly|assembly\.go\.kr/.test(u)?"국회 의안":/moel\.go\.kr/.test(u)?"고용노동부":/korea\.kr/.test(u)?"정책브리핑":"출처";}
 function srcLine(ids){const out=[];for(const id of ids){const it=D.items[id],e=entry(id);if(!it||!e)continue;out.push(`${esc(it.name)}: ${esc(e.basis||"")}${okSrc(e.src)?` <a href="${esc(e.src)}" target="_blank" rel="noopener">출처</a>`:""} (확인 ${esc(e.checked||"")})`);}return out.length?`<div class="basis">※ 적용 기준(${esc(ASOF)}): ${out.join(" / ")}</div>`:"";}
 
 /* 탭 */

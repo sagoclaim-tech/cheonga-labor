@@ -1,7 +1,7 @@
 {
-  "name": "청아노무법인",
-  "short_name": "청아노무법인",
-  "description": "노동 기준금액·요율 조회, 계산기, 고용지원금 적용 검토",
+  "name": "청아 노무수첩",
+  "short_name": "노무수첩",
+  "description": "기준금액·계산기·지원금·행정해석을 한곳에. 청아노무법인",
   "lang": "ko",
   "start_url": "./",
   "scope": "./",
@@ -9,8 +9,21 @@
   "background_color": "#eaf1f9",
   "theme_color": "#1a4c8c",
   "icons": [
-    {"src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png"},
-    {"src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png"},
-    {"src": "icons/maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable"}
+    {
+      "src": "icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    },
+    {
+      "src": "icons/maskable-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
   ]
 }

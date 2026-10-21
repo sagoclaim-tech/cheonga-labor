@@ -691,7 +691,7 @@ function rInterp(){
   const hasViews=items.some(x=>typeof x.views==="number");if(!hasViews)ISORT="recent";
   const cnt={};items.forEach(x=>cnt[x.topic]=(cnt[x.topic]||0)+1);
   app.innerHTML=`<section class="view"><div><span class="eyebrow">고용노동부 질의회시${IV&&IV.meta&&IV.meta.updated?" · 최종 갱신 "+esc(IV.meta.updated):""}</span><h2>행정해석</h2>
-  <p class="lede">금전 기준과 관련된 최신 행정해석을 모았습니다. 매일 아침 새로 나온 회시를 확인해 추가합니다. 항목을 누르면 질의·회시 요지와 원문 링크가 보입니다.</p></div>
+  <p class="lede">금전 기준과 관련된 고용노동부 행정해석을 분야별로 모았습니다. 매일 아침 새로 나온 회시를 확인해 추가합니다. 항목을 누르면 질의·회시 요지와 원문 링크가 보입니다.</p></div>
   <div class="search"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="6.5"/><path d="M16 16l4.5 4.5"/></svg><input id="iq" type="search" placeholder="예: 연차수당 퇴직, 통상임금 상여금" value="${esc(q)}" autocomplete="off"></div>
   <div class="chips">${["전체",...ITOPICS.filter(t=>cnt[t])].map(t=>`<button type="button" class="chip" data-it="${esc(t)}" aria-pressed="${ITOPIC===t}">${esc(t)} ${t==="전체"?items.length:cnt[t]}</button>`).join("")}</div>
   ${hasViews?`<div class="chips"><button type="button" class="chip" data-is="recent" aria-pressed="${ISORT==="recent"}">최신순</button><button type="button" class="chip" data-is="views" aria-pressed="${ISORT==="views"}">조회순</button></div>`:""}
@@ -701,8 +701,8 @@ function rInterp(){
     let list=items.filter(x=>(ITOPIC==="전체"||x.topic===ITOPIC)&&(!toks.length||interpMatch(x,toks)));
     list.sort(ISORT==="views"?(a,b)=>(b.views||0)-(a.views||0):(a,b)=>a.date<b.date?1:a.date>b.date?-1:0);
     const fresh=x=>x.added&&(new Date(todayStr())-new Date(x.added))/864e5<=7;
-    $("#ilist").innerHTML=`<p class="note">${list.length}건</p>`+(list.map(x=>`<details class="gcard" data-iid="${esc(x.id)}"><summary><div class="ghead"><span class="pill p-type">${esc(x.topic)}</span>${fresh(x)?'<span class="pill p-warn">새로 추가</span>':""}<span class="note">${esc(x.date)} · ${esc(x.no)}${typeof x.views==="number"?" · 조회 "+x.views.toLocaleString("ko-KR"):""}</span></div><span class="gname">${toks.length?hl(x.title,toks):esc(x.title)}</span></summary>
-      <div class="gbody"><dl><dt>질의 요지</dt><dd>${toks.length?hl(x.q,toks):esc(x.q)}</dd><dt>회시 요지</dt><dd>${toks.length?hl(x.a,toks):esc(x.a)}</dd>${x.basis?`<dt>관련 법령</dt><dd>${esc(x.basis)}</dd>`:""}</dl>
+    $("#ilist").innerHTML=`<p class="note">${list.length}건</p>`+(list.map(x=>`<details class="gcard" data-iid="${esc(x.id)}"><summary><div class="ghead"><span class="pill p-type">${esc(x.topic)}</span>${x.date<"2020-01-01"?'<span class="pill p-no">개정 전 회시 가능</span>':""}${fresh(x)?'<span class="pill p-warn">새로 추가</span>':""}<span class="note">${esc(x.date)} · ${esc(x.no)}${typeof x.views==="number"?" · 조회 "+x.views.toLocaleString("ko-KR"):""}</span></div><span class="gname">${toks.length?hl(x.title,toks):esc(x.title)}</span></summary>
+      <div class="gbody"><dl><dt>질의 요지</dt><dd>${toks.length?hl(x.q,toks):esc(x.q)}</dd><dt>회시 요지</dt><dd>${toks.length?hl(x.a,toks):esc(x.a)}</dd>${x.basis?`<dt>관련 법령</dt><dd>${esc(x.basis)}</dd>`:""}</dl>${x.note?`<p class="note">※ ${esc(x.note)}</p>`:""}${x.date<"2020-01-01"?`<p class="note">※ ${esc(x.date.slice(0,4))}년 회시입니다. 이후 법령 개정 여부를 현행 법령과 대조해 확인합니다.</p>`:""}
       <div class="basis">${okSrc(x.src)?`<a href="${esc(x.src)}" target="_blank" rel="noopener">회시 원문</a> · `:""}문서번호 ${esc(x.no)} · 회시일 ${esc(x.date)}</div></div></details>`).join("")||`<p class="note">${items.length?"찾는 행정해석이 없습니다. 다른 표현으로 검색하거나 분야를 전체로 바꿔 보세요.":(IV?"행정해석 자료를 준비 중입니다. 확인된 회시부터 순차로 게시됩니다.":"행정해석 자료를 불러오지 못했습니다. 오늘 버튼을 눌러 다시 불러오세요.")}</p>`);
     if(IOPEN){const d=$("#ilist").querySelector(`[data-iid="${CSS.escape(IOPEN)}"]`);IOPEN=null;if(d){d.open=true;setTimeout(()=>d.scrollIntoView({block:"start"}),30);}}};
   $("#iq").addEventListener("input",draw);

@@ -328,7 +328,7 @@ function rSummary(){
     {t:"산재 보상기준 1일",sub:"",rows:[["ia_min","최저보상기준"],["ia_max","최고보상기준"]]}];
   const figs=GROUPS.map(g=>`<div class="fgrp"><h3>${esc(g.t)}${g.sub?`<small>${esc(g.sub)}</small>`:""}</h3>${g.rows.map(([id,lab])=>{const it=D.items[id];if(!it)return"";const e=entry(id),n=nextEntry(id);
     return `<button type="button" class="frow" data-go="${esc(id)}"><span class="k">${esc(lab)}</span><span class="v">${showVal(it,e)}</span>
-    <span class="s">${e?(isFuture()&&e.from<ASOF?esc(e.from)+" 시행 값(이후 변경 미확정)":esc(e.from)+" 시행"):"해당 시점 자료 없음"}${n&&!isPast()&&!isFuture()?` · <span class="nx">${esc(n.from)}부터 ${showVal(it,n)}</span>`:""}</span></button>`}).join("")}</div>`).join("");
+    <span class="s">${e&&/자동 반영/.test(e.note||"")&&e.checked&&(new Date(todayStr())-new Date(e.checked))/864e5<=7?`<span class="pill p-warn">자동 반영 ${esc(e.checked.slice(5))}</span> `:""}${e?(isFuture()&&e.from<ASOF?esc(e.from)+" 시행 값(이후 변경 미확정)":esc(e.from)+" 시행"):"해당 시점 자료 없음"}${n&&!isPast()&&!isFuture()?` · <span class="nx">${esc(n.from)}부터 ${showVal(it,n)}</span>`:""}</span></button>`}).join("")}</div>`).join("");
   const TODAY=todayStr();
   const dayBefore=d=>{const x=new Date(d+"T00:00:00Z");x.setUTCDate(x.getUTCDate()-1);return x.toISOString().slice(0,10);};
   const ST={"확정":"p-ok","입법예고":"p-warn","국회 계류":"p-no","정부안":"p-no","예산안":"p-no"};
@@ -361,7 +361,7 @@ function rSummary(){
    <div class="firm-bar"></div>
    <p class="firm-lead">어렵고 복잡한 노동문제 <b>청아노무법인</b>과 함께 하세요</p>
    <p class="firm-sub"><b>20년 이상 실무경력</b>을 갖춘 최고의 전문가들이<br>축적된 <b>노하우(Know-how)</b>로 <b>현장 중심·Solution 중심</b>의<br>컨설팅을 제공합니다.</p>
-   <dl class="svc">${[["노동법률자문","각종 노동문제 상시 노무자문, 노동법률 검토 의견서"],["급여아웃소싱","근로계약서·임금체계·임금대장·4대보험 신고대행"],["노동사건대리","임금체불·체당금·부당해고·직장 내 괴롭힘·성희롱"],["인사제도정비","장시간근로개선·평가제도·정년고용·일터혁신컨설팅"],["산재보험대리","최초요양·장해급여·유족급여·심사재심사 이의신청"],["손해사정지원","산재초과손해액 평가·근재·자동차·단체보험 손해사정"]].map(([k,x])=>`<div><dt>${k}</dt><dd>${x}</dd></div>`).join("")}</dl>
+   <dl class="svc">${[["노동법률자문","각종 노동문제 상시 노무자문, 노동법률 검토 의견서"],["급여아웃소싱","근로계약서·임금체계·임금대장·4대보험 신고대행"],["노동사건대리","임금체불·대지급금·부당해고·직장 내 괴롭힘·성희롱"],["인사제도정비","장시간근로개선·평가제도·정년고용·일터혁신컨설팅"],["산재보험대리","최초요양·장해급여·유족급여·심사재심사 이의신청"],["손해사정지원","산재초과손해액 평가·근재·자동차·단체보험 손해사정"]].map(([k,x])=>`<div><dt>${k}</dt><dd>${x}</dd></div>`).join("")}</dl>
    ${[["부산","공인노무사·손해사정사","이진우","051-853-4421","01091144972","부산광역시 동구 중앙대로 282, 2층(초량동)"],["경남","공인노무사","신연옥","055-637-4421","01085508647","경상남도 거제시 거제중앙로 1930-10, 씨동 1207호(골든아트란티스)"]].map(([r,t,n,ph,mob,ad])=>`<div class="office"><div class="o-main"><div class="o-who"><b>${r}</b> <span>${t}</span> <b class="o-name">${n}</b></div><div class="o-tel">${ph}</div><div class="o-addr">${ad}</div></div><a class="o-call" href="tel:${mob}" aria-label="${n} 휴대폰으로 전화연결"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6.6 10.8a15.1 15.1 0 0 0 6.6 6.6l2.2-2.2a1 1 0 0 1 1-.25 11.4 11.4 0 0 0 3.6.57 1 1 0 0 1 1 1V20a1 1 0 0 1-1 1A17 17 0 0 1 3 4a1 1 0 0 1 1-1h3.5a1 1 0 0 1 1 1c0 1.25.2 2.45.57 3.57a1 1 0 0 1-.25 1z"/></svg>전화연결</a></div>`).join("")}
    <div class="firm-foot"><div class="ff-name">청아노무법인</div><div class="ff-sub">매일 업데이트 · 2026 ©</div>
    <div class="ff-note">데이터 ${esc(D.meta.version)} 판 · 최종 점검 ${esc(D.meta.checked)}<br>※ 본 앱은 1차 검토용이며, 최종 판단은 원문 법령·고시·지침으로 확인합니다.</div></div>
@@ -430,6 +430,7 @@ const HELP={
  p_ind:"주된 업종을 고릅니다. 여러 업종을 운영하면 근로자 수가 많은 업종을 기준으로 합니다(고용보험법 시행령 제12조).",
  p_emp:"전년도 매월 말일 근로자 수 합계를 조업개월수로 나눈 수입니다. 월 소정근로시간 60시간 이상 단시간근로자는 0.5명, 60시간 미만은 제외합니다.",
  p_ins:"현재 고용보험 피보험자 수입니다(대표자 제외).",
+ p_size:"자동 판정은 업종별 상시근로자 수 기준(고용보험법 시행령 제12조)입니다. 그 기준을 넘더라도 중소기업기본법상 중소기업이면 우선지원대상기업으로 보므로 직접 선택합니다. 중견기업은 일부 지원금(워라밸일자리장려금, 유연근무, 고령자 계속고용장려금 등)의 지원 대상입니다.",
  p_region:"수도권은 서울, 인천, 경기입니다. 인천 강화·옹진, 경기 가평·연천은 청년일자리도약장려금에서 비수도권으로 봅니다."
 };
 function num(id){const el=document.getElementById(id);if(!el)return 0;const x=Number(String(el.value).replace(/[^0-9.\-]/g,""));return isNaN(x)?0:x;}
@@ -534,14 +535,11 @@ function cSJ(root){
       else if(useMin&&A<L){a=L;steps.push(`평균임금 ${won(A)}이 최저보상기준금액 ${won(L)}보다 적으므로 ${won(L)}을 평균임금으로 봅니다.`+(L0<mwDay?" (최저보상기준금액이 최저임금액보다 적어 최저임금액 적용)":""));}
       else steps.push(`평균임금 ${won(A)}은 ${useMin?"최저보상기준금액 "+won(L)+" 이상, ":""}최고보상기준금액 ${won(M)} 이하이므로 그대로 적용합니다.`);return a;}
     if(kind==="rest"){
-      steps.push("휴업급여에는 최저보상기준금액을 평균임금으로 의제하지 않습니다(제36조 제7항 단서).");
-      const a=clamp(false);const low=L0*0.8;let day=a*0.7;
-      formula=`1일 휴업급여 = 평균임금 x 70% / 70% 금액이 최저보상기준금액 x 80% 이하이면 평균임금 x 90%(최저보상기준금액 x 80% 한도) / 90% 금액이 최저임금액 미만이면 최저임금액`;
-      steps.push(`평균임금 x 70% = ${won(day)}, 최저보상기준금액 x 80% = ${won(low)}`);
-      if(day<=low){const d90=a*0.9;steps.push(`70% 금액이 기준 이하이므로 평균임금 x 90% = ${won(d90)} 적용(제54조 제1항)`);
-        if(d90>low){day=low;steps.push(`90% 금액이 최저보상기준금액 x 80%를 넘으므로 ${won(low)} 지급(제54조 제1항 단서)`);}
-        else{day=d90;if(day<mwDay){day=mwDay;steps.push(`90% 금액이 최저임금액 ${won(mwDay)}보다 적으므로 최저임금액 지급(제54조 제2항)`);}}}
-      else steps.push("70% 금액이 최저보상기준금액 x 80%를 넘으므로 기본 산식(제52조) 적용");
+      const a=clamp(false);let day=a*0.7;
+      formula=`1일 휴업급여 = 평균임금 x 70% / 70% 금액이 최저보상기준금액 이하이면 최저보상기준금액 적용`;
+      steps.push(`평균임금 x 70% = ${won(day)}, 1일 최저보상기준금액 = ${won(L)}`);
+      if(day<=L){day=L;steps.push(`70% 금액이 최저보상기준금액 이하이므로 최저보상기준금액 ${won(L)}을 1일 휴업급여로 지급(산재보험법 제54조)`);}
+      else steps.push("70% 금액이 최저보상기준금액을 넘으므로 평균임금의 70%를 지급(산재보험법 제52조)");
       if(sval("sj_part")==="1"){const pp=num("sj_partpay");const pd=Math.max((a-pp)*0.9,0);steps.push(`부분휴업: (평균임금 ${won(a)} - 받은 임금 ${won(pp)}) x 90% = ${won(pd)} (제53조)`);day=pd;}
       big=day;tag="1일 휴업급여";kv=[["30일 환산",won(day*30)]];
       steps.push("요양 2년 경과 후 61세 이상 고령자 휴업급여 감액(제55조)과 상병보상연금 전환은 반영하지 않았습니다.");
@@ -631,12 +629,12 @@ function cDG(root){
 /* ---------- 지원금 ---------- */
 const PROFILE_FLAGS=[["parental","육아휴직·육아기 근로시간 단축 사용(예정)자 있음"],["youth","청년(15~34세) 정규직 신규채용 계획"],["older","정년 도래자 계속고용(정년연장·폐지·재고용) 검토"],["older60","60세 이상 근로자 고용 증가 계획"],["disabled","장애인 근로자 고용 중"],["downturn","경영 악화로 휴업·휴직 검토"],["hours","근로시간 단축 희망 근로자 있음"],["vuln","취업취약계층(취업지원제도 이수자 등) 채용 계획"],["lowpay","월 보수 기준액 미만 신규 근로자 있음"]];
 const INDUSTRY=[["mfg","제조업"],["g300","광업·건설·운수창고·정보통신·사업시설관리·전문과학기술·보건복지 등(300인)"],["g200","도소매·숙박음식·금융보험·예술스포츠(200인)"],["etc","그 밖의 업종(100인)"]];
-function prefCheck(p){const lim={mfg:500,g300:300,g200:200,etc:100}[p.ind]||100;return {yes:p.emp<=lim,lim};}
+function prefCheck(p){const lim={mfg:500,g300:300,g200:200,etc:100}[p.ind]||100;const sz=p.size||"auto";if(sz==="sme")return {yes:true,lim,why:"중소기업기본법상 중소기업"};if(sz==="mid")return {yes:false,mid:true,lim};if(sz==="large")return {yes:false,lim};return {yes:p.emp<=lim,lim};}
 function evalGrant(g,p){const r=g.rule||{};const why=[];let st="ok";
   if(r.closed)return {st:"no",why:["2026년 신규 지원 대상 아님"]};
   const pc=prefCheck(p);
   if(r.pref){if(pc.yes)why.push("우선지원대상기업 해당");else{st="no";why.push(`우선지원대상기업이 아님(업종 기준 ${pc.lim}인 초과). 중소기업기본법상 중소기업이면 재검토`);}}
-  if(r.prefOrMid){if(pc.yes)why.push("우선지원대상기업 해당");else{st="maybe";why.push("우선지원대상기업이 아님: 중견기업이면 지원 가능");}}
+  if(r.prefOrMid){if(pc.yes)why.push("우선지원대상기업 해당");else if(pc.mid)why.push("중견기업 해당");else{st="no";why.push("우선지원대상기업·중견기업이 아님");}}
   if(r.minEmp){if(p.emp<r.minEmp){st="no";why.push(`상시근로자 ${r.minEmp}인 이상 요건 불충족`);}else why.push(`상시근로자 ${r.minEmp}인 이상 충족`);}
   if(r.maxEmp){if(p.emp>=r.maxEmp){st="no";why.push(`상시근로자 ${r.maxEmp}인 미만 요건 불충족`);}else why.push(`상시근로자 ${r.maxEmp}인 미만 충족`);}
   if(r.minIns){if(p.ins<r.minIns){st="no";why.push(`피보험자 ${r.minIns}인 이상 요건 불충족${g.id==="youth"?"(특례업종은 1인 이상 가능)":""}`);}else why.push(`피보험자 ${r.minIns}인 이상 충족`);}
@@ -655,11 +653,12 @@ function rGrants(){
   const shown=ev.filter(x=>GFILTER==="all"||x.e.st===GFILTER);
   const lab={ok:["적용 가능","p-ok"],maybe:["추가 확인","p-warn"],no:["해당 없음","p-no"]};
   app.innerHTML=`<section class="view"><div><span class="eyebrow">${esc(asofText())} 기준 · ${esc(D.meta.grantsYear||"")}</span><h2>지원금 안내와 적용 검토</h2><p class="lede">사업장 정보를 입력하면 지원금별로 1차 판정합니다. 입력값은 이 기기에만 저장됩니다.</p></div>
-  <details class="panel" ${store.get("pOpen",true)?"open":""} id="pbox"><summary><h3 style="display:inline">사업장 정보</h3> <span class="pill ${pc.yes?"p-ok":"p-no"}">${pc.yes?"우선지원대상기업":"대규모기업"}</span></summary>
+  <details class="panel" ${store.get("pOpen",true)?"open":""} id="pbox"><summary><h3 style="display:inline">사업장 정보</h3> <span class="pill ${pc.yes?"p-ok":"p-no"}">${pc.yes?"우선지원대상기업":pc.mid?"중견기업":"대규모기업"}</span></summary>
    <div class="form" style="margin-top:12px">
    ${field("p_ind","업종",p.ind,"select",{opts:INDUSTRY,full:true})}
    ${field("p_emp","상시근로자 수",p.emp,"number")}${field("p_ins","고용보험 피보험자 수",p.ins,"number")}
    ${field("p_region","소재지",p.region,"select",{opts:[["nonmetro","비수도권"],["metro","수도권"]]})}
+   ${field("p_size","기업 구분",p.size||"auto","select",{opts:[["auto","업종·인원으로 자동 판정"],["sme","중소기업기본법상 중소기업"],["mid","중견기업"],["large","대규모기업"]],full:true})}
    <div class="full" style="display:grid;gap:6px">${PROFILE_FLAGS.map(([k,n])=>`<label class="chk"><input type="checkbox" id="pf_${k}" ${p.flags[k]?"checked":""}>${esc(n)}</label>`).join("")}</div>
    </div><p class="note">※ 우선지원대상기업 판정은 고용보험법 시행령 제12조 업종별 상시근로자 수 기준이며, 중소기업기본법상 중소기업은 규모와 무관하게 우선지원대상기업으로 봅니다.</p></details>
   <div class="chips">${[["all","전체 "+list.length],["ok","적용 가능 "+cnt.ok],["maybe","추가 확인 "+cnt.maybe],["no","해당 없음 "+cnt.no]].map(([k,n])=>`<button type="button" class="chip" data-gf="${k}" aria-pressed="${GFILTER===k}">${n}</button>`).join("")}</div>
@@ -671,7 +670,7 @@ function rGrants(){
   app.querySelectorAll("[data-gf]").forEach(b=>b.addEventListener("click",()=>{GFILTER=b.dataset.gf;rGrants();}));
   if(GOPEN){const d=app.querySelector(`[data-gid="${GOPEN}"]`);GOPEN=null;if(d){d.open=true;setTimeout(()=>d.scrollIntoView({block:"start"}),30);}}
   $("#pbox").addEventListener("toggle",e=>store.set("pOpen",e.target.open));
-  const save=()=>{const np={ind:sval("p_ind"),emp:num("p_emp"),ins:num("p_ins"),region:sval("p_region"),flags:{}};PROFILE_FLAGS.forEach(([k])=>np.flags[k]=document.getElementById("pf_"+k).checked);store.set("profile",np);const y=window.scrollY;rGrants();window.scrollTo(0,y);};
+  const save=()=>{const np={ind:sval("p_ind"),emp:num("p_emp"),ins:num("p_ins"),region:sval("p_region"),size:sval("p_size"),flags:{}};PROFILE_FLAGS.forEach(([k])=>np.flags[k]=document.getElementById("pf_"+k).checked);store.set("profile",np);const y=window.scrollY;rGrants();window.scrollTo(0,y);};
   app.querySelectorAll("#pbox input,#pbox select").forEach(el=>el.addEventListener("change",save));
 }
 
@@ -707,8 +706,8 @@ function goDoc(d){const g=d.go;
 function rSearch(){
   if(!DOCS||DOCS._d!==D){DOCS=buildDocs();DOCS._d=D;}
   const q=store.get("q","");
-  const KW=["실업급여 질병","직장 내 괴롭힘","최저임금","구직급여 상한","육아휴직","대체인력","청년","고령자","장해등급","장례비","체당금","국민연금","두루누리","2027"];
-  app.innerHTML=`<section class="view"><div><span class="eyebrow">${esc(asofText())} 기준</span><h2>통합 검색</h2><p class="lede">기준 수치, 지원금, 실업급여 이직사유, 산재 급여표, 계산기, 제도 동향을 한 번에 찾습니다. 띄어 쓴 단어는 모두 포함된 결과만 보여 주며, 체당금과 대지급금처럼 같은 뜻의 단어도 함께 찾습니다.</p></div>
+  const KW=["실업급여 질병","직장 내 괴롭힘","최저임금","구직급여 상한","육아휴직","대체인력","청년","고령자","장해등급","장례비","대지급금","국민연금","두루누리","2027"];
+  app.innerHTML=`<section class="view"><div><span class="eyebrow">${esc(asofText())} 기준</span><h2>통합 검색</h2><p class="lede">기준 수치, 지원금, 실업급여 이직사유, 산재 급여표, 계산기, 제도 동향을 한 번에 찾습니다. 띄어 쓴 단어는 모두 포함된 결과만 보여 주며, 장의비와 장례비처럼 같은 뜻의 단어도 함께 찾습니다.</p></div>
   <div class="search"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="6.5"/><path d="M16 16l4.5 4.5"/></svg><input id="q" type="search" placeholder="예: 질병 퇴사, 대체인력, 장해 7급" value="${esc(q)}" autocomplete="off"></div>
   <div class="kw">${KW.map(k=>`<button type="button" class="chip" data-kw="${esc(k)}">${esc(k)}</button>`).join("")}</div>
   <div id="res" style="display:grid;gap:10px"></div>

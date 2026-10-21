@@ -89,6 +89,9 @@ details.fgrp>summary::-webkit-details-marker{display:none}
 details.fgrp[open] .chev{transform:rotate(180deg)}
 details.fgrp[open]>summary{margin-bottom:6px}
 details.fgrp[open] .fk{display:none}
+.calcbtns{display:flex;flex-wrap:wrap;gap:8px;padding-top:10px;margin-top:4px;border-top:1px solid var(--line)}
+.calcbtn{display:inline-flex;align-items:center;gap:6px;background:var(--accent-soft);color:var(--accent);border:1px solid var(--accent-2);border-radius:999px;padding:7px 14px;font-size:13px;font-weight:700;cursor:pointer}
+.calcbtn svg{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:1.8}
 .fsub{font-size:11px;color:var(--muted);margin-bottom:2px}
 .fgrp h3{font-size:13px;color:var(--accent);margin:0 0 4px;display:flex;justify-content:space-between;gap:8px;align-items:baseline}
 .fgrp h3 small{font-weight:500;color:var(--muted);font-size:11px}
@@ -346,17 +349,17 @@ function render(){if(!D)return;({summary:rSummary,calc:rCalc,grants:rGrants,inte
 
 /* ---------- 요약 ---------- */
 function rSummary(){
-  const GROUPS=[{t:"최저임금",sub:"",rows:[["min_wage_hourly","시간급"],["min_wage_monthly","월 환산(209시간)"]]},
-    {t:"4대보험 요율",sub:"",rows:[["np_rate","국민연금(노사 합계)"],["hi_rate","건강보험(노사 합계)"],["ltc_rate","장기요양(소득 대비)"],["ei_ui_worker","고용보험 실업급여(근로자)"],["ei_sp_1","고용안정·직능(사업주, 150인 미만)"],["hi_cap_upper","건강보험료 월 상한(노사 합계)"],["hi_cap_lower","건강보험료 월 하한(노사 합계)"]]},
-    {t:"국민연금 기준소득월액",sub:"매년 7월 조정",rows:[["np_lower","하한"],["np_upper","상한"]]},
-    {t:"출산·육아 급여 상한",sub:"",rows:[["mat_cap","출산전후휴가(월)"],["pl_cap_1","육아휴직 1~3개월(월)"],["pl_cap_4","육아휴직 4~6개월(월)"],["pl_cap_7","육아휴직 7개월 이후(월)"],["spouse_leave_cap","배우자 출산휴가"]]},
-    {t:"구직급여 1일",sub:"",rows:[["ui_daily_max","상한액"],["ui_daily_min","하한액(8시간)"]]},
+  const GROUPS=[{t:"최저임금",sub:"",calc:[["mw","최저임금 위반 계산"]],rows:[["min_wage_hourly","시간급"],["min_wage_monthly","월 환산(209시간)"]]},
+    {t:"4대보험 요율",sub:"",calc:[["ins","4대보험료 계산"]],rows:[["np_rate","국민연금(노사 합계)"],["hi_rate","건강보험(노사 합계)"],["ltc_rate","장기요양(소득 대비)"],["ei_ui_worker","고용보험 실업급여(근로자)"],["ei_sp_1","고용안정·직능(사업주, 150인 미만)"],["hi_cap_upper","건강보험료 월 상한(노사 합계)"],["hi_cap_lower","건강보험료 월 하한(노사 합계)"]]},
+    {t:"국민연금 기준소득월액",sub:"매년 7월 조정",calc:[["ins","4대보험료 계산"]],rows:[["np_lower","하한"],["np_upper","상한"]]},
+    {t:"출산·육아 급여 상한",sub:"",calc:[["mat","출산휴가급여 계산"],["pl","육아휴직급여 계산"]],rows:[["mat_cap","출산전후휴가(월)"],["pl_cap_1","육아휴직 1~3개월(월)"],["pl_cap_4","육아휴직 4~6개월(월)"],["pl_cap_7","육아휴직 7개월 이후(월)"],["spouse_leave_cap","배우자 출산휴가"]]},
+    {t:"구직급여 1일",sub:"",calc:[["ui","실업급여 계산"]],rows:[["ui_daily_max","상한액"],["ui_daily_min","하한액(8시간)"]]},
     {t:"장애인 의무고용률",sub:"",rows:[["disabled_quota","민간 사업주"]]},
-    {t:"산재 보상기준",sub:"",rows:[["ia_min","최저보상기준(1일)"],["ia_max","최고보상기준(1일)"],["funeral_min","장례비 최저"],["funeral_max","장례비 최고"]]}];
+    {t:"산재 보상기준",sub:"",calc:[["sj","휴업급여 계산","rest"],["sj","장례비 계산","fun"]],rows:[["ia_min","최저보상기준(1일)"],["ia_max","최고보상기준(1일)"],["funeral_min","장례비 최저"],["funeral_max","장례비 최고"]]}];
   const keyv=g=>{const id=g.rows[0][0],it=D.items[id];return it?showVal(it,entry(id)):"";};
   const grp=(g,ix)=>`<details class="fgrp" data-gi="${ix}"><summary><span class="ft">${esc(g.t)}</span><span class="fk">${esc(g.rows[0][1])} ${keyv(g)}${g.rows.length>1?` 외 ${g.rows.length-1}건`:""}</span><svg class="chev" viewBox="0 0 16 16" aria-hidden="true"><path d="M4 6l4 4 4-4"/></svg></summary>${g.sub?`<div class="fsub">${esc(g.sub)}</div>`:""}${g.rows.map(([id,lab])=>{const it=D.items[id];if(!it)return"";const e=entry(id),n=nextEntry(id);
     return `<button type="button" class="frow" data-go="${esc(id)}"><span class="k">${esc(lab)}</span><span class="v">${showVal(it,e)}</span>
-    <span class="s">${e&&/자동 반영/.test(e.note||"")&&e.checked&&(new Date(todayStr())-new Date(e.checked))/864e5<=7?`<span class="pill p-warn">자동 반영 ${esc(e.checked.slice(5))}</span> `:""}${e?(isFuture()&&e.from<ASOF?esc(e.from)+" 시행 값(이후 변경 미확정)":esc(e.from)+" 시행"):"해당 시점 자료 없음"}${n&&!isPast()&&!isFuture()?` · <span class="nx">${esc(n.from)}부터 ${showVal(it,n)}</span>`:""}</span></button>`}).join("")}</details>`;
+    <span class="s">${e&&/자동 반영/.test(e.note||"")&&e.checked&&(new Date(todayStr())-new Date(e.checked))/864e5<=7?`<span class="pill p-warn">자동 반영 ${esc(e.checked.slice(5))}</span> `:""}${e?(isFuture()&&e.from<ASOF?esc(e.from)+" 시행 값(이후 변경 미확정)":esc(e.from)+" 시행"):"해당 시점 자료 없음"}${n&&!isPast()&&!isFuture()?` · <span class="nx">${esc(n.from)}부터 ${showVal(it,n)}</span>`:""}</span></button>`}).join("")}${(g.calc||[]).length?`<div class="calcbtns">${g.calc.map(([c,l,kd])=>`<button type="button" class="calcbtn" data-calc="${c}" data-kind="${kd||""}"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="3" width="14" height="18" rx="2"/><path d="M8 7h8M8 12h2M14 12h2M8 16h2M14 16h2"/></svg>${esc(l)}</button>`).join("")}</div>`:""}</details>`;
   const figs=GROUPS.map(grp).join("");
   const TODAY=todayStr();
   const dayBefore=d=>{const x=new Date(d+"T00:00:00Z");x.setUTCDate(x.getUTCDate()-1);return x.toISOString().slice(0,10);};
@@ -403,6 +406,7 @@ function rSummary(){
   </section>
   </section>`;
   app.querySelectorAll("[data-go]").forEach(b=>b.addEventListener("click",()=>{store.set("q",D.items[b.dataset.go].name);setTab("search");}));
+  app.querySelectorAll(".calcbtn").forEach(b=>b.addEventListener("click",()=>{CALC=b.dataset.calc;if(b.dataset.kind)store.set("sj.sj_kind",b.dataset.kind);setTab("calc");}));
 }
 
 /* ---------- 계산기 ---------- */

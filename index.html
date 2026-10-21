@@ -288,8 +288,11 @@ function nextEntry(id){const it=D.items[id];if(!it)return null;return [...it.his
 function v(id){const e=entry(id);return e?e.value:null;}
 function tbl(id){const t=D.tables[id];if(!t)return null;const vs=[...t.versions].sort((a,b)=>a.from<b.from?-1:1);let cur=null;for(const x of vs){if(x.from<=ASOF)cur=x;}return cur;}
 function showVal(it,e){if(!e)return"-";if(typeof e.value==="number"){return it.unit==="원"?won(e.value):fmt(e.value)+(it.unit?(it.unit==="%"?"%":" "+it.unit):"");}return esc(e.value);}
+/* 출처 허용 범위: 법제처, 정책브리핑, 고용노동부, 그 밖의 공공기관. 언론·민간 사이트 링크는 표시하지 않음 */
+const OK_SRC=/^https?:\/\/([a-z0-9-]+\.)*(law\.go\.kr|lawmaking\.go\.kr|korea\.kr|moel\.go\.kr|work24\.go\.kr|ei\.go\.kr|comwel\.or\.kr|nhis\.or\.kr|nps\.or\.kr|kead\.or\.kr|bokjiro\.go\.kr|mohw\.go\.kr|minimumwage\.go\.kr|assembly\.go\.kr|4insure\.or\.kr|kosha\.or\.kr)([\/?#]|$)/i;
+function okSrc(u){return OK_SRC.test(String(u||""));}
 function srcLabel(u){u=String(u||"");return /lawmaking\.go\.kr/.test(u)?"입법예고":/law\.go\.kr/.test(u)?"법령 원문":/likms\.assembly|assembly\.go\.kr/.test(u)?"국회 의안":/moel\.go\.kr/.test(u)?"고용노동부":/korea\.kr/.test(u)?"정책브리핑":"출처";}
-function srcLine(ids){const out=[];for(const id of ids){const it=D.items[id],e=entry(id);if(!it||!e)continue;out.push(`${esc(it.name)}: ${esc(e.basis||"")}${e.src?` <a href="${esc(e.src)}" target="_blank" rel="noopener">출처</a>`:""} (확인 ${esc(e.checked||"")})`);}return out.length?`<div class="basis">※ 적용 기준(${esc(ASOF)}): ${out.join(" / ")}</div>`:"";}
+function srcLine(ids){const out=[];for(const id of ids){const it=D.items[id],e=entry(id);if(!it||!e)continue;out.push(`${esc(it.name)}: ${esc(e.basis||"")}${okSrc(e.src)?` <a href="${esc(e.src)}" target="_blank" rel="noopener">출처</a>`:""} (확인 ${esc(e.checked||"")})`);}return out.length?`<div class="basis">※ 적용 기준(${esc(ASOF)}): ${out.join(" / ")}</div>`:"";}
 
 /* 탭 */
 function setTab(t){TAB=t;document.querySelectorAll("nav.tabs button").forEach(b=>b.setAttribute("aria-current",b.dataset.tab===t?"page":"false"));try{history.replaceState(null,"","#"+t)}catch(e){}render();window.scrollTo(0,0);}
@@ -337,7 +340,7 @@ function rSummary(){
     return out.sort((a,b)=>a.date<b.date?-1:a.date>b.date?1:(a.status==="확정"?-1:1));}
   function changeRows(list){return list.map(x=>`<div class="row"><span class="date">${esc(x.date)}</span><div><div class="ghead"><b>${esc(x.title)}</b><span class="pill ${ST[x.status]||"p-no"}">${esc(x.status)}</span></div>
     ${x.before||x.after?(x.before&&x.before===x.after?`<div>변동 없음(<b>${x.after}</b> 유지)</div>`:`<div>${x.before&&x.before!=="-"?`<span class="note">이전</span> ${x.before} · `:""}<span class="note">변경</span> <b>${x.after}</b></div>`):""}${x.note?`<div class="note">※ ${esc(x.note)}</div>`:""}
-    ${x.basis||x.src?`<div class="note">${esc(x.basis)}${x.src?` <a href="${esc(x.src)}" target="_blank" rel="noopener">${srcLabel(x.src)}</a>`:""}</div>`:""}</div></div>`).join("");}
+    ${x.basis||x.src?`<div class="note">${esc(x.basis)}${okSrc(x.src)?` <a href="${esc(x.src)}" target="_blank" rel="noopener">${srcLabel(x.src)}</a>`:""}</div>`:""}</div></div>`).join("");}
   const upcoming=changeList(TODAY,"9999-12-31");
   const atPoint=isFuture()?changeList(TODAY,ASOF):[];
   const recent=[];for(const [id,it] of Object.entries(D.items)){for(const e of it.hist){const d=(new Date(ASOF)-new Date(e.from))/864e5;if(d>=0&&d<=120)recent.push({id,it,e});}}
@@ -352,7 +355,7 @@ function rSummary(){
    :`<div class="panel"><div class="ghead"><h3>시행 예정 변경</h3><span class="pill p-next">${upcoming.length}건</span></div>
     <div class="list">${upcoming.length?changeRows(upcoming):`<p class="note">기준일 이후 예정된 변경이 없습니다.</p>`}</div></div>`}
   ${!isPast()&&!isFuture()&&recent.length?`<div class="panel"><h3>최근 120일 내 시행된 변경</h3><div class="list">${recent.map(x=>`<div class="row"><span class="date">${esc(x.e.from)}</span><div><b>${esc(x.it.name)}</b> ${showVal(x.it,x.e)}${x.e.note?`<div class="note">${esc(x.e.note)}</div>`:""}</div></div>`).join("")}</div></div>`:""}
-  ${!isPast()&&(D.notices||[]).length?`<div class="panel"><h3>입법·제도 동향 메모</h3><div class="list">${D.notices.map(n=>`<div class="row"><span class="date">${esc(n.date)}</span><div>${esc(n.text)}${n.src?` <a href="${esc(n.src)}" target="_blank" rel="noopener">${srcLabel(n.src)}</a>`:""}</div></div>`).join("")}</div></div>`:""}
+  ${!isPast()&&(D.notices||[]).length?`<div class="panel"><h3>입법·제도 동향 메모</h3><div class="list">${D.notices.map(n=>`<div class="row"><span class="date">${esc(n.date)}</span><div>${esc(n.text)}${okSrc(n.src)?` <a href="${esc(n.src)}" target="_blank" rel="noopener">${srcLabel(n.src)}</a>`:""}</div></div>`).join("")}</div></div>`:""}
   ${installPanel()}
   <section class="firm">
    <div class="firm-bar"></div>
@@ -464,7 +467,7 @@ function cUI(root){
    <details open><summary>기본 수급요건</summary><div class="rb"><ol>${R.basic.map(x=>`<li>${esc(x)}</li>`).join("")}</ol></div></details>
    <details><summary>정당한 이직 사유(자발적 이직이라도 수급 가능)</summary><div class="rb"><ul style="list-style:none;padding-left:0">${R.just.map(j=>`<li><span class="jn">${esc(j.no)}.</span><b>${esc(j.title)}</b><div class="note" style="color:var(--ink)">${esc(j.text)}</div>${j.proof?`<div class="note">※ 입증: ${esc(j.proof)}</div>`:""}</li>`).join("")}</ul></div></details>
    <details><summary>수급자격 제한 사유(제58조)</summary><div class="rb"><ol>${R.grave.map(x=>`<li>${esc(x)}</li>`).join("")}</ol><p class="note">※ 자기 사정 이직: 전직·자영업을 위한 이직, 중대한 귀책사유자가 권고로 이직한 경우, 별표2의 정당한 사유에 해당하지 않는 이직은 수급자격이 제한됩니다(제58조 제2호).</p></div></details>
-   <div class="basis">※ ${esc(R.basis||"")}${R.src?` <a href="${esc(R.src)}" target="_blank" rel="noopener">출처</a>`:""} (확인 ${esc(R.checked||"")})</div></div>`;
+   <div class="basis">※ ${esc(R.basis||"")}${okSrc(R.src)?` <a href="${esc(R.src)}" target="_blank" rel="noopener">출처</a>`:""} (확인 ${esc(R.checked||"")})</div></div>`;
   bind(root,()=>{const mw=v("min_wage_hourly"),cap=v("ui_daily_max");const avg=num("ui_wage")/(num("ui_days3")||92);const hrs=Math.min(num("ui_hours")||8,8);
     const lower=mw*0.8*hrs;let day=avg*0.6;let note="평균임금 60%";
     if(day>cap){day=cap;note="상한액 적용";} if(day<lower){day=lower;note=lower>cap?"하한액 적용(하한액이 상한액보다 커서 하한액 지급)":"하한액 적용";}
@@ -487,7 +490,7 @@ function cPL(root){
   root.innerHTML=`<div class="panel"><h3>육아휴직급여 월별 지급액</h3>
   <div class="form">${money("pl_wage","월 통상임금(원)",3500000)}${field("pl_months","휴직 개월 수",12,"number")}
   ${field("pl_66","부모 모두 사용 특례(6+6)",0,"select",{opts:[[0,"일반"],[1,"6+6 특례 적용"]]})}${field("pl_order","특례 적용 시 본인 순서",2,"select",{opts:[[1,"먼저 사용한 부모"],[2,"나중에 사용한 부모"]]})}</div>
-  <div class="result" id="pl_out"></div>${t&&t.basis?`<div class="basis">※ ${esc(t.basis)}${t.src?` <a href="${esc(t.src)}" target="_blank" rel="noopener">출처</a>`:""} (확인 ${esc(t.checked||"")})</div>`:""}</div>`;
+  <div class="result" id="pl_out"></div>${t&&t.basis?`<div class="basis">※ ${esc(t.basis)}${okSrc(t.src)?` <a href="${esc(t.src)}" target="_blank" rel="noopener">출처</a>`:""} (확인 ${esc(t.checked||"")})</div>`:""}</div>`;
   bind(root,()=>{if(!t){$("#pl_out").innerHTML="데이터 없음";return;}const w=num("pl_wage"),m=Math.max(1,Math.min(18,num("pl_months")||12));const sp=sval("pl_66")==="1";
     const rows=[];let tot=0;for(let i=1;i<=m;i++){let rate,cap,lab;
       if(sp&&i<=6&&t.sixsix){rate=1;cap=t.sixsix[i-1];lab="6+6 특례";}
@@ -623,7 +626,7 @@ function cDG(root){
   const t=tbl("dg_caps");
   root.innerHTML=`<div class="panel"><h3>대지급금 상한액</h3>${t?`
   <div class="tw"><table><thead><tr>${t.cols.map(c=>`<th>${esc(c)}</th>`).join("")}</tr></thead><tbody>${t.rows.map(r=>`<tr>${r.map((x,i)=>`<td class="${i?"n":""}">${typeof x==="number"?won(x):esc(x)}</td>`).join("")}</tr>`).join("")}</tbody></table></div>
-  ${(t.notes||[]).map(n=>`<p class="note">※ ${esc(n)}</p>`).join("")}<div class="basis">※ ${esc(t.basis||"")}${t.src?` <a href="${esc(t.src)}" target="_blank" rel="noopener">출처</a>`:""} (확인 ${esc(t.checked||"")})</div>`:"데이터 없음"}</div>`;}
+  ${(t.notes||[]).map(n=>`<p class="note">※ ${esc(n)}</p>`).join("")}<div class="basis">※ ${esc(t.basis||"")}${okSrc(t.src)?` <a href="${esc(t.src)}" target="_blank" rel="noopener">출처</a>`:""} (확인 ${esc(t.checked||"")})</div>`:"데이터 없음"}</div>`;}
 
 /* ---------- 지원금 ---------- */
 const PROFILE_FLAGS=[["parental","육아휴직·육아기 근로시간 단축 사용(예정)자 있음"],["youth","청년(15~34세) 정규직 신규채용 계획"],["older","정년 도래자 계속고용(정년연장·폐지·재고용) 검토"],["older60","60세 이상 근로자 고용 증가 계획"],["disabled","장애인 근로자 고용 중"],["downturn","경영 악화로 휴업·휴직 검토"],["hours","근로시간 단축 희망 근로자 있음"],["vuln","취업취약계층(취업지원제도 이수자 등) 채용 계획"],["lowpay","월 보수 기준액 미만 신규 근로자 있음"]];
@@ -663,7 +666,7 @@ function rGrants(){
   <div style="display:grid;gap:10px">${shown.map(({g,e})=>`<details class="gcard" data-gid="${esc(g.id)}"><summary><div class="ghead"><span class="pill ${lab[e.st][1]}">${lab[e.st][0]}</span><span class="note">${esc(g.family||"")}</span></div><span class="gname">${esc(g.name)}</span><span class="gamt">${esc(g.headline||"")}</span></summary>
    <div class="gbody"><div class="why"><ul>${e.why.map(w=>`<li>${esc(w)}</li>`).join("")}</ul></div>
    <dl>${[["지원대상",g.target],["근로자 요건",g.worker],["지원금액",g.amount],["지원기간",g.period],["한도",g.limit],["제외·유의",g.exclude],["신청",g.apply],["2026 변경",g.changes],["2027 예정",g.next],["근거",g.basis]].filter(x=>x[1]).map(([k,x])=>`<dt>${k}</dt><dd>${esc(x)}</dd>`).join("")}</dl>
-   <div class="basis">${g.src?`<a href="${esc(g.src)}" target="_blank" rel="noopener">출처 원문</a> · `:""}확인 ${esc(g.checked||"")}</div></div></details>`).join("")||`<p class="note">해당하는 지원금이 없습니다.</p>`}</div>
+   <div class="basis">${okSrc(g.src)?`<a href="${esc(g.src)}" target="_blank" rel="noopener">출처 원문</a> · `:""}확인 ${esc(g.checked||"")}</div></div></details>`).join("")||`<p class="note">해당하는 지원금이 없습니다.</p>`}</div>
   <p class="foot">※ 지원금은 연도별 사업운영지침과 예산 소진 여부에 따라 달라집니다. 신청 전 고용24 공고로 최종 확인합니다.</p></section>`;
   app.querySelectorAll("[data-gf]").forEach(b=>b.addEventListener("click",()=>{GFILTER=b.dataset.gf;rGrants();}));
   if(GOPEN){const d=app.querySelector(`[data-gid="${GOPEN}"]`);GOPEN=null;if(d){d.open=true;setTimeout(()=>d.scrollIntoView({block:"start"}),30);}}
@@ -695,12 +698,12 @@ function hl(text,toks){let t=esc(text);toks.flat().filter(w=>w.length>0).sort((a
 function snippet(text,toks){const low=text.toLowerCase();let pos=-1;for(const g of toks)for(const w of g){const i=low.indexOf(w.toLowerCase());if(i>=0&&(pos<0||i<pos))pos=i;}const st=Math.max(0,pos-30);return (st>0?"…":"")+text.slice(st,st+120)+(text.length>st+120?"…":"");}
 function itemDetail(id){const it=D.items[id];const e=entry(id),n=nextEntry(id);const hist=[...it.hist].sort((a,b)=>a.from<b.from?1:-1);
   return `<div class="hitdetail"><div class="ghead">${e?`<span class="pill p-now">${esc(e.from)} 시행</span>`:""}${n?`<span class="pill p-next">${esc(n.from)} 예정: ${showVal(it,n)}</span>`:""}</div>
-  ${e?`<div class="meta">근거: ${esc(e.basis||"")} · 확인 ${esc(e.checked||"")}${e.src?` · <a href="${esc(e.src)}" target="_blank" rel="noopener">출처</a>`:""}</div>`:""}
+  ${e?`<div class="meta">근거: ${esc(e.basis||"")} · 확인 ${esc(e.checked||"")}${okSrc(e.src)?` · <a href="${esc(e.src)}" target="_blank" rel="noopener">출처</a>`:""}</div>`:""}
   ${e&&e.note?`<div class="note">※ ${esc(e.note)}</div>`:""}${hist.length>1?`<div class="hist">이력: ${hist.map(h=>`${esc(h.from)} ${showVal(it,h)}`).join(" / ")}</div>`:""}</div>`;}
 function goDoc(d){const g=d.go;
   if(g.grant){GFILTER="all";GOPEN=g.grant;setTab("grants");return;}
   if(g.calc){CALC=g.calc;if(g.just){store.set("ui.ui_reason","just");store.set("ui.ui_just",g.just);}if(g.kind)store.set("sj.sj_kind",g.kind);setTab("calc");return;}
-  if(g.notice){window.open(g.notice,"_blank","noopener");}}
+  if(g.notice&&okSrc(g.notice)){window.open(g.notice,"_blank","noopener");}}
 function rSearch(){
   if(!DOCS||DOCS._d!==D){DOCS=buildDocs();DOCS._d=D;}
   const q=store.get("q","");

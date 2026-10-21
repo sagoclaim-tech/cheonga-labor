@@ -104,14 +104,14 @@
      "from": "2019-01-01",
      "value": 66000,
      "basis": "고용보험법 시행령 제68조(종전)",
-     "src": "https://korea.legal/wiki/%EA%B3%A0%EC%9A%A9%EB%B3%B4%ED%97%98%EB%B2%95-%EC%8B%9C%ED%96%89%EB%A0%B9-%EC%A0%9C68%EC%A1%B0/",
+     "src": "https://www.law.go.kr/법령/고용보험법시행령/제68조",
      "checked": "2026-10-21"
     },
     {
      "from": "2026-01-01",
      "value": 68100,
      "basis": "고용보험법 시행령 제68조(2025.12.23. 개정, 임금일액 상한 113,500원), 부칙 제4조",
-     "src": "https://korea.legal/wiki/%EA%B3%A0%EC%9A%A9%EB%B3%B4%ED%97%98%EB%B2%95-%EC%8B%9C%ED%96%89%EB%A0%B9-%EC%A0%9C68%EC%A1%B0/",
+     "src": "https://www.law.go.kr/법령/고용보험법시행령/제68조",
      "checked": "2026-10-21",
      "note": "2026.1.1. 이후 이직자부터 적용, 2025.12.31. 이전 이직자는 66,000원"
     }
@@ -141,7 +141,7 @@
      "from": "2026-01-01",
      "value": 66048,
      "basis": "고용보험법 제46조: 최저임금 x 80% x 1일 소정근로시간",
-     "src": "https://www.jobplanet.co.kr/contents/news-8001",
+     "src": "https://www.law.go.kr/법령/고용보험법/제46조",
      "checked": "2026-10-21"
     },
     {
@@ -556,7 +556,7 @@
      "from": "2022-07-01",
      "value": 1.8,
      "basis": "고용보험 및 산업재해보상보험의 보험료징수 등에 관한 법률 시행령, 근로자·사업주 각 0.9%",
-     "src": "https://www.kosca21.or.kr/km_board/upload/km_b_notice/1767346180_02.pdf",
+     "src": "https://www.law.go.kr/법령/고용보험및산업재해보상보험의보험료징수등에관한법률시행령/제12조",
      "checked": "2026-10-21",
      "note": "정부 개편안에 2027년 각 1.0%(합계 2.0%) 인상 포함, 미확정"
     }
@@ -571,7 +571,7 @@
      "from": "2022-07-01",
      "value": 0.25,
      "basis": "보험료징수법 시행령",
-     "src": "https://www.kosca21.or.kr/km_board/upload/km_b_notice/1767346180_02.pdf",
+     "src": "https://www.law.go.kr/법령/고용보험및산업재해보상보험의보험료징수등에관한법률시행령/제12조",
      "checked": "2026-10-21",
      "note": "사업주 전액 부담"
     }
@@ -586,7 +586,7 @@
      "from": "2022-07-01",
      "value": 0.45,
      "basis": "보험료징수법 시행령",
-     "src": "https://www.kosca21.or.kr/km_board/upload/km_b_notice/1767346180_02.pdf",
+     "src": "https://www.law.go.kr/법령/고용보험및산업재해보상보험의보험료징수등에관한법률시행령/제12조",
      "checked": "2026-10-21"
     }
    ]
@@ -600,7 +600,7 @@
      "from": "2022-07-01",
      "value": 0.65,
      "basis": "보험료징수법 시행령",
-     "src": "https://www.kosca21.or.kr/km_board/upload/km_b_notice/1767346180_02.pdf",
+     "src": "https://www.law.go.kr/법령/고용보험및산업재해보상보험의보험료징수등에관한법률시행령/제12조",
      "checked": "2026-10-21"
     }
    ]
@@ -614,7 +614,7 @@
      "from": "2022-07-01",
      "value": 0.85,
      "basis": "보험료징수법 시행령",
-     "src": "https://www.kosca21.or.kr/km_board/upload/km_b_notice/1767346180_02.pdf",
+     "src": "https://www.law.go.kr/법령/고용보험및산업재해보상보험의보험료징수등에관한법률시행령/제12조",
      "checked": "2026-10-21"
     }
    ]
@@ -815,7 +815,7 @@
       4500000
      ],
      "basis": "구 고용보험법 시행령 제95조: 통상임금 80%(상한 150만원, 하한 70만원), 25%는 복직 후 6개월 이상 근무 시 사후지급. 6+6 특례(2024.1.1. 시행) 첫 6개월 상한 200만~450만원",
-     "src": "https://www.newsis.com/view/NISX20231218_0002562231",
+     "src": "https://www.law.go.kr/법령/고용보험법시행령/제95조의3",
      "checked": "2026-10-21"
     },
     {
@@ -853,7 +853,7 @@
       4500000
      ],
      "basis": "고용보험법 시행령 제95조, 제95조의3. 사후지급금은 2025.1. 폐지. 6+6 특례 1개월차 상한은 자료에 따라 200만원/250만원으로 달라 원문 대조 필요, 하한 70만원",
-     "src": "https://www.jobplanet.co.kr/contents/news-8455",
+     "src": "https://www.law.go.kr/법령/고용보험법시행령/제95조",
      "checked": "2026-10-21"
     }
    ]
@@ -908,7 +908,7 @@
       "연령별 상한 고시의 번호와 6개월 확대 이후 재고시 여부는 원문 확인이 필요합니다."
      ],
      "basis": "임금채권보장법 시행령 제6조, 고용노동부 고시",
-     "src": "https://korea.legal/wiki/%EC%9E%84%EA%B8%88%EC%B1%84%EA%B6%8C%EB%B3%B4%EC%9E%A5%EB%B2%95%EC%8B%9C%ED%96%89-20260820-%EC%A0%9C7%EC%A1%B0/",
+     "src": "https://www.law.go.kr/법령/임금채권보장법/제7조",
      "checked": "2026-10-21"
     }
    ]
@@ -918,7 +918,7 @@
     {
      "from": "2000-01-01",
      "basis": "산업재해보상보험법 제57조 및 별표2(장해급여표), 시행령 제53조 제5항(제1급~제3급은 연금만 지급)",
-     "src": "https://korea.legal/wiki/%ec%82%b0%ec%97%85%ec%9e%ac%ed%95%b4%eb%b3%b4%ec%83%81%eb%b3%b4%ed%97%98%eb%b2%95-%eb%b3%84%ed%91%9c2-%ec%9e%a5%ed%95%b4%ea%b8%89%ec%97%ac%ed%91%9c/",
+     "src": "https://www.law.go.kr/법령/산업재해보상보험법/제57조",
      "checked": "2026-10-21",
      "rows": [
       [
@@ -1020,7 +1020,7 @@
   {
    "date": "2026-08-20",
    "text": "도산대지급금 지급 범위가 최종 6개월분으로 확대 시행되었습니다.",
-   "src": "https://korea.legal/wiki/%EC%9E%84%EA%B8%88%EC%B1%84%EA%B6%8C%EB%B3%B4%EC%9E%A5%EB%B2%95%EC%8B%9C%ED%96%89-20260820-%EC%A0%9C7%EC%A1%B0/"
+   "src": "https://www.law.go.kr/법령/임금채권보장법/제7조"
   },
   {
    "date": "2026-07-01",
@@ -1425,7 +1425,7 @@
  ],
  "ui_rules": {
   "basis": "고용보험법 제40조, 제58조, 시행규칙 제101조 및 별표1의2·별표2(2024.7.1. 개정)",
-  "src": "https://korea.legal/wiki/%ea%b3%a0%ec%9a%a9%eb%b3%b4%ed%97%98%eb%b2%95-%ec%8b%9c%ed%96%89%ea%b7%9c%ec%b9%99-%eb%b3%84%ed%91%9c2-%ea%b7%bc%eb%a1%9c%ec%9e%90%ec%9d%98-%ec%88%98%ea%b8%89%ec%9e%90%ea%b2%a9/",
+  "src": "https://www.law.go.kr/법령/고용보험법시행규칙/제101조",
   "checked": "2026-10-21",
   "basic": [
    "기준기간(이직일 이전 18개월) 동안 피보험단위기간이 합산하여 180일 이상일 것(제40조 제1항 제1호)",

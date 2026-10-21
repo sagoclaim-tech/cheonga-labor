@@ -348,12 +348,12 @@ function rSummary(){
     ${x.basis||x.src?`<div class="note">${esc(x.basis)}${okSrc(x.src)?` <a href="${esc(x.src)}" target="_blank" rel="noopener">${srcLabel(x.src)}</a>`:""}</div>`:""}</div></div>`).join("");}
   const upcoming=changeList(TODAY,"9999-12-31");
   const atPoint=isFuture()?changeList(TODAY,ASOF):[];
-  const recent=[];for(const [id,it] of Object.entries(D.items)){for(const e of it.hist){const d=(new Date(ASOF)-new Date(e.from))/864e5;if(d>=0&&d<=120)recent.push({id,it,e});}}
-  recent.sort((a,b)=>a.e.from<b.e.from?1:-1);
+  const d120=new Date(new Date(ASOF+"T00:00:00Z").getTime()-120*864e5).toISOString().slice(0,10);
+  const recent=changeList(dayBefore(d120),ASOF).filter(x=>x.status==="확정").reverse();
   app.innerHTML=`<section class="view">
   <div><span class="eyebrow">${esc(asofText())} 기준 현행</span><h2>주요 기준금액과 요율</h2><p class="lede">수치를 누르면 근거와 변경 이력을 볼 수 있습니다. 조회 월을 바꾸면 그달 1일에 시행 중인 값으로, 오늘을 누르면 현 시점 최신 데이터로 다시 불러옵니다.</p></div>
   <div class="figs">${figs}</div>
-  ${!isPast()&&!isFuture()&&recent.length?`<div class="panel"><h3>최근 120일 내 시행된 변경</h3><div class="list">${recent.map(x=>`<div class="row"><span class="date">${esc(x.e.from)}</span><div><b>${esc(x.it.name)}</b> ${showVal(x.it,x.e)}${x.e.note?`<div class="note">${esc(x.e.note)}</div>`:""}</div></div>`).join("")}</div></div>`:""}
+  ${!isPast()&&!isFuture()&&recent.length?`<div class="panel"><div class="ghead"><h3>최근 120일 내 시행된 변경</h3><span class="pill p-ok">${recent.length}건</span></div><div class="list">${changeRows(recent)}</div></div>`:""}
   ${isFuture()?`<div class="panel"><div class="ghead"><h3>${esc(asofText())}까지 바뀌는 주요 내용</h3><span class="pill p-next">${atPoint.length}건</span></div>
     <p class="note">오늘(${esc(TODAY)}) 이후 ${esc(asofText())}까지 시행되거나 추진 중인 변경입니다. <b>확정</b>은 공포·고시된 사항, <b>입법예고·국회 계류·정부안·예산안</b>은 아직 바뀔 수 있는 사항입니다. "이후 변경 미확정"으로 표시된 수치는 해당 연도 고시 전이라 현행 값을 보여 줍니다.</p>
     <div class="list">${atPoint.length?changeRows(atPoint):`<p class="note">해당 기간에 예정된 변경이 없습니다.</p>`}</div></div>`
@@ -684,7 +684,9 @@ const SYN=[["실업급여","구직급여","실업"],["대지급금","체당금"]
 function expand(tok){const out=new Set([tok]);SYN.forEach(g=>{if(g.some(w=>w.includes(tok)||tok.includes(w)))g.forEach(w=>out.add(w));});return [...out];}
 let DOCS=null;
 function buildDocs(){const docs=[];const add=(type,title,text,go,val)=>docs.push({type,title,text:String(text||""),go,val,hay:(type+" "+title+" "+(text||"")).toLowerCase()});
-  for(const [id,it] of Object.entries(D.items)){const txt=[it.group,it.short,...it.hist.map(h=>[h.basis,h.note].join(" "))].join(" ");add("기준 수치",it.name,txt,{item:id});}
+  for(const [id,it] of Object.entries(D.items)){const cur=entry(id);const others=[...it.hist].sort((a,b)=>a.from<b.from?1:-1).filter(h=>h!==cur);
+    const txt=[cur?`현행 ${it.name} ${showVal(it,cur)}(${cur.from} 시행) ${cur.basis||""} ${cur.note||""}`:"",it.group,it.short,...others.map(h=>`${h.from} ${showVal(it,h)} ${h.basis||""} ${h.note||""}`)].join(" ");add("기준 수치",it.name,txt,{item:id});}
+  (D.scheduled||[]).forEach(c=>add(c.from>todayStr()?"시행 예정":"제도 변경",c.title,`${c.from} ${c.status} ${c.before?"이전 "+c.before+" ":""}변경 ${c.after} ${c.note||""} ${c.basis||""}`,{notice:c.src}));
   (D.grants||[]).forEach(g=>add("지원금",g.name,[g.family,g.headline,g.target,g.worker,g.amount,g.period,g.limit,g.exclude,g.apply,g.changes,g.next,g.basis].join(" "),{grant:g.id},g.headline));
   const R=D.ui_rules;if(R){R.just.forEach(j=>add("실업급여 이직사유",`정당한 이직 사유 ${j.no}호: ${j.title}`,j.text+(j.proof?" 입증: "+j.proof:""),{calc:"ui",just:j.no}));
     R.grave.forEach((x,i)=>add("실업급여 이직사유",`수급자격 제한 사유 ${i+1}`,x,{calc:"ui"}));R.basic.forEach((x,i)=>add("실업급여 수급요건",`기본 수급요건 ${i+1}`,x,{calc:"ui"}));}
@@ -709,7 +711,7 @@ function goDoc(d){const g=d.go;
   if(g.calc){CALC=g.calc;if(g.just){store.set("ui.ui_reason","just");store.set("ui.ui_just",g.just);}if(g.kind)store.set("sj.sj_kind",g.kind);setTab("calc");return;}
   if(g.notice&&okSrc(g.notice)){window.open(g.notice,"_blank","noopener");}}
 function rSearch(){
-  if(!DOCS||DOCS._d!==D){DOCS=buildDocs();DOCS._d=D;}
+  if(!DOCS||DOCS._d!==D||DOCS._a!==ASOF){DOCS=buildDocs();DOCS._d=D;DOCS._a=ASOF;}
   const q=store.get("q","");
   const KW=["실업급여 질병","직장 내 괴롭힘","최저임금","구직급여 상한","육아휴직","대체인력","청년","고령자","장해등급","장례비","대지급금","국민연금","두루누리","2027"];
   app.innerHTML=`<section class="view"><div><span class="eyebrow">${esc(asofText())} 기준</span><h2>통합 검색</h2><p class="lede">기준 수치, 지원금, 실업급여 이직사유, 산재 급여표, 계산기, 제도 동향을 한 번에 찾습니다. 띄어 쓴 단어는 모두 포함된 결과만 보여 주며, 장의비와 장례비처럼 같은 뜻의 단어도 함께 찾습니다.</p></div>

@@ -132,7 +132,7 @@ h2{color:var(--accent)}
 .lab label{min-width:0}
 .q{flex:none;width:20px;height:20px;border-radius:50%;border:1px solid var(--accent-2);background:var(--surface);color:var(--accent-2);font-size:12px;font-weight:700;line-height:1;cursor:pointer;display:inline-grid;place-items:center;padding:0}
 .q[aria-expanded="true"]{background:var(--accent-2);color:#fff;border-color:var(--accent-2)}
-.help{font-size:12px;line-height:1.55;color:var(--ink);background:var(--accent-soft);border-radius:8px;padding:8px 10px}
+.help{font-size:12px;line-height:1.55;color:var(--ink);background:var(--accent-soft);border-radius:8px;padding:8px 10px;white-space:pre-line}
 .chkrow{display:flex;gap:6px;align-items:flex-start;justify-content:space-between}
 .steps{margin:0;padding-left:20px;display:grid;gap:4px;font-size:13px}
 .steps li b{font-family:var(--f-num);font-variant-numeric:tabular-nums}
@@ -447,7 +447,7 @@ const HELP={
  sj_grade:"근로복지공단이 결정한 장해등급입니다. 제1급부터 제3급은 연금만, 제4급부터 제7급은 연금 또는 일시금 선택, 제8급부터 제14급은 일시금입니다.",
  sj_dmethod:"제4급부터 제7급은 수급권자가 연금과 일시금 중 선택할 수 있습니다.",
  sj_ymethod:"유족보상연금 수급자격자가 있으면 연금이 원칙입니다. 수급자격자가 원하면 일시금 50%와 연금 50%로 받을 수 있고, 수급자격자가 없으면 일시금 1,300일분을 지급합니다(제62조).",
- sj_ycount:"유족보상연금 수급권자와 근로자 사망 당시 생계를 같이 하던 수급자격자의 수입니다. 1인당 급여기초연액의 5%를 더하며 최대 20%(4인)까지입니다.",
+ sj_ycount:"가산금액은 유족보상연금수급권자와, 근로자 사망 당시 생계를 같이 하던 유족보상연금수급자격자 1인당 급여기초연액의 5%이며, 합산 20%(4명)가 한도입니다(산재보험법 별표3). 수급권자 본인도 1명으로 셉니다.\n\n※ 수급자격자(제63조 제1항): 근로자 사망 당시 생계를 같이 하던 유족 중 배우자, 60세 이상 부모·조부모, 25세 미만 자녀·손자녀, 19세 미만 또는 60세 이상 형제자매, 그리고 이 연령에 해당하지 않더라도 고용노동부령이 정한 장애 정도에 해당하는 장애인인 자녀·부모·손자녀·조부모·형제자매입니다. 사망 당시 외국에 거주하던 외국인 유족은 제외됩니다.\n\n※ 수급권자(제63조 제3항): 수급자격자 중 배우자, 자녀, 부모, 손자녀, 조부모, 형제자매 순서로 선순위인 사람이 연금을 받을 권리를 가집니다.",
  sj_fwho:"유족이 장례를 지낸 경우 평균임금 120일분을 지급합니다. 유족이 아닌 사람이 지낸 경우 120일분 범위에서 실제 비용을 지급합니다(제71조).",
  sj_fcost:"유족이 아닌 사람이 장례를 지낸 경우 실제 지출한 장례 비용입니다.",
  ins_pay:"비과세소득(식대 월 20만원 등)을 뺀 월 보수액입니다.",
@@ -557,7 +557,7 @@ function cSJ(root){
   ${money("sj_avg","1일 평균임금(원)",120000,true)}
   <div class="full form" id="sj_rest" style="padding:0">${field("sj_part","부분휴업 여부",0,"select",{opts:[[0,"전부 휴업"],[1,"부분휴업(취업한 날)"]]})}${money("sj_partpay","부분휴업일 받은 임금(1일, 원)",0)}</div>
   <div class="full form" id="sj_dis" style="padding:0">${field("sj_grade","장해등급",7,"select",{opts:Array.from({length:14},(_,i)=>[i+1,"제"+(i+1)+"급"])})}${field("sj_dmethod","지급 방식(4~7급)","pension","select",{opts:[["pension","장해보상연금"],["lump","장해보상일시금"]]})}</div>
-  <div class="full form" id="sj_sur" style="padding:0">${field("sj_ymethod","지급 방식","pension","select",{opts:[["pension","유족보상연금"],["half","일시금 50% + 연금 50%"],["lump","유족보상일시금(수급자격자 없음)"]]})}${field("sj_ycount","가산 대상 인원",1,"select",{opts:[[0,"0명"],[1,"1명"],[2,"2명"],[3,"3명"],[4,"4명 이상"]]})}</div>
+  <div class="full form" id="sj_sur" style="padding:0">${field("sj_ymethod","지급 방식","pension","select",{opts:[["pension","유족보상연금"],["half","일시금 50% + 연금 50%"],["lump","유족보상일시금(수급자격자 없음)"]]})}${field("sj_ycount","수급권자·수급자격자 수",1,"select",{opts:[[1,"1명(수급권자만)"],[2,"2명"],[3,"3명"],[4,"4명 이상"]]})}</div>
   <div class="full form" id="sj_fun" style="padding:0">${field("sj_fwho","장례를 지낸 사람","family","select",{opts:[["family","유족"],["other","유족 외의 사람"]]})}${money("sj_fcost","실제 장례비용(유족 외, 원)",0)}</div>
   </div><div class="result" id="sj_out"></div>
   ${srcLine(["ia_max","ia_min","min_wage_hourly","funeral_max","funeral_min"])}
@@ -586,11 +586,11 @@ function cSJ(root){
       if(row){if(m==="pension"){const yr=a*row[1];big=yr;tag=`제${g}급 연금 연액(${row[1]}일분)`;kv=[["월 지급액(연액/12)",won(yr/12)],["참고: 일시금("+row[2]+"일분)",won(a*row[2])]];steps.push(`${won(a)} x ${row[1]}일 = ${won(yr)} (연액)`);}
         else{const l=a*row[2];big=l;tag=`제${g}급 일시금(${row[2]}일분)`;kv=row[1]?[["참고: 연금 연액("+row[1]+"일분)",won(a*row[1])]]:[];steps.push(`${won(a)} x ${row[2]}일 = ${won(l)}`);}}
     }
-    if(kind==="sur"){const a=clamp(true);const n=+sval("sj_ycount");const meth=sval("sj_ymethod");const base=a*365;const add=Math.min(n*5,20);const rate=47+add;const pen=base*rate/100;
-      formula="유족보상연금(연액) = 급여기초연액(평균임금 x 365) x (기본 47% + 가산 1인당 5%, 최대 20%) / 유족보상일시금 = 평균임금 x 1,300일";
+    if(kind==="sur"){const a=clamp(true);const n=Math.max(1,+sval("sj_ycount")||1);const meth=sval("sj_ymethod");const base=a*365;const add=Math.min(n*5,20);const rate=47+add;const pen=base*rate/100;
+      formula="유족보상연금(연액) = 급여기초연액(평균임금 x 365) x (기본 47% + 수급권자·수급자격자 1인당 5%, 한도 20%) / 유족보상일시금 = 평균임금 x 1,300일";
       steps.push(`급여기초연액 = ${won(a)} x 365 = ${won(base)}`);
       if(meth==="lump"){big=a*1300;tag="유족보상일시금(1,300일분)";steps.push(`${won(a)} x 1,300일 = ${won(big)}`);}
-      else{steps.push(`지급률 = 기본 47% + 가산 ${add}% = ${rate}%`);
+      else{steps.push(`지급률 = 기본 47% + 가산 ${add}%(수급권자·수급자격자 ${n>=4?"4명 이상":n+"명"} x 5%, 한도 20%) = ${rate}%`);
         if(meth==="half"){const half=a*1300*0.5;big=pen*0.5;tag="반액 연금 연액";kv=[["일시금(1,300일분의 50%)",won(half)],["반액 연금 월액",won(pen*0.5/12)],["참고: 전액 연금 연액",won(pen)]];steps.push(`일시금 ${won(a*1300)} x 50% = ${won(half)}, 연금 ${won(pen)} x 50% = ${won(pen*0.5)} (제62조 제3항)`);}
         else{big=pen;tag=`유족보상연금 연액(${rate}%)`;kv=[["월 지급액(연액/12)",won(pen/12)]];steps.push(`${won(base)} x ${rate}% = ${won(pen)}`);}}
     }

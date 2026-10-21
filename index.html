@@ -78,8 +78,17 @@ h3{font-size:16px;margin:0;font-weight:600}
 .eyebrow{font-size:11px;letter-spacing:.08em;color:var(--muted);font-weight:600}
 
 /* 요약 수치 */
-.figs{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
-@media (min-width:620px){.figs{grid-template-columns:repeat(3,minmax(0,1fr))}}
+.figs{display:grid;grid-template-columns:minmax(0,1fr);gap:10px}
+@media (min-width:620px){.figs{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.fgrp{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:12px 14px;display:grid;gap:2px;min-width:0;align-content:start}
+.fgrp h3{font-size:13px;color:var(--accent);margin:0 0 4px;display:flex;justify-content:space-between;gap:8px;align-items:baseline}
+.fgrp h3 small{font-weight:500;color:var(--muted);font-size:11px}
+.frow{display:grid;grid-template-columns:auto 1fr;gap:2px 12px;align-items:baseline;background:none;border:0;border-top:1px dashed var(--line);padding:8px 0 6px;text-align:left;cursor:pointer;width:100%}
+.frow:first-of-type{border-top:0}
+.frow .k{font-size:13px;color:var(--muted);white-space:nowrap}
+.frow .v{justify-self:end;color:var(--accent);font-family:var(--f-num);font-size:19px;font-weight:600;font-variant-numeric:tabular-nums;white-space:nowrap}
+.frow .s{grid-column:1/-1;justify-self:end;font-size:11px;color:var(--muted);text-align:right}
+.frow .nx{color:var(--seal);font-weight:600}
 .fig{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:12px;display:grid;gap:2px;min-width:0;cursor:pointer;text-align:left}
 .fig .k{font-size:12px;color:var(--muted)}
 .fig .v{color:var(--accent);font-family:var(--f-num);font-size:19px;font-weight:600;font-variant-numeric:tabular-nums;word-break:keep-all}
@@ -308,10 +317,13 @@ function render(){if(!D)return;({summary:rSummary,calc:rCalc,grants:rGrants,sear
 
 /* ---------- 요약 ---------- */
 function rSummary(){
-  const keys=D.summary||[];
-  const figs=keys.map(id=>{const it=D.items[id];if(!it)return"";const e=entry(id),n=nextEntry(id);
-    return `<button type="button" class="fig" data-go="${esc(id)}"><span class="k">${esc(it.short||it.name)}</span><span class="v">${showVal(it,e)}</span>
-    <span class="s">${e?esc(e.from)+" 시행":"해당 시점 자료 없음"}</span>${n&&!isPast()?`<span class="nx">${esc(n.from)}부터 ${showVal(it,n)}</span>`:""}</button>`}).join("");
+  const GROUPS=[{t:"최저임금",sub:"",rows:[["min_wage_hourly","시간급"],["min_wage_monthly","월 환산(209시간)"]]},
+    {t:"사회보험요율",sub:"근로자·사업주 합계",rows:[["np_rate","국민연금"],["hi_rate","건강보험"],["ltc_rate","장기요양(소득 대비)"]]},
+    {t:"구직급여 1일",sub:"",rows:[["ui_daily_max","상한액"],["ui_daily_min","하한액(8시간)"]]},
+    {t:"산재 보상기준 1일",sub:"",rows:[["ia_max","최고보상기준"],["ia_min","최저보상기준"]]}];
+  const figs=GROUPS.map(g=>`<div class="fgrp"><h3>${esc(g.t)}${g.sub?`<small>${esc(g.sub)}</small>`:""}</h3>${g.rows.map(([id,lab])=>{const it=D.items[id];if(!it)return"";const e=entry(id),n=nextEntry(id);
+    return `<button type="button" class="frow" data-go="${esc(id)}"><span class="k">${esc(lab)}</span><span class="v">${showVal(it,e)}</span>
+    <span class="s">${e?esc(e.from)+" 시행":"해당 시점 자료 없음"}${n&&!isPast()?` · <span class="nx">${esc(n.from)}부터 ${showVal(it,n)}</span>`:""}</span></button>`}).join("")}</div>`).join("");
   const up=[];for(const [id,it] of Object.entries(D.items)){for(const e of it.hist){if(e.from>ASOF)up.push({id,it,e});}}
   up.sort((a,b)=>a.e.from<b.e.from?-1:1);
   const recent=[];for(const [id,it] of Object.entries(D.items)){for(const e of it.hist){const d=(new Date(ASOF)-new Date(e.from))/864e5;if(d>=0&&d<=120)recent.push({id,it,e});}}

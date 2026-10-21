@@ -352,7 +352,7 @@ function rSummary(){
     {t:"출산·육아 급여 상한",sub:"",rows:[["mat_cap","출산전후휴가(월)"],["pl_cap_1","육아휴직 1~3개월(월)"],["pl_cap_4","육아휴직 4~6개월(월)"],["pl_cap_7","육아휴직 7개월 이후(월)"],["spouse_leave_cap","배우자 출산휴가"]]},
     {t:"구직급여 1일",sub:"",rows:[["ui_daily_max","상한액"],["ui_daily_min","하한액(8시간)"]]},
     {t:"장애인 의무고용률",sub:"",rows:[["disabled_quota","민간 사업주"]]},
-    {t:"산재 보상기준 1일",sub:"",rows:[["ia_min","최저보상기준"],["ia_max","최고보상기준"]]}];
+    {t:"산재 보상기준",sub:"",rows:[["ia_min","최저보상기준(1일)"],["ia_max","최고보상기준(1일)"],["funeral_min","장례비 최저"],["funeral_max","장례비 최고"]]}];
   const OPEN=store.get("figOpen",{});
   const keyv=g=>{const id=g.rows[0][0],it=D.items[id];return it?showVal(it,entry(id)):"";};
   const grp=(g,ix)=>`<details class="fgrp" data-gi="${ix}" ${OPEN[ix]?"open":""}><summary><span class="ft">${esc(g.t)}</span><span class="fk">${esc(g.rows[0][1])} ${keyv(g)}${g.rows.length>1?` 외 ${g.rows.length-1}건`:""}</span><svg class="chev" viewBox="0 0 16 16" aria-hidden="true"><path d="M4 6l4 4 4-4"/></svg></summary>${g.sub?`<div class="fsub">${esc(g.sub)}</div>`:""}${g.rows.map(([id,lab])=>{const it=D.items[id];if(!it)return"";const e=entry(id),n=nextEntry(id);

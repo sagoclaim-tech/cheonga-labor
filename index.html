@@ -288,6 +288,7 @@ function nextEntry(id){const it=D.items[id];if(!it)return null;return [...it.his
 function v(id){const e=entry(id);return e?e.value:null;}
 function tbl(id){const t=D.tables[id];if(!t)return null;const vs=[...t.versions].sort((a,b)=>a.from<b.from?-1:1);let cur=null;for(const x of vs){if(x.from<=ASOF)cur=x;}return cur;}
 function showVal(it,e){if(!e)return"-";if(typeof e.value==="number"){return it.unit==="원"?won(e.value):fmt(e.value)+(it.unit?(it.unit==="%"?"%":" "+it.unit):"");}return esc(e.value);}
+function srcLabel(u){u=String(u||"");return /lawmaking\.go\.kr/.test(u)?"입법예고":/law\.go\.kr/.test(u)?"법령 원문":/likms\.assembly|assembly\.go\.kr/.test(u)?"국회 의안":/moel\.go\.kr/.test(u)?"고용노동부":/korea\.kr/.test(u)?"정책브리핑":"출처";}
 function srcLine(ids){const out=[];for(const id of ids){const it=D.items[id],e=entry(id);if(!it||!e)continue;out.push(`${esc(it.name)}: ${esc(e.basis||"")}${e.src?` <a href="${esc(e.src)}" target="_blank" rel="noopener">출처</a>`:""} (확인 ${esc(e.checked||"")})`);}return out.length?`<div class="basis">※ 적용 기준(${esc(ASOF)}): ${out.join(" / ")}</div>`:"";}
 
 /* 탭 */
@@ -325,17 +326,33 @@ function rSummary(){
   const figs=GROUPS.map(g=>`<div class="fgrp"><h3>${esc(g.t)}${g.sub?`<small>${esc(g.sub)}</small>`:""}</h3>${g.rows.map(([id,lab])=>{const it=D.items[id];if(!it)return"";const e=entry(id),n=nextEntry(id);
     return `<button type="button" class="frow" data-go="${esc(id)}"><span class="k">${esc(lab)}</span><span class="v">${showVal(it,e)}</span>
     <span class="s">${e?(isFuture()&&e.from<ASOF?esc(e.from)+" 시행 값(이후 변경 미확정)":esc(e.from)+" 시행"):"해당 시점 자료 없음"}${n&&!isPast()&&!isFuture()?` · <span class="nx">${esc(n.from)}부터 ${showVal(it,n)}</span>`:""}</span></button>`}).join("")}</div>`).join("");
-  const up=[];for(const [id,it] of Object.entries(D.items)){for(const e of it.hist){if(e.from>ASOF)up.push({id,it,e});}}
-  up.sort((a,b)=>a.e.from<b.e.from?-1:1);
+  const TODAY=todayStr();
+  const dayBefore=d=>{const x=new Date(d+"T00:00:00Z");x.setUTCDate(x.getUTCDate()-1);return x.toISOString().slice(0,10);};
+  const ST={"확정":"p-ok","입법예고":"p-warn","국회 계류":"p-no","정부안":"p-no","예산안":"p-no"};
+  /* 변경 목록: 기준 수치 이력(확정) + 예정 사항(scheduled) */
+  function changeList(from,to){const out=[];
+    for(const [id,it] of Object.entries(D.items)){for(const e of it.hist){if(e.from>from&&e.from<=to){const pv=entry(id,dayBefore(e.from));
+      out.push({date:e.from,title:it.name,before:pv?showVal(it,pv):"-",after:showVal(it,e),status:"확정",note:e.note||"",basis:e.basis||"",src:e.src||"",item:id});}}}
+    for(const c of (D.scheduled||[])){if(c.from>from&&c.from<=to)out.push({date:c.from,title:c.title,before:esc(c.before||""),after:esc(c.after||""),status:c.status||"",note:c.note||"",basis:c.basis||"",src:c.src||""});}
+    return out.sort((a,b)=>a.date<b.date?-1:a.date>b.date?1:(a.status==="확정"?-1:1));}
+  function changeRows(list){return list.map(x=>`<div class="row"><span class="date">${esc(x.date)}</span><div><div class="ghead"><b>${esc(x.title)}</b><span class="pill ${ST[x.status]||"p-no"}">${esc(x.status)}</span></div>
+    ${x.before||x.after?(x.before&&x.before===x.after?`<div>변동 없음(<b>${x.after}</b> 유지)</div>`:`<div>${x.before&&x.before!=="-"?`<span class="note">이전</span> ${x.before} · `:""}<span class="note">변경</span> <b>${x.after}</b></div>`):""}${x.note?`<div class="note">※ ${esc(x.note)}</div>`:""}
+    ${x.basis||x.src?`<div class="note">${esc(x.basis)}${x.src?` <a href="${esc(x.src)}" target="_blank" rel="noopener">${srcLabel(x.src)}</a>`:""}</div>`:""}</div></div>`).join("");}
+  const upcoming=changeList(TODAY,"9999-12-31");
+  const atPoint=isFuture()?changeList(TODAY,ASOF):[];
   const recent=[];for(const [id,it] of Object.entries(D.items)){for(const e of it.hist){const d=(new Date(ASOF)-new Date(e.from))/864e5;if(d>=0&&d<=120)recent.push({id,it,e});}}
   recent.sort((a,b)=>a.e.from<b.e.from?1:-1);
   app.innerHTML=`<section class="view">
   <div><span class="eyebrow">${esc(asofText())} 기준 현행</span><h2>주요 기준금액과 요율</h2><p class="lede">수치를 누르면 근거와 변경 이력을 볼 수 있습니다. 조회 월을 바꾸면 그달 1일에 시행 중인 값으로, 오늘을 누르면 현 시점 최신 데이터로 다시 불러옵니다.</p></div>
   <div class="figs">${figs}</div>
-  ${isFuture()?`<div class="panel"><h3>시행 예정 시점 조회 중</h3><p class="note">${esc(asofText())}에 시행될 것으로 확정된 기준입니다. "이후 변경 미확정"으로 표시된 항목은 아직 해당 연도 고시가 나오지 않아 현행 값을 보여 줍니다(예: 산재 보상기준은 통상 12월 말, 국민연금 기준소득월액은 7월에 조정). 오늘을 누르면 현재 기준으로 돌아갑니다.</p></div>`:isPast()?`<div class="panel"><h3>과거 시점 조회 중</h3><p class="note">${esc(asofText())}에 시행 중이던 기준입니다. 이후 변경 이력은 검색 탭의 각 항목에서 확인할 수 있으며, 오늘을 누르면 현재 기준으로 돌아갑니다.</p></div>`:`<div class="panel"><div class="ghead"><h3>시행 예정 변경</h3><span class="pill p-next">${up.length}건</span></div>
-    <div class="list">${up.length?up.map(x=>`<div class="row"><span class="date">${esc(x.e.from)}</span><div><b>${esc(x.it.name)}</b> ${showVal(x.it,entry(x.id))} 에서 <b>${showVal(x.it,x.e)}</b>${x.e.note?`<div class="note">${esc(x.e.note)}</div>`:""}</div></div>`).join(""):`<p class="note">기준일 이후 예정된 변경이 없습니다.</p>`}</div></div>`}
+  ${isFuture()?`<div class="panel"><div class="ghead"><h3>${esc(asofText())}까지 바뀌는 주요 내용</h3><span class="pill p-next">${atPoint.length}건</span></div>
+    <p class="note">오늘(${esc(TODAY)}) 이후 ${esc(asofText())}까지 시행되거나 추진 중인 변경입니다. <b>확정</b>은 공포·고시된 사항, <b>입법예고·국회 계류·정부안·예산안</b>은 아직 바뀔 수 있는 사항입니다. "이후 변경 미확정"으로 표시된 수치는 해당 연도 고시 전이라 현행 값을 보여 줍니다.</p>
+    <div class="list">${atPoint.length?changeRows(atPoint):`<p class="note">해당 기간에 예정된 변경이 없습니다.</p>`}</div></div>`
+   :isPast()?`<div class="panel"><h3>과거 시점 조회 중</h3><p class="note">${esc(asofText())}에 시행 중이던 기준입니다. 이후 변경 이력은 검색 탭의 각 항목에서 확인할 수 있으며, 오늘을 누르면 현재 기준으로 돌아갑니다.</p></div>`
+   :`<div class="panel"><div class="ghead"><h3>시행 예정 변경</h3><span class="pill p-next">${upcoming.length}건</span></div>
+    <div class="list">${upcoming.length?changeRows(upcoming):`<p class="note">기준일 이후 예정된 변경이 없습니다.</p>`}</div></div>`}
   ${!isPast()&&!isFuture()&&recent.length?`<div class="panel"><h3>최근 120일 내 시행된 변경</h3><div class="list">${recent.map(x=>`<div class="row"><span class="date">${esc(x.e.from)}</span><div><b>${esc(x.it.name)}</b> ${showVal(x.it,x.e)}${x.e.note?`<div class="note">${esc(x.e.note)}</div>`:""}</div></div>`).join("")}</div></div>`:""}
-  ${!isPast()&&!isFuture()&&(D.notices||[]).length?`<div class="panel"><h3>입법·제도 동향 메모</h3><div class="list">${D.notices.map(n=>`<div class="row"><span class="date">${esc(n.date)}</span><div>${esc(n.text)}${n.src?` <a href="${esc(n.src)}" target="_blank" rel="noopener">출처</a>`:""}</div></div>`).join("")}</div></div>`:""}
+  ${!isPast()&&(D.notices||[]).length?`<div class="panel"><h3>입법·제도 동향 메모</h3><div class="list">${D.notices.map(n=>`<div class="row"><span class="date">${esc(n.date)}</span><div>${esc(n.text)}${n.src?` <a href="${esc(n.src)}" target="_blank" rel="noopener">${srcLabel(n.src)}</a>`:""}</div></div>`).join("")}</div></div>`:""}
   ${installPanel()}
   <section class="firm">
    <div class="firm-bar"></div>

@@ -47,7 +47,7 @@
   --ok:#62c48f; --ok-soft:#123222; --warn:#e6ae55; --warn-soft:#342812; --no:#8a9ab0; --no-soft:#1a263a; color-scheme:dark}
 *{box-sizing:border-box}
 html,body{background:var(--paper)}
-body{color:var(--ink);font-family:var(--f-body);font-size:15px;line-height:1.6;-webkit-text-size-adjust:100%}
+body{color:var(--ink);font-family:var(--f-body);font-size:15px;line-height:1.6;word-break:keep-all;overflow-wrap:break-word;line-break:strict;-webkit-text-size-adjust:100%}
 body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--hdr)}
 .num{font-family:var(--f-num);font-variant-numeric:tabular-nums}
 button,input,select{font:inherit;color:inherit}
@@ -160,7 +160,7 @@ h2{color:var(--accent)}
 .big{font-family:var(--f-num);font-size:24px;font-weight:600;font-variant-numeric:tabular-nums}
 .kv{display:grid;grid-template-columns:minmax(7.5em,1fr) minmax(0,auto);gap:4px 12px;font-size:13px}
 .kv dt{color:var(--muted)}
-.kv dd{margin:0;text-align:right;overflow-wrap:anywhere;font-family:var(--f-num);font-variant-numeric:tabular-nums}
+.kv dd{margin:0;text-align:right;font-family:var(--f-num);font-variant-numeric:tabular-nums}
 .note{font-size:12px;color:var(--muted)}
 .note b{color:var(--ink)}
 .basis{font-size:11px;color:var(--muted);border-top:1px dashed var(--line);padding-top:8px}
@@ -212,7 +212,7 @@ details.more>summary{cursor:pointer;color:var(--accent-2);font-size:13px;padding
 .item:first-child{border-top:0}
 .item .t{display:flex;justify-content:space-between;gap:10px;align-items:baseline;flex-wrap:wrap}
 .item .val{font-family:var(--f-num);font-weight:600;font-variant-numeric:tabular-nums}
-.item .meta{font-size:11px;color:var(--muted);word-break:break-all}
+.item .meta{font-size:11px;color:var(--muted);overflow-wrap:anywhere}
 .hist{font-size:12px;color:var(--muted)}
 
 /* 하단 탭 */
@@ -765,7 +765,7 @@ function cAL(root){
     if(!fiscal){
       out.innerHTML=`<div class="ghead"><span class="big">${jDays}일</span><span class="asof-d">(연차발생일: ${jDate?kd(jDate):"아직 없음"})</span></div>
       <dl class="kv"><dt>근속기간</dt><dd>${yrs}년 ${m%12}개월</dd><dt>산정 내용</dt><dd style="text-align:right;font-family:inherit">${esc(jTxt)}</dd>
-      <dt>다음 발생일</dt><dd>${kd(jNext)}${under1?"(15일, 1년간 80% 이상 출근 시)":"(출근율 80% 이상이면 "+annual(yrs+1)+"일)"}</dd></dl>
+      <dt>다음 발생일</dt><dd style="font-family:inherit">${kd(jNext)}${under1?"(15일, 1년간 80% 이상 출근 시)":"(출근율 80% 이상이면 "+annual(yrs+1)+"일)"}</dd></dl>
       <p class="note">※ 연차는 1년(또는 1개월) 근로를 마친 다음 날 발생합니다. 입사 1년 미만 기간의 월 단위 연차는 입사일부터 1년간 사용할 수 있고, 1년간 80% 이상 출근하고 1년 근로를 마친 다음 날 근로관계가 있어야 15일이 발생합니다(대법원 2021. 10. 14. 선고 2021다227100 판결). 상시 5인 이상 사업장에 적용합니다.</p>`;return;}
     // 회계연도 기준
     const fm=+sval("al_fm")||1;let S=new Date(a.getFullYear(),fm-1,1);if(S<a)S.setFullYear(S.getFullYear()+1);

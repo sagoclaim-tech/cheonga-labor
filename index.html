@@ -130,7 +130,7 @@ h2{color:var(--accent)}
 
 /* 계산기 */
 .chips{display:flex;gap:6px;overflow-x:auto;padding-bottom:4px;scrollbar-width:none}
-.chips::-webkit-scrollbar{display:none}
+.chips::-webkit-scrollbar{display:none}.cmp2{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:10px 0}.cmp2>div{border:1px solid var(--line);border-radius:12px;padding:10px 12px;display:grid;gap:2px;background:var(--card)}.cmp2>div.on{border:2px solid var(--hdr,#1a4c8c)}.cmp2 span{font-size:12px;color:var(--muted)}.cmp2 b{font-size:17px}.cmp2 small{font-size:11px;color:var(--muted)}.asof-d{font-size:14px;color:var(--muted);margin-left:6px}.chips.wrap{flex-wrap:wrap;overflow:visible;row-gap:8px}
 .chip{border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:6px 12px;font-size:13px;white-space:nowrap;cursor:pointer}
 .chip[aria-pressed="true"]{background:var(--accent);color:var(--surface);border-color:var(--accent)}
 .form{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px 12px}
@@ -158,9 +158,9 @@ h2{color:var(--accent)}
 .chk input{margin-top:5px;accent-color:var(--accent)}
 .result{background:var(--sunk);border-radius:8px;padding:12px;display:grid;gap:6px}
 .big{font-family:var(--f-num);font-size:24px;font-weight:600;font-variant-numeric:tabular-nums}
-.kv{display:grid;grid-template-columns:1fr auto;gap:4px 12px;font-size:13px}
+.kv{display:grid;grid-template-columns:minmax(7.5em,1fr) minmax(0,auto);gap:4px 12px;font-size:13px}
 .kv dt{color:var(--muted)}
-.kv dd{margin:0;text-align:right;font-family:var(--f-num);font-variant-numeric:tabular-nums}
+.kv dd{margin:0;text-align:right;overflow-wrap:anywhere;font-family:var(--f-num);font-variant-numeric:tabular-nums}
 .note{font-size:12px;color:var(--muted)}
 .note b{color:var(--ink)}
 .basis{font-size:11px;color:var(--muted);border-top:1px dashed var(--line);padding-top:8px}
@@ -423,7 +423,7 @@ function rSummary(){
 const CALCS=[["mw","최저임금"],["ui","실업급여"],["pl","육아휴직급여"],["mat","출산휴가급여"],["sj","산재보상"],["ins","4대보험료"],["sev","퇴직금"],["al","연차일수"],["dg","대지급금"],["dis","장애인 고용"]];
 function rCalc(){
   app.innerHTML=`<section class="view"><div><span class="eyebrow">${esc(asofText())} 기준 적용</span><h2>계산기</h2><p class="lede">입력값은 이 기기에만 저장됩니다.</p></div>
-  <div class="chips" role="tablist">${CALCS.map(([k,n])=>`<button type="button" class="chip" data-c="${k}" aria-pressed="${k===CALC}">${n}</button>`).join("")}</div>
+  <div class="chips wrap" role="tablist">${CALCS.map(([k,n])=>`<button type="button" class="chip" data-c="${k}" aria-pressed="${k===CALC}">${n}</button>`).join("")}</div>
   <div id="cbody"></div></section>`;
   app.querySelectorAll("[data-c]").forEach(b=>b.addEventListener("click",()=>{CALC=b.dataset.c;rCalc();}));
   ({mw:cMW,ui:cUI,pl:cPL,mat:cMAT,sj:cSJ,dis:cDIS,ins:cINS,sev:cSEV,al:cAL,dg:cDG}[CALC])($("#cbody"));
@@ -493,7 +493,10 @@ const HELP={
  sv_ord:"평균임금이 통상임금보다 적으면 통상임금을 평균임금으로 합니다(근로기준법 제2조 제2항). 비교가 필요할 때만 입력합니다.",
  al_in:"입사일을 입력합니다.",
  al_at:"연차 발생 여부를 확인할 날짜입니다.",
- al_rate:"직전 1년간 소정근로일수의 80% 이상 출근했는지 선택합니다.",
+ al_rate:"직전 1년간 소정근로일수의 80% 이상 출근했는지 선택합니다. 80% 미만이면 개근한 달 수만큼 연차가 발생합니다.",
+ al_basis:"입사일 기준은 근로자마다 입사일에 맞춰 연차가 발생합니다. 회계연도 기준은 취업규칙 등으로 정한 날(보통 1월 1일)에 전 직원에게 일괄 부여합니다.",
+ al_fm:"회계연도가 시작하는 달입니다. 대부분 1월 1일입니다.",
+ al_full:"결근 없이 출근한 달의 수입니다. 입사 1년 미만이거나 직전 1년 출근율이 80% 미만이면 개근한 달마다 1일이 발생합니다(최대 11일).",
  p_ind:"주된 업종을 고릅니다. 여러 업종을 운영하면 근로자 수가 많은 업종을 기준으로 합니다(고용보험법 시행령 제12조).",
  p_emp:"전년도 매월 말일 근로자 수 합계를 조업개월수로 나눈 수입니다. 월 소정근로시간 60시간 이상 단시간근로자는 0.5명, 60시간 미만은 제외합니다.",
  p_ins:"현재 고용보험 피보험자 수입니다(대표자 제외).",
@@ -728,23 +731,57 @@ function cSEV(root){
   <div class="result" id="sv_res"></div></div>`;
   bind(root,()=>{const a=new Date(sval("sv_in")),b=new Date(sval("sv_out"));if(isNaN(a)||isNaN(b)||b<=a){$("#sv_res").innerHTML="날짜를 확인해 주세요.";return;}
     const tenure=Math.round((b-a)/864e5);const s3=new Date(b);s3.setMonth(s3.getMonth()-3);const d3=Math.round((b-s3)/864e5);
-    const wages=num("sv_3m")+num("sv_bonus")*3/12+num("sv_al")*3/12;let avg=wages/d3;const ord=num("sv_ord");let used="평균임금";if(ord>avg){avg=ord;used="통상임금(평균임금보다 많아 적용)";}
+    const wages=num("sv_3m")+num("sv_bonus")*3/12+num("sv_al")*3/12;const avgW=wages/d3;const ord=num("sv_ord");const useOrd=ord>avgW;const avg=useOrd?ord:avgW;
     const sev=avg*30*tenure/365;const ok=tenure>=365;
     $("#sv_res").innerHTML=`<div class="ghead"><span class="big">${ok?won(sev):"지급 대상 아님"}</span><span class="pill ${ok?"p-ok":"p-warn"}">계속근로 ${fmt(tenure)}일</span></div>
-    <dl class="kv"><dt>산정기간 3개월 일수</dt><dd>${d3}일</dd><dt>1일 ${used}</dt><dd>${won(avg)}</dd><dt>산식</dt><dd>일액 x 30 x 재직일수 / 365</dd></dl>
+    <div class="cmp2"><div class="${useOrd?"":"on"}"><span>1일 평균임금</span><b>${won(avgW)}</b><small>3개월 임금 ${won(wages)} / ${d3}일</small></div><div class="${useOrd?"on":""}"><span>1일 통상임금</span><b>${ord?won(ord):"미입력"}</b><small>${ord?"비교용 입력값":"입력하면 비교합니다"}</small></div></div>
+    <dl class="kv"><dt>퇴직금 산정 적용 금액</dt><dd><b>${won(avg)}</b>(${useOrd?"통상임금 적용":"평균임금 적용"})</dd><dt>산식</dt><dd>적용 금액 x 30 x 재직일수 / 365</dd></dl>
+    ${useOrd?`<p class="note">※ 평균임금이 통상임금보다 적어 통상임금을 평균임금으로 합니다(근로기준법 제2조 제2항).</p>`:""}
     <p class="note">※ 1년 이상 계속근로하고 4주 평균 1주 소정근로시간 15시간 이상인 경우 지급합니다. 상여금·연차수당은 3/12 가산했습니다. 평균임금 산정 제외기간(수습, 휴업, 산재 요양 등)은 반영하지 않았습니다.</p>`},"sev");}
 
 function cAL(root){
+  const y=+ASOF.slice(0,4);
   root.innerHTML=`<div class="panel"><h3>연차유급휴가 일수</h3>
-  <div class="form">${field("al_in","입사일","2023-03-01","date")}${field("al_at","확인 기준일",ASOF,"date")}
-  ${field("al_rate","직전 1년 출근율",1,"select",{opts:[[1,"80% 이상"],[0,"80% 미만"]]})}</div>
+  <div class="form">${field("al_basis","부여 기준","join","select",{opts:[["join","입사일 기준"],["fiscal","회계연도 기준"]]})}${field("al_fm","회계연도 시작 월",1,"select",{opts:Array.from({length:12},(_,i)=>[i+1,(i+1)+"월 1일"])})}
+  ${field("al_in","입사일","2023-03-01","date")}${field("al_at","확인 기준일",ASOF,"date")}
+  ${field("al_rate","직전 1년 출근율",1,"select",{opts:[[1,"80% 이상"],[0,"80% 미만"]]})}${field("al_full","개근한 달 수",11,"number")}</div>
   <div class="result" id="al_out"></div></div>`;
-  bind(root,()=>{const a=new Date(sval("al_in")),b=new Date(sval("al_at"));if(isNaN(a)||isNaN(b)||b<a){$("#al_out").innerHTML="날짜를 확인해 주세요.";return;}
-    let months=(b.getFullYear()-a.getFullYear())*12+(b.getMonth()-a.getMonth());if(b.getDate()<a.getDate())months--;const yrs=Math.floor(months/12);
-    let txt,days;if(yrs<1){days=Math.min(months,11);txt=`입사 1년 미만: 1개월 개근 시 1일씩, 현재까지 최대 ${days}일 발생`;}
-    else{const base=sval("al_rate")==="1"?15:0;const add=Math.floor((yrs-1)/2);days=base?Math.min(base+add,25):0;txt=base?`근속 ${yrs}년차 경과: 15일 + 가산 ${add}일 (최대 25일)`:"출근율 80% 미만: 1개월 개근 시 1일씩 발생";}
-    $("#al_out").innerHTML=`<div class="ghead"><span class="big">${days}일</span><span class="pill p-now">근속 ${months}개월</span></div><p class="note">${esc(txt)}</p>
-    <p class="note">※ 상시 5인 이상 사업장에 적용합니다. 1년 미만 기간에 발생한 연차는 입사일부터 1년간 사용할 수 있으며, 1년간 80% 이상 출근 후 퇴직(1년 근로 다음 날 퇴직)하면 15일분이 추가 발생한다는 것이 판례·행정해석의 입장입니다.</p>`},"al");}
+  const kd=d=>`${d.getFullYear()}년 ${d.getMonth()+1}월 ${d.getDate()}일`;
+  const addM=(d,n)=>{const x=new Date(d);x.setMonth(x.getMonth()+n);return x;};
+  bind(root,()=>{const a=new Date(sval("al_in")+"T00:00:00"),b=new Date(sval("al_at")+"T00:00:00");const out=$("#al_out");
+    const fiscal=sval("al_basis")==="fiscal";$("#al_fm").closest(".f").style.display=fiscal?"":"none";
+    if(isNaN(a)||isNaN(b)||b<a){out.innerHTML="날짜를 확인해 주세요.";return;}
+    let m=(b.getFullYear()-a.getFullYear())*12+(b.getMonth()-a.getMonth());if(b.getDate()<a.getDate())m--;const yrs=Math.floor(m/12);
+    const rate80=sval("al_rate")==="1";const under1=yrs<1;
+    $("#al_full").closest(".f").style.display=(under1||!rate80)?"":"none";$("#al_rate").closest(".f").style.display=under1?"none":"";
+    const full=Math.max(0,Math.floor(num("al_full")));
+    const annual=k=>Math.min(15+Math.floor((k-1)/2),25);
+    // 입사일 기준
+    let jDays,jDate,jTxt,jNext;
+    if(under1){const c=Math.min(full,m,11);jDays=c;jDate=m>=1?addM(a,Math.min(m,11)):null;jTxt=`입사 1년 미만: 1개월 개근 시 1일(근로기준법 제60조 제2항). 근속 ${m}개월 중 개근 ${c}개월`;jNext=addM(a,12);}
+    else{jDate=new Date(a);jDate.setFullYear(a.getFullYear()+yrs);jDays=rate80?annual(yrs):Math.min(full,11);
+      jTxt=rate80?`근속 ${yrs}년: 15일${annual(yrs)>15?" + 가산 "+(annual(yrs)-15)+"일":""}(제60조 제1항, 제4항, 최대 25일)`:`직전 1년 출근율 80% 미만: 개근한 ${Math.min(full,11)}개월에 1일씩(제60조 제2항), 가산휴가 없음`;
+      jNext=new Date(a);jNext.setFullYear(a.getFullYear()+yrs+1);}
+    if(!fiscal){
+      out.innerHTML=`<div class="ghead"><span class="big">${jDays}일</span><span class="asof-d">(연차발생일: ${jDate?kd(jDate):"아직 없음"})</span></div>
+      <dl class="kv"><dt>근속기간</dt><dd>${yrs}년 ${m%12}개월</dd><dt>산정 내용</dt><dd style="text-align:right;font-family:inherit">${esc(jTxt)}</dd>
+      <dt>다음 발생일</dt><dd>${kd(jNext)}${under1?"(15일, 1년간 80% 이상 출근 시)":"(출근율 80% 이상이면 "+annual(yrs+1)+"일)"}</dd></dl>
+      <p class="note">※ 연차는 1년(또는 1개월) 근로를 마친 다음 날 발생합니다. 입사 1년 미만 기간의 월 단위 연차는 입사일부터 1년간 사용할 수 있고, 1년간 80% 이상 출근하고 1년 근로를 마친 다음 날 근로관계가 있어야 15일이 발생합니다(대법원 2021. 10. 14. 선고 2021다227100 판결). 상시 5인 이상 사업장에 적용합니다.</p>`;return;}
+    // 회계연도 기준
+    const fm=+sval("al_fm")||1;let S=new Date(a.getFullYear(),fm-1,1);if(S<a)S.setFullYear(S.getFullYear()+1);
+    const partial=S>a;const pDays=Math.round((S-a)/864e5);const prop=Math.round(15*pDays/365*100)/100;
+    const rows=[];if(partial)rows.push({d:new Date(S),days:prop,k:`비례 부여(15일 x ${pDays}/365)`});
+    for(let k=1;k<=40;k++){const d=new Date(S);d.setFullYear(S.getFullYear()+k);rows.push({d,days:annual(k),k:k===1?"정기 부여":`정기 부여(${k}회차)`});if(d>b&&rows.filter(r=>r.d>b).length>=1)break;}
+    const past=rows.filter(r=>r.d<=b);const cur=past[past.length-1];const nxt=rows.find(r=>r.d>b);
+    let curDays=cur?cur.days:0;if(cur&&!rate80&&!cur.k.startsWith("비례")){curDays=Math.min(full,11);}
+    const monthly=b<addM(a,12)?Math.min(under1?full:11,m,11):0;
+    out.innerHTML=`<div class="ghead"><span class="big">${cur?fmt(curDays)+"일":"정기 부여 전"}</span><span class="asof-d">${cur?`(연차발생일: ${kd(cur.d)})`:""}</span></div>
+    <dl class="kv">${cur?`<dt>구분</dt><dd style="text-align:right;font-family:inherit">${esc(!rate80&&!cur.k.startsWith("비례")?"직전 회계연도 출근율 80% 미만: 개근 월수만큼(가산 없음)":cur.k)}</dd>`:""}
+    ${b<addM(a,12)?`<dt>입사 1년 미만 월 단위 연차(별도)</dt><dd>${monthly}일(개근 1개월마다 1일, 최대 11일)</dd>`:""}
+    ${nxt?`<dt>다음 발생일</dt><dd>${kd(nxt.d)}(${fmt(nxt.days)}일)</dd>`:""}
+    <dt>참고: 입사일 기준이면</dt><dd>${jDays}일(${jDate?kd(jDate):"발생 전"})</dd></dl>
+    <div class="tw"><table style="min-width:0"><thead><tr><th>발생일</th><th>구분</th><th>일수</th></tr></thead><tbody>${rows.slice(0,Math.min(rows.length,past.length+1)).map(r=>`<tr${r===cur?' style="font-weight:700"':""}><td style="white-space:nowrap">${r.d.getFullYear()}.${r.d.getMonth()+1}.${r.d.getDate()}.</td><td>${esc(r.k)}</td><td class="n">${fmt(r.days)}일</td></tr>`).join("")}</tbody></table></div>
+    <p class="note">※ 회계연도 기준은 취업규칙이나 단체협약으로 정해 운영할 수 있으며, 연도 중 입사자에게는 다음 해에 입사 연도 근속기간에 비례해 휴가를 주고 이후 회계연도 기준으로 부여합니다. 퇴직 시 총 휴가일수가 입사일 기준보다 적으면 부족분을 연차휴가수당으로 정산해야 한다는 것이 고용노동부 입장입니다(고용노동부 연차유급휴가 질의회신). 비례 일수의 소수점 처리(올림 부여 또는 수당 정산)는 사업장 규정에 따릅니다. 가산휴가는 정기 부여 3회차부터 2회차마다 1일씩 더하는 일반적인 운영 방식으로 계산했습니다.</p>`},"al");}
 
 function cDIS(root){
   const t=tbl("dis_levy");

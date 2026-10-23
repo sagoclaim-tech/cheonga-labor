@@ -360,7 +360,7 @@ function rSummary(){
   const GROUPS=[{t:"최저임금",sub:"",calc:[["mw","최저임금 계산"]],rows:[["min_wage_hourly","시간급"],["min_wage_monthly","월 환산(209시간)"]]},
     {t:"4대보험 요율",sub:"",calc:[["ins","4대보험료 계산"]],rows:[["np_rate","국민연금(노사 합계)"],["hi_rate","건강보험(노사 합계)"],["ltc_rate","장기요양(소득 대비)"],["ei_ui_worker","고용보험 실업급여(근로자)"],["ei_sp_1","고용안정·직능(사업주, 150인 미만)"],["hi_cap_upper","건강보험료 월 상한(노사 합계)"],["hi_cap_lower","건강보험료 월 하한(노사 합계)"]]},
     {t:"국민연금 기준소득월액",sub:"매년 7월 조정",calc:[["ins","국민연금 보험료 계산"]],rows:[["np_lower","하한"],["np_upper","상한"]]},
-    {t:"출산·육아 급여 상한",sub:"",calc:[["mat","출산휴가급여 계산"],["pl","육아휴직급여 계산"]],rows:[["mat_cap","출산전후휴가(월)"],["pl_cap_1","육아휴직 1~3개월(월)"],["pl_cap_4","육아휴직 4~6개월(월)"],["pl_cap_7","육아휴직 7개월 이후(월)"],["spouse_leave_cap","배우자 출산휴가"]]},
+    {t:"출산·육아 급여 상한",sub:"",calc:[["mat","출산전후휴가급여 계산"],["sp","배우자 출산휴가급여 계산"],["pl","육아휴직급여 계산"]],rows:[["mat_cap","출산전후휴가(월)"],["pl_cap_1","육아휴직 1~3개월(월)"],["pl_cap_4","육아휴직 4~6개월(월)"],["pl_cap_7","육아휴직 7개월 이후(월)"],["spouse_leave_cap","배우자 출산휴가"]]},
     {t:"구직급여 1일",sub:"",calc:[["ui","실업급여 계산"]],rows:[["ui_daily_max","상한액"],["ui_daily_min","하한액(8시간)"]]},
     {t:"장애인 의무고용률",sub:"",calc:[["dis","의무고용·부담금 계산"]],rows:[["disabled_quota","민간 사업주"]]},
     {t:"산재 보상기준",sub:"",calc:[["sj","보험급여 계산"]],rows:[["ia_min","최저보상기준(1일)"],["ia_max","최고보상기준(1일)"],["funeral_min","장례비 최저"],["funeral_max","장례비 최고"]]}];
@@ -420,13 +420,13 @@ function rSummary(){
 }
 
 /* ---------- 계산기 ---------- */
-const CALCS=[["mw","최저임금"],["ui","실업급여"],["pl","육아휴직급여"],["mat","출산휴가급여"],["sj","산재보상"],["ins","4대보험료"],["sev","퇴직금"],["al","연차일수"],["dg","대지급금"],["dis","장애인 고용"]];
+const CALCS=[["mw","최저임금"],["ui","실업급여"],["pl","육아휴직급여"],["mat","출산전후휴가급여"],["sp","배우자 출산휴가급여"],["sj","산재보상"],["ins","4대보험료"],["sev","퇴직금"],["al","연차일수"],["dg","대지급금"],["dis","장애인 고용"]];
 function rCalc(){
   app.innerHTML=`<section class="view"><div><span class="eyebrow">${esc(asofText())} 기준 적용</span><h2>계산기</h2><p class="lede">입력값은 이 기기에만 저장됩니다.</p></div>
   <div class="chips wrap" role="tablist">${CALCS.map(([k,n])=>`<button type="button" class="chip" data-c="${k}" aria-pressed="${k===CALC}">${n}</button>`).join("")}</div>
   <div id="cbody"></div></section>`;
   app.querySelectorAll("[data-c]").forEach(b=>b.addEventListener("click",()=>{CALC=b.dataset.c;rCalc();}));
-  ({mw:cMW,ui:cUI,pl:cPL,mat:cMAT,sj:cSJ,dis:cDIS,ins:cINS,sev:cSEV,al:cAL,dg:cDG}[CALC])($("#cbody"));
+  ({mw:cMW,ui:cUI,pl:cPL,mat:cMAT,sp:cSP,sj:cSJ,dis:cDIS,ins:cINS,sev:cSEV,al:cAL,dg:cDG}[CALC])($("#cbody"));
 }
 function labHtml(id,label){const h=HELP[id];return `<div class="lab"><label for="${id}">${label}</label>${h?`<button type="button" class="q" data-q="${id}" aria-expanded="false" aria-label="${esc(label)} 입력 방법">?</button>`:""}</div>`;}
 function helpHtml(id){const h=HELP[id];return h?`<div class="help" id="h_${id}" hidden>${esc(h)}</div>`:"";}
@@ -504,6 +504,10 @@ const HELP={
  dis_mild:"중증이 아닌 장애인 근로자 수입니다.",
  dis_severe:"월 소정근로시간 60시간 이상인 중증장애인은 1명을 2명으로 인정합니다.",
  dis_sev_short:"월 소정근로시간 60시간 미만인 중증장애인은 1명으로 셉니다.",
+ sp_wage:"휴가 전 매월 정기적으로 지급하는 통상임금입니다.",
+ sp_hours:"하루 소정근로시간입니다. 8시간을 넘으면 8시간으로 계산합니다.",
+ sp_days:"이번에 계산할 휴가 일수입니다. 나누어 쓰는 경우 해당 회차 일수를 넣으면 됩니다.",
+ sp_pref:"우선지원대상기업(중소기업 등) 근로자만 고용보험에서 배우자 출산휴가급여를 받습니다.",
  p_size:"자동 판정은 업종별 상시근로자 수 기준(고용보험법 시행령 제12조)입니다. 그 기준을 넘더라도 중소기업기본법상 중소기업이면 우선지원대상기업으로 보므로 직접 선택합니다. 중견기업은 일부 지원금(워라밸일자리장려금, 유연근무, 고령자 계속고용장려금 등)의 지원 대상입니다.",
  p_region:"수도권은 서울, 인천, 경기입니다. 인천 강화·옹진, 경기 가평·연천은 청년일자리도약장려금에서 비수도권으로 봅니다."
 };
@@ -632,17 +636,32 @@ function cPL(root){
 
 function cMAT(root){
   root.innerHTML=`<div class="panel"><h3>출산전후휴가급여</h3>
-  <div class="form">${money("mat_wage","월 통상임금(원)",3000000)}${field("mat_type","휴가 유형",1,"select",{opts:[[1,"단태아 90일"],[2,"다태아 120일"]]})}
+  <div class="form">${money("mat_wage","월 통상임금(원)",3000000)}${field("mat_type","휴가 유형",1,"select",{opts:[[1,"단태아 90일"],[2,"다태아 120일"],[3,"미숙아 출산 100일"]]})}
   ${field("mat_pref","기업 구분",1,"select",{opts:[[1,"우선지원대상기업"],[0,"대규모기업"]]})}</div>
   <div class="result" id="mat_out"></div>${srcLine(["mat_cap","min_wage_hourly"])}</div>`;
-  bind(root,()=>{const w=num("mat_wage"),cap=v("mat_cap"),mw=v("min_wage_hourly");const multi=sval("mat_type")==="2",pref=sval("mat_pref")==="1";
-    const totalDays=multi?120:90,paidDays=multi?75:60;const daily=w/30;const capD=cap/30;const minD=mw*8;
+  bind(root,()=>{const w=num("mat_wage"),cap=v("mat_cap"),mw=v("min_wage_hourly");const mt=sval("mat_type"),multi=mt==="2",pref=sval("mat_pref")==="1";
+    const totalDays=multi?120:mt==="3"?100:90,paidDays=multi?75:60;const daily=w/30;const capD=cap/30;const minD=mw*209/30;
     const govDays=pref?totalDays:(totalDays-paidDays);const gDay=Math.max(Math.min(daily,capD),minD);const gov=gDay*govDays;const empDays=pref?paidDays:paidDays;
     const empTop=pref?Math.max(daily-gDay,0)*paidDays:daily*paidDays;
     $("#mat_out").innerHTML=`<div class="ghead"><span class="big">${won(gov)}</span><span class="pill p-now">고용보험 지급 ${govDays}일분</span></div>
     <dl class="kv"><dt>통상임금 일액</dt><dd>${won(daily)}</dd><dt>급여 일액(상한 ${won(capD)}/일)</dt><dd>${won(gDay)}</dd>
     <dt>사업주 부담(최초 ${paidDays}일${pref?" 차액":""})</dt><dd>${won(empTop)}</dd></dl>
-    <p class="note">※ 우선지원대상기업은 휴가 전 기간을 고용보험에서 상한액 범위로 지급하고, 최초 ${paidDays}일은 통상임금과의 차액을 사업주가 지급합니다. 대규모기업은 최초 ${paidDays}일을 사업주가 통상임금으로 지급하고 나머지 기간만 고용보험에서 지급합니다.</p>`},"mat");}
+    <p class="note">※ 우선지원대상기업은 휴가 전 기간을 고용보험에서 상한액 범위로 지급하고, 최초 ${paidDays}일은 통상임금과의 차액을 사업주가 지급합니다. 대규모기업은 최초 ${paidDays}일을 사업주가 통상임금으로 지급하고 나머지 기간만 고용보험에서 지급합니다(근로기준법 제74조, 고용보험법 제75조). 급여 일액은 최저임금보다 적을 수 없습니다.</p>`},"mat");}
+
+function cSP(root){
+  root.innerHTML=`<div class="panel"><h3>배우자 출산휴가급여</h3>
+  <div class="form">${money("sp_wage","월 통상임금(원)",3000000)}${field("sp_hours","1일 소정근로시간",8,"number")}
+  ${field("sp_days","사용 일수(최대 20일)",20,"number")}${field("sp_pref","기업 구분",1,"select",{opts:[[1,"우선지원대상기업"],[0,"대규모기업"]]})}</div>
+  <div class="result" id="sp_out"></div>${srcLine(["spouse_leave_cap"])}</div>`;
+  bind(root,()=>{const w=num("sp_wage"),h=Math.min(num("sp_hours")||8,8),days=Math.max(0,Math.min(20,Math.floor(num("sp_days")||0)));const pref=sval("sp_pref")==="1";
+    const cap=v("spouse_leave_cap");const daily=w/209*h;const capD=cap?cap/20:0;const total=daily*days;
+    const gov=pref&&cap?Math.min(daily,capD)*days:0;const emp=total-gov;
+    $("#sp_out").innerHTML=`<div class="ghead"><span class="big">${won(gov)}</span><span class="pill ${pref?"p-now":"p-warn"}">${pref?"고용보험 지급 "+days+"일분":"고용보험 지원 대상 아님"}</span></div>
+    <dl class="kv"><dt>1일 통상임금</dt><dd>${won(daily)}</dd><dt>휴가 기간 임금 총액(${days}일)</dt><dd>${won(total)}</dd>
+    ${pref?`<dt>급여 일액(상한 ${won(capD)}/일)</dt><dd>${won(Math.min(daily,capD))}</dd>`:""}
+    <dt>사업주 부담${pref?"(통상임금과의 차액)":"(전액)"}</dt><dd><b>${won(emp)}</b></dd></dl>
+    <p class="note">※ 배우자 출산휴가는 20일 모두 유급이며, 배우자가 출산한 날부터 120일 이내에 사용해야 하고 3회까지 나누어 쓸 수 있습니다(남녀고용평등과 일·가정 양립 지원에 관한 법률 제18조의2). 우선지원대상기업 근로자는 20일 전체에 대해 고용보험에서 상한액 범위로 급여를 받고, 사업주는 통상임금과의 차액을 지급합니다. 대규모기업은 사업주가 통상임금 전액을 지급합니다. 고용보험 피보험 단위기간 180일 이상이 필요합니다.</p>
+    <p class="note">※ 1일 통상임금은 월 통상임금을 209시간으로 나눈 시간급에 1일 소정근로시간을 곱해 계산했습니다(주 40시간 기준). 상한액은 고시상 20일분 금액을 20으로 나눈 1일 기준입니다.</p>`},"sp");}
 
 function cSJ(root){
   const dt=tbl("ia_disability");
@@ -912,7 +931,7 @@ function buildDocs(){const docs=[];const add=(type,title,text,go,val)=>docs.push
   add("계산기","산재 휴업급여 계산","휴업급여 평균임금 70% 90% 저소득 최저임금액 최저보상기준 최고보상기준 부분휴업 요양",{calc:"sj",kind:"rest"});
   const pl=tbl("pl_caps");if(pl)add("기준표","육아휴직급여 기간별 상한",pl.bands.map(b=>b.label+" 상한 "+b.cap.toLocaleString()+"원").join(", ")+" 6+6 부모육아휴직제 특례 "+pl.basis,{calc:"pl"});
   const dg=tbl("dg_caps");if(dg)add("기준표","대지급금 연령별 상한액",dg.rows.map(r=>r[0]+" "+r[1].toLocaleString()+"원").join(", ")+" "+(dg.notes||[]).join(" "),{calc:"dg"});
-  [["mw","최저임금 계산기","최저임금 위반 산입범위 월 환산 209시간 수습 감액 포괄임금 고정연장 역산 단시간 주휴 미달 차액 체불 소멸시효 내년 인상"],["ui","실업급여 계산기","구직급여 일액 상한 하한 소정급여일수 수급요건 이직사유"],["pl","육아휴직급여 계산기","육아휴직 6+6 통상임금 상한"],["mat","출산전후휴가급여 계산기","출산휴가 다태아 우선지원대상기업 상한"],["ins","4대보험료 계산기","국민연금 건강보험 장기요양 고용보험 산재보험 요율 보험료"],["sev","퇴직금 계산기","퇴직금 평균임금 상여금 연차수당 계속근로"],["al","연차일수 계산기","연차유급휴가 출근율 가산휴가"],["dg","대지급금 계산기","체당금 도산 간이 상한"],["dis","장애인 고용 계산기","장애인 의무고용 부담금 부담기초액 고용장려금 중증 2배"]].forEach(([c,t,k])=>add("계산기",t,k,{calc:c}));
+  [["mw","최저임금 계산기","최저임금 위반 산입범위 월 환산 209시간 수습 감액 포괄임금 고정연장 역산 단시간 주휴 미달 차액 체불 소멸시효 내년 인상"],["ui","실업급여 계산기","구직급여 일액 상한 하한 소정급여일수 수급요건 이직사유"],["pl","육아휴직급여 계산기","육아휴직 6+6 통상임금 상한"],["mat","출산전후휴가급여 계산기","출산휴가 다태아 미숙아 우선지원대상기업 상한"],["ins","4대보험료 계산기","국민연금 건강보험 장기요양 고용보험 산재보험 요율 보험료"],["sev","퇴직금 계산기","퇴직금 평균임금 상여금 연차수당 계속근로"],["al","연차일수 계산기","연차유급휴가 출근율 가산휴가"],["dg","대지급금 계산기","체당금 도산 간이 상한"],["sp","배우자 출산휴가급여 계산기","배우자 출산휴가 20일 남편 아빠 출산 급여 우선지원대상기업"],["dis","장애인 고용 계산기","장애인 의무고용 부담금 부담기초액 고용장려금 중증 2배"]].forEach(([c,t,k])=>add("계산기",t,k,{calc:c}));
   (D.notices||[]).forEach(n=>add("제도 동향",n.date+" 동향",n.text,{notice:n.src}));
   ((IV&&IV.items)||[]).forEach(x=>add("행정해석",x.title,`${x.no} ${x.date} ${x.topic} ${(x.orig||[]).map(o=>o.t).join(" ")||(x.q+" "+x.a)} ${x.basis||""}`,{interp:x.id}));
   return docs;}

@@ -505,6 +505,7 @@ const HELP={
  dis_severe:"월 소정근로시간 60시간 이상인 중증장애인은 1명을 2명으로 인정합니다.",
  dis_sev_short:"월 소정근로시간 60시간 미만인 중증장애인은 1명으로 셉니다.",
  sp_wage:"휴가 전 매월 정기적으로 지급하는 통상임금입니다.",
+ sp_wdays:"1주에 근무하기로 정한 날 수입니다. 보통 5일입니다.",
  sp_hours:"하루 소정근로시간입니다. 6.5처럼 소수점으로 넣을 수 있고, 8시간을 넘으면 8시간으로 계산합니다.",
  sp_days:"이번에 계산할 휴가 일수입니다. 나누어 쓰는 경우 해당 회차 일수를 넣으면 됩니다.",
  sp_pref:"우선지원대상기업(중소기업 등) 근로자만 고용보험에서 배우자 출산휴가급여를 받습니다.",
@@ -650,18 +651,20 @@ function cMAT(root){
 
 function cSP(root){
   root.innerHTML=`<div class="panel"><h3>배우자 출산휴가급여</h3>
-  <div class="form">${money("sp_wage","월 통상임금(원)",3000000)}${field("sp_hours","1일 소정근로시간",8,"number")}
+  <div class="form">${money("sp_wage","월 통상임금(원)",3000000)}${field("sp_hours","1일 소정근로시간",8,"number")}${field("sp_wdays","1주 소정근로일수",5,"number")}
   ${field("sp_days","사용 일수(최대 20일)",20,"number")}${field("sp_pref","기업 구분",1,"select",{opts:[[1,"우선지원대상기업"],[0,"대규모기업"]]})}</div>
   <div class="result" id="sp_out"></div>${srcLine(["spouse_leave_cap"])}</div>`;
   bind(root,()=>{const w=num("sp_wage"),h=Math.min(num("sp_hours")||8,8),days=Math.max(0,Math.min(20,Math.floor(num("sp_days")||0)));const pref=sval("sp_pref")==="1";
-    const cap=v("spouse_leave_cap");const daily=w/209*h;const capD=cap?cap/20:0;const total=daily*days;
+    const wd=Math.max(1,Math.min(7,num("sp_wdays")||5));const wk=h*wd;const hol=wk<15?0:Math.min(8,wk/40*8);
+    const mExact=(wk+hol)*365/7/12;const mH=(wk===40&&hol===8)?209:mExact;
+    const cap=v("spouse_leave_cap");const daily=w/mH*h;const capD=cap?cap/20:0;const total=daily*days;
     const gov=pref&&cap?Math.min(daily,capD)*days:0;const emp=total-gov;
     $("#sp_out").innerHTML=`<div class="ghead"><span class="big">${won(gov)}</span><span class="pill ${pref?"p-now":"p-warn"}">${pref?"고용보험 지급 "+days+"일분":"고용보험 지원 대상 아님"}</span></div>
-    <dl class="kv"><dt>1일 통상임금</dt><dd>${won(daily)}</dd><dt>휴가 기간 임금 총액(${days}일)</dt><dd>${won(total)}</dd>
+    <dl class="kv"><dt>월 통상임금 산정 기준시간</dt><dd>${fmt(Math.round(mH*100)/100)}시간</dd><dt>시간급 통상임금</dt><dd>${won(w/mH)}</dd><dt>1일 통상임금(${fmt(h)}시간)</dt><dd>${won(daily)}</dd><dt>휴가 기간 임금 총액(${days}일)</dt><dd>${won(total)}</dd>
     ${pref?`<dt>급여 일액(상한 ${won(capD)}/일)</dt><dd>${won(Math.min(daily,capD))}</dd>`:""}
     <dt>사업주 부담${pref?"(통상임금과의 차액)":"(전액)"}</dt><dd><b>${won(emp)}</b></dd></dl>
     <p class="note">※ 배우자 출산휴가는 20일 모두 유급이며, 배우자가 출산한 날부터 120일 이내에 사용해야 하고 3회까지 나누어 쓸 수 있습니다(남녀고용평등과 일·가정 양립 지원에 관한 법률 제18조의2). 우선지원대상기업 근로자는 20일 전체에 대해 고용보험에서 상한액 범위로 급여를 받고, 사업주는 통상임금과의 차액을 지급합니다. 대규모기업은 사업주가 통상임금 전액을 지급합니다. 고용보험 피보험 단위기간 180일 이상이 필요합니다.</p>
-    <p class="note">※ 1일 통상임금은 월 통상임금을 209시간으로 나눈 시간급에 1일 소정근로시간을 곱해 계산했습니다(주 40시간 기준). 상한액은 고시상 20일분 금액을 20으로 나눈 1일 기준입니다.</p>`},"sp");}
+    <p class="note">※ 1일 통상임금 = 월 통상임금 ÷ 월 기준시간 x 1일 소정근로시간. 월 기준시간 = (1주 소정근로시간 + 주휴시간) x 365 / 7 / 12이며, 주 40시간이면 209시간입니다. 예: 1일 6.5시간, 주 5일이면 (32.5 + 6.5) x 4.3452 = 169.46시간. 주휴시간은 통상근로자(주 40시간, 8시간) 대비 비율로 계산했습니다. 상한액은 고시상 20일분 금액을 20으로 나눈 1일 기준입니다.</p>`},"sp");}
 
 function cSJ(root){
   const dt=tbl("ia_disability");

@@ -847,7 +847,7 @@ function rGrants(){
    ${field("p_size","기업 구분",p.size||"auto","select",{opts:[["auto","업종·인원으로 자동 판정"],["sme","중소기업기본법상 중소기업"],["mid","중견기업"],["large","대규모기업"]],full:true})}
    <div class="full" style="display:grid;gap:6px">${PROFILE_FLAGS.map(([k,n])=>`<label class="chk"><input type="checkbox" id="pf_${k}" ${p.flags[k]?"checked":""}>${esc(n)}</label>`).join("")}</div>
    </div><p class="note">※ 우선지원대상기업 판정은 고용보험법 시행령 제12조 업종별 상시근로자 수 기준이며, 중소기업기본법상 중소기업은 규모와 무관하게 우선지원대상기업으로 봅니다.</p></details>
-  <div class="chips">${[["all","전체 "+list.length],["ok","적용 가능 "+cnt.ok],["maybe","추가 확인 "+cnt.maybe],["no","해당 없음 "+cnt.no]].map(([k,n])=>`<button type="button" class="chip" data-gf="${k}" aria-pressed="${GFILTER===k}">${n}</button>`).join("")}</div>
+  <div class="chips wrap">${[["all","전체 "+list.length],["ok","적용 가능 "+cnt.ok],["maybe","추가 확인 "+cnt.maybe],["no","해당 없음 "+cnt.no]].map(([k,n])=>`<button type="button" class="chip" data-gf="${k}" aria-pressed="${GFILTER===k}">${n}</button>`).join("")}</div>
   <div style="display:grid;gap:10px">${shown.map(({g,e})=>`<details class="gcard" data-gid="${esc(g.id)}"><summary><div class="ghead"><span class="pill ${lab[e.st][1]}">${lab[e.st][0]}</span><span class="note">${esc(g.family||"")}</span></div><span class="gname">${esc(g.name)}</span><span class="gamt">${esc(g.headline||"")}</span></summary>
    <div class="gbody"><div class="why"><ul>${e.why.map(w=>`<li>${esc(w)}</li>`).join("")}</ul></div>
    <dl>${[["지원대상",g.target],["근로자 요건",g.worker],["지원금액",g.amount],["지원기간",g.period],["한도",g.limit],["제외·유의",g.exclude],["신청",g.apply],["2026 변경",g.changes],["2027 예정",g.next],["근거",g.basis]].filter(x=>x[1]).map(([k,x])=>`<dt>${k}</dt><dd>${esc(x)}</dd>`).join("")}</dl>
@@ -872,15 +872,16 @@ function rInterp(){
   app.innerHTML=`<section class="view"><div><span class="eyebrow">고용노동부 질의회시${IV&&IV.meta&&IV.meta.updated?" · 최종 갱신 "+esc(IV.meta.updated):""}</span><h2>행정해석</h2>
   <p class="lede">금전 기준과 관련된 고용노동부 행정해석(문서번호가 있는 질의회시)과 최근 국민신문고 민원 답변을 분야별로 모았습니다. 매일 아침 새로 나온 회시를 확인해 추가합니다. 항목을 누르면 질의와 회시 원문이 바로 보입니다.</p></div>
   <div class="search"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="6.5"/><path d="M16 16l4.5 4.5"/></svg><input id="iq" type="search" placeholder="예: 연차수당 퇴직, 통상임금 상여금" value="${esc(q)}" autocomplete="off"></div>
-  <div class="chips">${["전체",...ITOPICS.filter(t=>cnt[t])].map(t=>`<button type="button" class="chip" data-it="${esc(t)}" aria-pressed="${ITOPIC===t}">${esc(t)} ${t==="전체"?items.length:cnt[t]}</button>`).join("")}</div>
-  ${items.some(x=>x.kind==="civil")?`<div class="chips">${[["all","전체"],["interp","행정해석(문서번호)"],["civil","민원 답변"]].map(([k,n])=>`<button type="button" class="chip" data-ik="${k}" aria-pressed="${IKIND===k}">${n} ${k==="all"?items.length:items.filter(x=>(k==="civil")===(x.kind==="civil")).length}</button>`).join("")}</div>`:""}
-  ${hasViews?`<div class="chips"><button type="button" class="chip" data-is="recent" aria-pressed="${ISORT==="recent"}">최신순</button><button type="button" class="chip" data-is="views" aria-pressed="${ISORT==="views"}">조회순</button></div>`:""}
+  <div class="chips wrap">${["전체",...ITOPICS.filter(t=>cnt[t])].map(t=>`<button type="button" class="chip" data-it="${esc(t)}" aria-pressed="${ITOPIC===t}">${esc(t)} ${t==="전체"?items.length:cnt[t]}</button>`).join("")}</div>
+  ${items.some(x=>x.kind==="civil")?`<div class="chips wrap">${[["all","전체"],["interp","행정해석(문서번호)"],["civil","민원 답변"]].map(([k,n])=>`<button type="button" class="chip" data-ik="${k}" aria-pressed="${IKIND===k}">${n} ${k==="all"?items.length:items.filter(x=>(k==="civil")===(x.kind==="civil")).length}</button>`).join("")}</div>`:""}
+  ${hasViews?`<div class="chips wrap"><button type="button" class="chip" data-is="recent" aria-pressed="${ISORT==="recent"}">최신순</button><button type="button" class="chip" data-is="views" aria-pressed="${ISORT==="views"}">조회순</button></div>`:""}
   <div id="ilist" style="display:grid;gap:10px"></div>
   <p class="foot">※ 행정해석은 행정기관의 법령 해석으로 법원을 기속하지 않습니다. 구체적 사안은 회시 원문과 최신 판례로 확인합니다.</p></section>`;
   const draw=()=>{const s=sval("iq").trim();store.set("iq",s);const toks=s?s.toLowerCase().split(/\s+/).filter(Boolean).map(expand):[];
     let list=items.filter(x=>(IKIND==="all"||(IKIND==="civil")===(x.kind==="civil"))&&(ITOPIC==="전체"||x.topic===ITOPIC)&&(!toks.length||interpMatch(x,toks)));
-    list.sort(ISORT==="views"?(a,b)=>(b.views||0)-(a.views||0):(a,b)=>a.date<b.date?1:a.date>b.date?-1:0);
     const fresh=x=>x.added&&(new Date(todayStr())-new Date(x.added))/864e5<=7;
+    const base=ISORT==="views"?(a,b)=>(b.views||0)-(a.views||0):(a,b)=>a.date<b.date?1:a.date>b.date?-1:0;
+    list.sort((a,b)=>{const fa=fresh(a)?1:0,fb=fresh(b)?1:0;if(fa!==fb)return fb-fa;if(fa&&a.added!==b.added)return a.added<b.added?1:-1;return base(a,b);});
     $("#ilist").innerHTML=`<p class="note">${list.length}건</p>`+(list.map(x=>`<details class="gcard" data-iid="${esc(x.id)}"><summary><div class="ghead"><span class="pill p-type">${esc(x.topic)}</span>${x.kind==="civil"?'<span class="pill p-no">민원 답변</span>':""}${fresh(x)?'<span class="pill p-warn">새로 추가</span>':""}<span class="note">${esc(x.date)} · ${x.no?esc(x.no):"문서번호 없음"}${typeof x.views==="number"?" · 조회 "+x.views.toLocaleString("ko-KR"):""}</span></div><span class="gname">${toks.length?hl(x.title,toks):esc(x.title)}</span></summary>
       <div class="gbody">${(x.orig&&x.orig.length?x.orig:[{h:"질의 요지",t:x.q},{h:"회시 요지",t:x.a}]).map(sec=>`<div class="osec"><div class="oh">${esc(secName(sec.h,x))}</div><div class="ot">${toks.length?hl(sec.t,toks):esc(sec.t)}</div></div>`).join("")}
       ${x.note?`<p class="note">※ ${esc(x.note)}</p>`:""}${x.date<"2020-01-01"?`<p class="note">※ ${esc(x.date.slice(0,4))}년 회시로, 그 뒤 법령이 바뀌었을 수 있으니 현행 법령을 함께 확인하세요.</p>`:""}

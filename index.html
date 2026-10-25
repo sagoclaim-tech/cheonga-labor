@@ -233,7 +233,7 @@ html{padding-top:env(safe-area-inset-top,0px)}
 body{margin:0}
 img{max-width:100%}
 [hidden]{display:none!important}
-.install{display:grid;gap:8px}
+.instb{background:var(--hdr,#1a4c8c);color:#fff;border-radius:14px;padding:12px 14px;display:grid;gap:8px;margin-bottom:4px}.instb .ibar{display:flex;align-items:center;justify-content:space-between;gap:8px}.instb .ititle{display:flex;align-items:center;gap:7px;font-size:15px}.instb .ititle svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:2;flex:none}.instb .ix{background:transparent;border:0;color:#cfe0fa;font:inherit;font-size:12.5px;cursor:pointer;padding:4px}.instb .isub{margin:0;font-size:13px;color:#dbe8f8;line-height:1.55}.instb .isteps{margin:0;padding-left:20px;font-size:13.5px;line-height:1.7;color:#eef4fc}.instb .ibtn{justify-self:start;display:inline-block;background:#fff;color:var(--hdr,#1a4c8c);border:0;border-radius:999px;padding:8px 16px;font:inherit;font-size:14px;font-weight:700;text-decoration:none;cursor:pointer}.install{display:grid;gap:8px}
 .install .btnlink{justify-self:start;background:var(--accent);color:var(--surface);border-radius:8px;padding:9px 14px;font-weight:600;text-decoration:none}
 .install button{justify-self:start;background:var(--accent);color:var(--surface);border:0;border-radius:8px;padding:9px 14px;font-weight:600;cursor:pointer}
 /* 하단 법인 소개 */
@@ -385,7 +385,7 @@ function rSummary(){
   const atPoint=isFuture()?changeList(TODAY,ASOF):[];
   const d120=new Date(new Date(ASOF+"T00:00:00Z").getTime()-120*864e5).toISOString().slice(0,10);
   const recent=changeList(dayBefore(d120),ASOF).filter(x=>x.status==="확정").reverse();
-  app.innerHTML=`<section class="view">
+  app.innerHTML=`<section class="view">${installPanel()}
   <div><span class="eyebrow">${esc(asofText())} 기준 현행</span><h2>자주 찾는 수치</h2><p class="lede">수치를 누르면 근거와 변경 이력을 볼 수 있습니다. 조회 월을 바꾸면 그달 1일에 시행 중인 값으로, 오늘을 누르면 현 시점 최신 데이터로 다시 불러옵니다.</p></div>
   <div class="figs">${figs}</div>
   ${!isPast()&&!isFuture()&&recent.length?`<div class="panel"><div class="ghead"><h3>최근 개정 사항</h3><span class="pill p-ok">${recent.length}건</span><span class="note">최근 120일</span></div><div class="list">${changeRows(recent,4)}</div></div>`:""}
@@ -396,7 +396,6 @@ function rSummary(){
    :`<div class="panel"><div class="ghead"><h3>개정 예정 사항</h3><span class="pill p-next">${upcoming.length}건</span></div>
     <div class="list">${upcoming.length?changeRows(upcoming,4):`<p class="note">기준일 이후 예정된 변경이 없습니다.</p>`}</div></div>`}
   ${!isPast()&&(D.notices||[]).length?`<div class="panel"><h3>입법 동향</h3><div class="list">${[...D.notices].sort((a,b)=>Math.abs(new Date(a.date)-new Date(TODAY))-Math.abs(new Date(b.date)-new Date(TODAY))).map((n,ix)=>ix===8?`<details class="more"><summary>이전 동향 ${D.notices.length-8}건 더 보기</summary>`+noticeRow(n):noticeRow(n)).join("")+(D.notices.length>8?"</details>":"")}</div></div>`:""}
-  ${installPanel()}
   <section class="firm">
    <div class="firm-bar"></div>
    <p class="firm-lead">어렵고 복잡한 노동문제 <b>청아노무법인</b>과 함께 하세요</p>
@@ -981,14 +980,27 @@ let DEFER=null;
 const STANDALONE=(window.matchMedia&&matchMedia("(display-mode: standalone)").matches)||navigator.standalone===true;
 window.addEventListener("beforeinstallprompt",e=>{e.preventDefault();DEFER=e;if(TAB==="summary")render();});
 window.addEventListener("appinstalled",()=>{DEFER=null;if(TAB==="summary")render();});
-function installPanel(){if(STANDALONE)return"";const ua=navigator.userAgent;const ios=/iphone|ipad|ipod/i.test(ua);const android=/android/i.test(ua);
+function installPanel(){if(STANDALONE)return"";
+  let hid=null;try{hid=localStorage.getItem("instHide");}catch(_){}
+  if(hid&&(Date.now()-(+hid))<14*864e5)return"";
+  const ua=navigator.userAgent;const ios=/iphone|ipad|ipod/i.test(ua);const android=/android/i.test(ua);const mobile=ios||android;
   const kakao=/KAKAOTALK/i.test(ua);const inapp=kakao||/NAVER\(inapp|DaumApps|Instagram|FBAN|FBAV|Line\/|; wv\)/i.test(ua);
+  const samsung=/SamsungBrowser/i.test(ua);
   const here=location.href.split("#")[0];
+  const head=`<div class="ibar"><div class="ititle"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v12M7 10l5 5 5-5M5 19h14"/></svg><b>청아 노무수첩을 앱으로 설치하세요</b></div><button type="button" class="ix" data-insthide aria-label="닫기">닫기</button></div>`;
+  let body="";
   if(inapp){const chrome=android?`intent://${here.replace(/^https?:\/\//,"")}#Intent;scheme=https;package=com.android.chrome;end`:"";
     const kk=kakao?`kakaotalk://web/openExternal?url=${encodeURIComponent(here)}`:"";
-    return `<div class="panel install"><h3>앱으로 설치</h3><p class="note"><b>지금은 카카오톡 등 다른 앱 안의 브라우저로 열려 있어 설치할 수 없습니다.</b> ${ios?"화면의 메뉴에서 \"다른 브라우저로 열기\"나 \"Safari로 열기\"를 눌러 사파리에서 연 뒤, 공유 버튼의 \"홈 화면에 추가\"를 선택하세요.":"화면의 메뉴에서 \"다른 브라우저로 열기\"를 눌러 크롬에서 연 뒤 설치하세요."}</p>
-    ${android?`<a class="btnlink" href="${esc(chrome)}">크롬으로 열기</a>`:kk?`<a class="btnlink" href="${esc(kk)}">기본 브라우저로 열기</a>`:""}</div>`;}
-  return `<div class="panel install"><h3>앱으로 설치</h3>${DEFER?`<p class="note">이 기기에 청아노무법인 앱을 설치하면 아이콘으로 바로 실행되고, 인터넷이 없어도 마지막으로 받은 기준으로 열립니다.</p><button type="button" id="btnInstall">이 기기에 설치</button>`:ios?`<p class="note">사파리 하단의 공유 버튼을 누른 뒤 "홈 화면에 추가"를 선택하면 앱처럼 설치됩니다. 아이폰은 사파리에서만 설치됩니다.</p>`:android?`<p class="note">크롬 오른쪽 위 점 세 개 메뉴에서 "앱 설치" 또는 "홈 화면에 추가"를 선택하면 앱처럼 설치됩니다.</p>`:`<p class="note">크롬·엣지 주소창 오른쪽의 설치 아이콘을 누르거나, 브라우저 메뉴에서 "앱 설치"를 선택하면 앱처럼 설치됩니다.</p>`}</div>`;}
+    body=`<p class="isub">지금은 ${kakao?"카카오톡":"다른 앱"} 안에서 열려 있어 설치할 수 없습니다.</p>
+    ${android?`<a class="ibtn" href="${esc(chrome)}">크롬으로 열기</a><p class="isub">크롬이 열리면 같은 자리에 나오는 안내대로 설치하세요.</p>`:ios?`${kk?`<a class="ibtn" href="${esc(kk)}">사파리로 열기</a>`:""}<p class="isub">사파리에서 아래쪽 공유 버튼, "홈 화면에 추가" 순서로 누르세요.</p>`:kk?`<a class="ibtn" href="${esc(kk)}">기본 브라우저로 열기</a>`:""}`;}
+  else if(DEFER){body=`<p class="isub">아이콘 하나로 바로 열리고, 인터넷이 없어도 마지막 기준으로 볼 수 있습니다.</p><button type="button" class="ibtn" id="btnInstall">${mobile?"휴대폰에":"이 PC에"} 설치</button>`;}
+  else if(ios){body=`<ol class="isteps"><li>사파리 아래쪽 <b>공유 버튼</b>(네모에 위쪽 화살표)</li><li><b>홈 화면에 추가</b></li><li>오른쪽 위 <b>추가</b></li></ol><p class="isub">※ 아이폰은 사파리에서만 설치됩니다.</p>`;}
+  else if(samsung){const chrome=`intent://${here.replace(/^https?:\/\//,"")}#Intent;scheme=https;package=com.android.chrome;end`;
+    body=`<p class="isub">삼성 인터넷으로 추가하면 아이콘에 인터넷 표시가 붙습니다. 크롬에서 설치하시는 것을 권합니다.</p><a class="ibtn" href="${esc(chrome)}">크롬으로 열기</a>`;}
+  else if(android){body=`<ol class="isteps"><li>크롬 오른쪽 위 <b>점 세 개 메뉴</b></li><li><b>앱 설치</b>(또는 홈 화면에 추가)</li><li><b>설치</b></li></ol>`;}
+  else{body=`<ol class="isteps"><li>크롬·엣지 주소창 오른쪽 <b>설치 아이콘</b></li><li><b>설치</b></li></ol><p class="isub">※ 아이콘이 없으면 점 세 개 메뉴, "저장 및 공유", "페이지를 앱으로 설치" 순서로 누르세요.</p>`;}
+  return `<div class="instb">${head}${body}</div>`;}
+document.addEventListener("click",e=>{if(e.target.closest&&e.target.closest("[data-insthide]")){try{localStorage.setItem("instHide",String(Date.now()));}catch(_){}const el=document.querySelector(".instb");if(el)el.remove();}});
 document.addEventListener("click",e=>{if(e.target&&e.target.id==="btnInstall"&&DEFER){DEFER.prompt();DEFER.userChoice.finally(()=>{DEFER=null;render();});}});
 if("serviceWorker" in navigator){window.addEventListener("load",()=>{navigator.serviceWorker.register("sw.js").catch(()=>{});});}
 /* 시작 */
@@ -1001,7 +1013,7 @@ loadData().then(()=>render())
 })();
 
 document.addEventListener("click",async e=>{const b=e.target.closest("[data-share]");if(!b)return;
-  const url="https://sagoclaim-tech.github.io/cheonga-labor/";const text="[청아노무법인] 청아 노무수첩\n기준금액·계산기·지원금·행정해석을 한곳에";
+  const url="https://sagoclaim-tech.github.io/cheonga-labor/";const text="[청아노무법인] 청아 노무수첩\n기준금액·계산기·지원금·행정해석을 한곳에\n※ 링크를 열면 첫 화면 맨 위에 휴대폰·PC 설치 방법이 나옵니다.";
   try{gtag("event","share",{method:navigator.share?"native":"copy"});}catch(_){}
   if(navigator.share){try{await navigator.share({title:"청아 노무수첩",text,url});}catch(_){}return;}
   try{await navigator.clipboard.writeText(text+"\n"+url);b.lastChild.textContent="링크 복사됨";setTimeout(()=>{b.lastChild.textContent="앱 공유하기";},2000);}catch(_){prompt("아래 주소를 복사해 주세요.",url);}

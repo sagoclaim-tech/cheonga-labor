@@ -386,7 +386,7 @@ function rSummary(){
   const d120=new Date(new Date(ASOF+"T00:00:00Z").getTime()-120*864e5).toISOString().slice(0,10);
   const recent=changeList(dayBefore(d120),ASOF).filter(x=>x.status==="확정").reverse();
   app.innerHTML=`<section class="view">${installPanel()}
-  <div><span class="eyebrow">${esc(asofText())} 기준 현행</span><h2>자주 찾는 수치</h2><p class="lede">수치를 누르면 근거와 변경 이력을 볼 수 있습니다. 조회 월을 바꾸면 그달 1일에 시행 중인 값으로, 오늘을 누르면 현 시점 최신 데이터로 다시 불러옵니다.</p></div>
+  <div><span class="eyebrow">${esc(asofText())} 기준 현행</span><h2>자주 찾는 숫자</h2><p class="lede">숫자를 누르면 근거와 변경 이력을 볼 수 있습니다. 조회 월을 바꾸면 그달 1일에 시행 중인 값으로, 오늘을 누르면 현 시점 최신 데이터로 다시 불러옵니다.</p></div>
   <div class="figs">${figs}</div>
   ${!isPast()&&!isFuture()&&recent.length?`<div class="panel"><div class="ghead"><h3>최근 개정 사항</h3><span class="pill p-ok">${recent.length}건</span><span class="note">최근 120일</span></div><div class="list">${changeRows(recent,4)}</div></div>`:""}
   ${isFuture()?`<div class="panel"><div class="ghead"><h3>${esc(asofText())}까지 개정 예정 사항</h3><span class="pill p-next">${atPoint.length}건</span></div>

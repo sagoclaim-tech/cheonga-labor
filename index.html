@@ -934,9 +934,8 @@ function rInterp(){
   <p class="foot">※ 행정해석은 행정기관의 법령 해석으로 법원을 기속하지 않습니다. 구체적 사안은 회시 원문과 최신 판례로 확인합니다.</p></section>`;
   const draw=()=>{const s=sval("iq").trim();store.set("iq",s);const toks=s?s.toLowerCase().split(/\s+/).filter(Boolean).map(expand):[];
     let list=items.filter(x=>(IKIND==="all"||KOF(x)===IKIND)&&(ITOPIC==="전체"||x.topic===ITOPIC)&&(!toks.length||interpMatch(x,toks)));
-    const fresh=x=>x.added&&(new Date(todayStr())-new Date(x.added))/864e5<=7;
-    const base=ISORT==="views"?(a,b)=>(b.views||0)-(a.views||0):(a,b)=>a.date<b.date?1:a.date>b.date?-1:0;
-    list.sort((a,b)=>{const fa=fresh(a)?1:0,fb=fresh(b)?1:0;if(fa!==fb)return fb-fa;if(fa&&a.added!==b.added)return a.added<b.added?1:-1;return base(a,b);});
+    const fresh=x=>x.added&&(new Date(todayStr())-new Date(x.added))/864e5<=7&&(new Date(x.added)-new Date(x.date))/864e5<=30;
+    list.sort(ISORT==="views"?(a,b)=>(b.views||0)-(a.views||0)||(a.date<b.date?1:-1):(a,b)=>a.date<b.date?1:a.date>b.date?-1:0);
     $("#ilist").innerHTML=`<p class="note">${list.length}건</p>`+(list.map(x=>`<details class="gcard" data-iid="${esc(x.id)}"><summary><div class="ghead"><span class="pill p-type">${esc(x.topic)}</span>${x.kind==="civil"?'<span class="pill p-no">민원 답변</span>':x.kind==="moleg"?'<span class="pill p-now">법제처 해석</span>':""}${fresh(x)?'<span class="pill p-warn">새로 추가</span>':""}<span class="note">${esc(x.date)} · ${x.no?esc(x.no):"문서번호 없음"}${typeof x.views==="number"?" · 조회 "+x.views.toLocaleString("ko-KR"):""}</span></div><span class="gname">${toks.length?hl(x.title,toks):esc(x.title)}</span></summary>
       <div class="gbody">${(x.orig&&x.orig.length?x.orig:[{h:"질의 요지",t:x.q},{h:"회시 요지",t:x.a}]).map(sec=>`<div class="osec"><div class="oh">${esc(secName(sec.h,x))}</div><div class="ot">${toks.length?hl(sec.t,toks):esc(sec.t)}</div></div>`).join("")}
       ${x.note?`<p class="note">※ ${esc(x.note)}</p>`:""}${x.date<"2020-01-01"?`<p class="note">※ ${esc(x.date.slice(0,4))}년 회시로, 그 뒤 법령이 바뀌었을 수 있으니 현행 법령을 함께 확인하세요.</p>`:""}

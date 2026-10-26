@@ -7,3 +7,4 @@
 - 설치·오프라인: `manifest.webmanifest`, `sw.js`, `icons/`
 
 ※ 본 앱은 1차 검토용이며, 최종 판단은 원문 법령·고시·지침으로 확인합니다.
+- 법령 개정 감시: `tools/law_watch.py`가 `law_watch.json`의 감시 법령(법률·시행령·시행규칙) 연혁을 국가법령정보센터에서 읽어, 아직 검토하지 않은 개정(시행 2026.1.1. 이후)을 NEW로 보여 줍니다. 평일 자동 점검이 NEW 항목을 검토해 `data.json`의 scheduled에 반영하고, 검토 결과를 `law_watch.json`의 reviewed에 기록합니다.

@@ -345,8 +345,22 @@ function srcLine(ids){const out=[];for(const id of ids){const it=D.items[id],e=e
 /* 탭 */
 /* 뒤로가기: 요약 외 탭에서 휴대폰 뒤로가기를 누르면 요약으로 돌아감 */
 function showTab(t){TAB=t;try{const nm={summary:"요약",calc:"계산기",grants:"지원금",interp:"행정해석",search:"검색"}[t]||t;gtag("event","page_view",{page_title:""+nm,page_location:location.origin+location.pathname+"#"+t});}catch(e){}document.querySelectorAll("nav.tabs button").forEach(b=>b.setAttribute("aria-current",b.dataset.tab===t?"page":"false"));render();window.scrollTo(0,0);}
-function setTab(t){const from=TAB;try{if(t!=="summary"&&from==="summary")history.pushState({tab:t},"","#"+t);else if(t==="summary"&&from!=="summary"&&history.state&&history.state.tab){history.back();return;}else history.replaceState({tab:t},"","#"+t);}catch(e){}showTab(t);}
-window.addEventListener("popstate",e=>{const t=(e.state&&e.state.tab)||"summary";if(t!==TAB)showTab(t);});
+let NAVLOCK=false;
+function navState(extra){return Object.assign({tab:TAB,calc:CALC,it:ITOPIC,ik:IKIND,gf:GFILTER,open:null,y:0},extra||{});}
+function saveY(){try{history.replaceState(Object.assign({},history.state||{tab:TAB},{y:window.scrollY}),"",location.hash);}catch(e){}}
+function pushNav(extra,noSave){if(NAVLOCK)return;if(!noSave)saveY();try{history.pushState(navState(extra),"","#"+TAB);}catch(e){}}
+function cardKey(d){return d.dataset.iid?"i:"+d.dataset.iid:d.dataset.gid?"g:"+d.dataset.gid:d.dataset.gi!=null?"s:"+d.dataset.gi:null;}
+function cardBy(k){if(!k)return null;const [t,v]=[k.slice(0,1),k.slice(2)];const a=t==="i"?"data-iid":t==="g"?"data-gid":"data-gi";return document.querySelector(`[${a}="${CSS.escape(v)}"]`);}
+function setTab(t){if(t===TAB){showTab(t);return;}saveY();showTab(t);pushNav(null,true);}
+window.addEventListener("popstate",e=>{const st=e.state||{tab:"summary"};NAVLOCK=true;
+  const same=st.tab===TAB&&(st.calc||CALC)===CALC&&(st.it||ITOPIC)===ITOPIC&&(st.ik||IKIND)===IKIND&&(st.gf||GFILTER)===GFILTER;
+  if(!same){if(st.calc)CALC=st.calc;if(st.it)ITOPIC=st.it;if(st.ik)IKIND=st.ik;if(st.gf)GFILTER=st.gf;showTab(st.tab||"summary");}
+  document.querySelectorAll("details.gcard[open],details.fgrp[open]").forEach(d=>{if(cardKey(d)!==st.open)d.open=false;});
+  if(st.open){const d=cardBy(st.open);if(d)d.open=true;}
+  if(!same){const go=()=>{if(st.open){const d=cardBy(st.open);if(d&&!d.open)d.open=true;}window.scrollTo(0,st.y||0);};setTimeout(go,80);setTimeout(go,250);}
+  setTimeout(()=>{NAVLOCK=false;},350);});
+document.addEventListener("toggle",e=>{const d=e.target;if(NAVLOCK||!d.matches||!d.matches("details.gcard,details.fgrp"))return;const k=cardKey(d);if(!k)return;
+  if(d.open){pushNav({open:k});}else{const st=history.state;if(st&&st.open===k){history.back();}}},true);
 document.querySelectorAll("nav.tabs button").forEach(b=>b.addEventListener("click",()=>setTab(b.dataset.tab)));
 /* 조회 기준: 월 단위 선택(해당 월 1일 기준), 오늘 버튼은 현 시점 기준으로 데이터를 다시 불러옴 */
 let MODE="today";
@@ -443,7 +457,7 @@ function rCalc(){
   app.innerHTML=`<section class="view"><div><span class="eyebrow">${esc(asofText())} 기준 적용</span><h2>계산기</h2><p class="lede">입력값은 이 기기에만 저장됩니다.</p></div>
   <div class="cgrid" role="tablist">${CALCS.map(([k,n])=>`<button type="button" class="chip" data-c="${k}" aria-pressed="${k===CALC}">${n}</button>`).join("")}</div>
   <div id="cbody"></div></section>`;
-  app.querySelectorAll("[data-c]").forEach(b=>b.addEventListener("click",()=>{CALC=b.dataset.c;rCalc();}));
+  app.querySelectorAll("[data-c]").forEach(b=>b.addEventListener("click",()=>{saveY();CALC=b.dataset.c;rCalc();pushNav(null,true);}));
   ({mw:cMW,ui:cUI,pl:cPL,mat:cMAT,sp:cSP,sj:cSJ,dis:cDIS,ins:cINS,sev:cSEV,al:cAL,dg:cDG}[CALC])($("#cbody"));
 }
 function labHtml(id,label){const h=HELP[id];return `<div class="lab"><label for="${id}">${label}</label>${h?`<button type="button" class="q" data-q="${id}" aria-expanded="false" aria-label="${esc(label)} 입력 방법">?</button>`:""}</div>`;}
@@ -893,7 +907,7 @@ function rGrants(){
    <dl>${[["지원대상",g.target],["근로자 요건",g.worker],["지원금액",g.amount],["지원기간",g.period],["한도",g.limit],["제외·유의",g.exclude],["신청",g.apply],["2026 변경",g.changes],["2027 예정",g.next],["근거",g.basis]].filter(x=>x[1]).map(([k,x])=>`<dt>${k}</dt><dd>${esc(x)}</dd>`).join("")}</dl>
    <div class="basis">${okSrc(g.src)?`<a href="${esc(g.src)}" target="_blank" rel="noopener">출처 원문</a> · `:""}확인 ${esc(g.checked||"")}</div></div></details>`).join("")||`<p class="note">해당하는 지원금이 없습니다.</p>`}</div>
   <p class="foot">※ 지원금은 연도별 사업운영지침과 예산 소진 여부에 따라 달라집니다. 신청 전 고용24 공고로 최종 확인합니다.</p></section>`;
-  app.querySelectorAll("[data-gf]").forEach(b=>b.addEventListener("click",()=>{GFILTER=b.dataset.gf;rGrants();}));
+  app.querySelectorAll("[data-gf]").forEach(b=>b.addEventListener("click",()=>{saveY();GFILTER=b.dataset.gf;rGrants();pushNav(null,true);}));
   if(GOPEN){const d=app.querySelector(`[data-gid="${GOPEN}"]`);GOPEN=null;if(d){d.open=true;setTimeout(()=>d.scrollIntoView({block:"start"}),30);}}
   $("#pbox").addEventListener("toggle",e=>store.set("pOpen",e.target.open));
   const save=()=>{const np={ind:sval("p_ind"),emp:num("p_emp"),ins:num("p_ins"),region:sval("p_region"),size:sval("p_size"),flags:{}};PROFILE_FLAGS.forEach(([k])=>np.flags[k]=document.getElementById("pf_"+k).checked);store.set("profile",np);const y=window.scrollY;rGrants();window.scrollTo(0,y);};
@@ -929,9 +943,9 @@ function rInterp(){
       ${x.kind==="moleg"?`<p class="note">※ 법제처 법령해석은 행정부 내부의 법령해석 지침으로 법원의 확정판결과 같은 법적 기속력은 없으며, 해석 당시 법령을 대상으로 합니다.</p>`:""}<div class="basis">출처: ${x.kind==="civil"?"고용노동부 국민신문고 민원 답변":x.kind==="moleg"?"법제처 법령해석":"고용노동부 질의회시"}${x.no?" "+esc(x.no.replace(/^법제처 /,"")):""}, ${esc(x.date)}${/law\.go\.kr/.test(x.src||"")?" (법제처 국가법령정보센터 수록)":""}</div></div></details>`).join("")||`<p class="note">${items.length?"찾는 행정해석이 없습니다. 다른 표현으로 검색하거나 분야를 전체로 바꿔 보세요.":(IV?"행정해석 자료를 준비 중입니다. 확인된 회시부터 순차로 게시됩니다.":"행정해석 자료를 불러오지 못했습니다. 오늘 버튼을 눌러 다시 불러오세요.")}</p>`);
     if(IOPEN){const d=$("#ilist").querySelector(`[data-iid="${CSS.escape(IOPEN)}"]`);IOPEN=null;if(d){d.open=true;setTimeout(()=>d.scrollIntoView({block:"start"}),30);}}};
   $("#iq").addEventListener("input",draw);
-  app.querySelectorAll("[data-it]").forEach(b=>b.addEventListener("click",()=>{ITOPIC=b.dataset.it;rInterp();}));
+  app.querySelectorAll("[data-it]").forEach(b=>b.addEventListener("click",()=>{saveY();ITOPIC=b.dataset.it;rInterp();pushNav(null,true);}));
   app.querySelectorAll("[data-is]").forEach(b=>b.addEventListener("click",()=>{ISORT=b.dataset.is;rInterp();}));
-  app.querySelectorAll("[data-ik]").forEach(b=>b.addEventListener("click",()=>{IKIND=b.dataset.ik;rInterp();}));
+  app.querySelectorAll("[data-ik]").forEach(b=>b.addEventListener("click",()=>{saveY();IKIND=b.dataset.ik;rInterp();pushNav(null,true);}));
   draw();
 }
 

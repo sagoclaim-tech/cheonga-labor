@@ -132,8 +132,24 @@ h2{color:var(--accent)}
 /* 계산기 */
 .chips{display:flex;gap:6px;overflow-x:auto;padding-bottom:4px;scrollbar-width:none}
 .chips::-webkit-scrollbar{display:none}.cmp2{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:10px 0}.cmp2>div{border:1px solid var(--line);border-radius:12px;padding:10px 12px;display:grid;gap:2px;background:var(--card)}.cmp2>div.on{border:2px solid var(--hdr,#1a4c8c)}.cmp2 span{font-size:12px;color:var(--muted)}.cmp2 b{font-size:17px}.cmp2 small{font-size:11px;color:var(--muted)}.asof-d{font-size:14px;color:var(--muted);margin-left:6px}.chips.wrap{flex-wrap:wrap;overflow:visible;row-gap:8px}
-.chip{border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:6px 12px;font-size:13px;white-space:nowrap;cursor:pointer}
+.chip{border:1px solid var(--line);background:var(--surface);color:var(--ink);border-radius:999px;padding:6px 12px;font:inherit;font-size:13px;line-height:1.3;white-space:nowrap;cursor:pointer;display:inline-flex;align-items:center;gap:5px;transition:background .15s,border-color .15s}
+.chip .cnt{font-size:11.5px;color:var(--muted);font-variant-numeric:tabular-nums}
 .chip[aria-pressed="true"]{background:var(--accent);color:var(--surface);border-color:var(--accent)}
+.chip[aria-pressed="true"] .cnt{color:rgba(255,255,255,.75)}
+.cgrid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px}
+.cgrid .chip{justify-content:center;white-space:normal;text-align:center;border-radius:10px;padding:9px 4px;font-size:12.5px;word-break:keep-all;min-height:40px}
+@media (min-width:640px){.cgrid{grid-template-columns:repeat(4,minmax(0,1fr))}}
+.seg{display:flex;background:color-mix(in srgb,var(--line) 55%,transparent);border-radius:12px;padding:3px;gap:2px}
+.seg button{flex:1 1 0;min-width:0;border:0;background:transparent;color:var(--muted);font:inherit;font-size:12.5px;font-weight:600;padding:7px 2px;border-radius:9px;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:1px;line-height:1.25;word-break:keep-all}
+.seg button .cnt{font-size:11px;font-weight:500;font-variant-numeric:tabular-nums;opacity:.8}
+.seg button[aria-pressed="true"]{background:var(--surface);color:var(--accent);box-shadow:0 1px 3px rgba(19,35,58,.15)}
+.sortbar{display:flex;align-items:center;justify-content:flex-end;gap:2px;font-size:12.5px;color:var(--muted)}
+.sortbar span{margin-right:6px}
+.sortbar button{border:0;background:transparent;font:inherit;color:var(--muted);padding:4px 8px;border-radius:6px;cursor:pointer}
+.sortbar button[aria-pressed="true"]{color:var(--accent);font-weight:700;background:color-mix(in srgb,var(--accent) 10%,transparent)}
+.kw{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.kwl{width:100%;font-size:12px;color:var(--muted);margin-bottom:2px}
+.kchip{border:0;background:color-mix(in srgb,var(--accent) 9%,transparent);color:var(--accent);border-radius:999px;padding:5px 11px;font:inherit;font-size:12.5px;cursor:pointer}
 .form{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px 12px}
 .form .full{grid-column:1/-1}
 @media (max-width:420px){.form{grid-template-columns:1fr}}
@@ -425,7 +441,7 @@ function rSummary(){
 const CALCS=[["mw","최저임금"],["ui","실업급여"],["pl","육아휴직급여"],["mat","출산전후휴가급여"],["sp","배우자 출산휴가급여"],["sj","산재보상"],["ins","4대보험료"],["sev","퇴직금"],["al","연차일수"],["dg","대지급금"],["dis","장애인 고용"]];
 function rCalc(){
   app.innerHTML=`<section class="view"><div><span class="eyebrow">${esc(asofText())} 기준 적용</span><h2>계산기</h2><p class="lede">입력값은 이 기기에만 저장됩니다.</p></div>
-  <div class="chips wrap" role="tablist">${CALCS.map(([k,n])=>`<button type="button" class="chip" data-c="${k}" aria-pressed="${k===CALC}">${n}</button>`).join("")}</div>
+  <div class="cgrid" role="tablist">${CALCS.map(([k,n])=>`<button type="button" class="chip" data-c="${k}" aria-pressed="${k===CALC}">${n}</button>`).join("")}</div>
   <div id="cbody"></div></section>`;
   app.querySelectorAll("[data-c]").forEach(b=>b.addEventListener("click",()=>{CALC=b.dataset.c;rCalc();}));
   ({mw:cMW,ui:cUI,pl:cPL,mat:cMAT,sp:cSP,sj:cSJ,dis:cDIS,ins:cINS,sev:cSEV,al:cAL,dg:cDG}[CALC])($("#cbody"));
@@ -871,7 +887,7 @@ function rGrants(){
    ${field("p_size","기업 구분",p.size||"auto","select",{opts:[["auto","업종·인원으로 자동 판정"],["sme","중소기업기본법상 중소기업"],["mid","중견기업"],["large","대규모기업"]],full:true})}
    <div class="full" style="display:grid;gap:6px">${PROFILE_FLAGS.map(([k,n])=>`<label class="chk"><input type="checkbox" id="pf_${k}" ${p.flags[k]?"checked":""}>${esc(n)}</label>`).join("")}</div>
    </div><p class="note">※ 우선지원대상기업 판정은 고용보험법 시행령 제12조 업종별 상시근로자 수 기준이며, 중소기업기본법상 중소기업은 규모와 무관하게 우선지원대상기업으로 봅니다.</p></details>
-  <div class="chips wrap">${[["all","전체 "+list.length],["ok","적용 가능 "+cnt.ok],["maybe","추가 확인 "+cnt.maybe],["no","해당 없음 "+cnt.no]].map(([k,n])=>`<button type="button" class="chip" data-gf="${k}" aria-pressed="${GFILTER===k}">${n}</button>`).join("")}</div>
+  <div class="seg">${[["all","전체",list.length],["ok","적용 가능",cnt.ok],["maybe","추가 확인",cnt.maybe],["no","해당 없음",cnt.no]].map(([k,n,c])=>`<button type="button" data-gf="${k}" aria-pressed="${GFILTER===k}">${n}<span class="cnt">${c}</span></button>`).join("")}</div>
   <div style="display:grid;gap:10px">${shown.map(({g,e})=>`<details class="gcard" data-gid="${esc(g.id)}"><summary><div class="ghead"><span class="pill ${lab[e.st][1]}">${lab[e.st][0]}</span><span class="note">${esc(g.family||"")}</span></div><span class="gname">${esc(g.name)}</span><span class="gamt">${esc(g.headline||"")}</span></summary>
    <div class="gbody"><div class="why"><ul>${e.why.map(w=>`<li>${esc(w)}</li>`).join("")}</ul></div>
    <dl>${[["지원대상",g.target],["근로자 요건",g.worker],["지원금액",g.amount],["지원기간",g.period],["한도",g.limit],["제외·유의",g.exclude],["신청",g.apply],["2026 변경",g.changes],["2027 예정",g.next],["근거",g.basis]].filter(x=>x[1]).map(([k,x])=>`<dt>${k}</dt><dd>${esc(x)}</dd>`).join("")}</dl>
@@ -897,9 +913,9 @@ function rInterp(){
   app.innerHTML=`<section class="view"><div><span class="eyebrow">고용노동부 질의회시${IV&&IV.meta&&IV.meta.updated?" · 최종 갱신 "+esc(IV.meta.updated):""}</span><h2>행정해석</h2>
   <p class="lede">금전 기준과 관련된 고용노동부 질의회시, 법제처 법령해석, 최근 국민신문고 민원 답변을 분야별로 모았습니다. 평일 아침마다 새로 나온 회시를 확인해 추가합니다. 항목을 누르면 질의와 회시 원문이 바로 보입니다.</p></div>
   <div class="search"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="6.5"/><path d="M16 16l4.5 4.5"/></svg><input id="iq" type="search" placeholder="예: 연차수당 퇴직, 통상임금 상여금" value="${esc(q)}" autocomplete="off"></div>
-  <div class="chips wrap">${["전체",...ITOPICS.filter(t=>cnt[t])].map(t=>`<button type="button" class="chip" data-it="${esc(t)}" aria-pressed="${ITOPIC===t}">${esc(t)} ${t==="전체"?items.length:cnt[t]}</button>`).join("")}</div>
-  ${items.some(x=>KOF(x)!=="interp")?`<div class="chips wrap">${[["all","전체"],["interp","고용노동부 회시"],["moleg","법제처 해석"],["civil","민원 답변"]].filter(([k])=>k==="all"||items.some(x=>KOF(x)===k)).map(([k,n])=>`<button type="button" class="chip" data-ik="${k}" aria-pressed="${IKIND===k}">${n} ${k==="all"?items.length:items.filter(x=>KOF(x)===k).length}</button>`).join("")}</div>`:""}
-  ${hasViews?`<div class="chips wrap"><button type="button" class="chip" data-is="recent" aria-pressed="${ISORT==="recent"}">최신순</button><button type="button" class="chip" data-is="views" aria-pressed="${ISORT==="views"}">조회순</button></div>`:""}
+  <div class="chips wrap">${["전체",...ITOPICS.filter(t=>cnt[t])].map(t=>`<button type="button" class="chip" data-it="${esc(t)}" aria-pressed="${ITOPIC===t}">${esc(t)}<span class="cnt">${t==="전체"?items.length:cnt[t]}</span></button>`).join("")}</div>
+  ${items.some(x=>KOF(x)!=="interp")?`<div class="seg">${[["all","전체"],["interp","노동부 회시"],["moleg","법제처 해석"],["civil","민원 답변"]].filter(([k])=>k==="all"||items.some(x=>KOF(x)===k)).map(([k,n])=>`<button type="button" data-ik="${k}" aria-pressed="${IKIND===k}">${n}<span class="cnt">${k==="all"?items.length:items.filter(x=>KOF(x)===k).length}</span></button>`).join("")}</div>`:""}
+  ${hasViews?`<div class="sortbar"><span>정렬</span><button type="button" data-is="recent" aria-pressed="${ISORT==="recent"}">최신순</button><button type="button" data-is="views" aria-pressed="${ISORT==="views"}">조회순</button></div>`:""}
   <div id="ilist" style="display:grid;gap:10px"></div>
   <p class="foot">※ 행정해석은 행정기관의 법령 해석으로 법원을 기속하지 않습니다. 구체적 사안은 회시 원문과 최신 판례로 확인합니다.</p></section>`;
   const draw=()=>{const s=sval("iq").trim();store.set("iq",s);const toks=s?s.toLowerCase().split(/\s+/).filter(Boolean).map(expand):[];
@@ -958,7 +974,7 @@ function rSearch(){
   const KW=["실업급여 질병","직장 내 괴롭힘","최저임금","구직급여 상한","육아휴직","대체인력","청년","고령자","장해등급","장례비","대지급금","국민연금","두루누리","2027"];
   app.innerHTML=`<section class="view"><div><span class="eyebrow">${esc(asofText())} 기준</span><h2>통합 검색</h2><p class="lede">기준 수치, 지원금, 실업급여 이직사유, 산재 급여표, 계산기, 제도 동향을 한 번에 찾습니다. 띄어 쓴 단어는 모두 포함된 결과만 보여 주며, 장의비와 장례비처럼 같은 뜻의 단어도 함께 찾습니다.</p></div>
   <div class="search"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="6.5"/><path d="M16 16l4.5 4.5"/></svg><input id="q" type="search" placeholder="예: 질병 퇴사, 대체인력, 장해 7급" value="${esc(q)}" autocomplete="off"></div>
-  <div class="kw">${KW.map(k=>`<button type="button" class="chip" data-kw="${esc(k)}">${esc(k)}</button>`).join("")}</div>
+  <div class="kw"><span class="kwl">자주 찾는 검색어</span>${KW.map(k=>`<button type="button" class="kchip" data-kw="${esc(k)}">${esc(k)}</button>`).join("")}</div>
   <div id="res" style="display:grid;gap:10px"></div>
   <div id="all" style="display:grid;gap:14px"></div></section>`;
   const draw=()=>{const s=sval("q").trim();store.set("q",s);

@@ -887,29 +887,30 @@ function rGrants(){
 /* ---------- 행정해석 ---------- */
 let ITOPIC="전체",ISORT="recent",IOPEN=null,IKIND="all";
 const ITOPICS=["최저임금","임금","퇴직금","연차휴가","근로시간","실업급여","모성보호","지원금","대지급금","산재보상","사회보험","기타"];
-function secName(h,x){h=String(h||"").trim();if(h==="질의요지"||h==="질의")return x.kind==="civil"?"민원 내용":"질의";if(h==="회답"||h==="회시")return x.kind==="civil"?"답변":"회시";return h;}
+const KOF=x=>x.kind==="civil"?"civil":x.kind==="moleg"?"moleg":"interp";
+function secName(h,x){h=String(h||"").trim();if(x.kind==="moleg")return h;if(h==="질의요지"||h==="질의")return x.kind==="civil"?"민원 내용":"질의";if(h==="회답"||h==="회시")return x.kind==="civil"?"답변":"회시";return h;}
 function interpMatch(x,toks){const hay=[x.title,x.q,x.a,x.no,x.basis,x.topic,...(x.orig||[]).map(o=>o.t)].join(" ").toLowerCase();return toks.every(g=>g.some(w=>hay.includes(w.toLowerCase())));}
 function rInterp(){
   const items=(IV&&IV.items)||[];const q=store.get("iq","");
   const hasViews=items.some(x=>typeof x.views==="number");if(!hasViews)ISORT="recent";
   const cnt={};items.forEach(x=>cnt[x.topic]=(cnt[x.topic]||0)+1);
   app.innerHTML=`<section class="view"><div><span class="eyebrow">고용노동부 질의회시${IV&&IV.meta&&IV.meta.updated?" · 최종 갱신 "+esc(IV.meta.updated):""}</span><h2>행정해석</h2>
-  <p class="lede">금전 기준과 관련된 고용노동부 행정해석(문서번호가 있는 질의회시)과 최근 국민신문고 민원 답변을 분야별로 모았습니다. 평일 아침마다 새로 나온 회시를 확인해 추가합니다. 항목을 누르면 질의와 회시 원문이 바로 보입니다.</p></div>
+  <p class="lede">금전 기준과 관련된 고용노동부 질의회시, 법제처 법령해석, 최근 국민신문고 민원 답변을 분야별로 모았습니다. 평일 아침마다 새로 나온 회시를 확인해 추가합니다. 항목을 누르면 질의와 회시 원문이 바로 보입니다.</p></div>
   <div class="search"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="6.5"/><path d="M16 16l4.5 4.5"/></svg><input id="iq" type="search" placeholder="예: 연차수당 퇴직, 통상임금 상여금" value="${esc(q)}" autocomplete="off"></div>
   <div class="chips wrap">${["전체",...ITOPICS.filter(t=>cnt[t])].map(t=>`<button type="button" class="chip" data-it="${esc(t)}" aria-pressed="${ITOPIC===t}">${esc(t)} ${t==="전체"?items.length:cnt[t]}</button>`).join("")}</div>
-  ${items.some(x=>x.kind==="civil")?`<div class="chips wrap">${[["all","전체"],["interp","행정해석(문서번호)"],["civil","민원 답변"]].map(([k,n])=>`<button type="button" class="chip" data-ik="${k}" aria-pressed="${IKIND===k}">${n} ${k==="all"?items.length:items.filter(x=>(k==="civil")===(x.kind==="civil")).length}</button>`).join("")}</div>`:""}
+  ${items.some(x=>KOF(x)!=="interp")?`<div class="chips wrap">${[["all","전체"],["interp","고용노동부 회시"],["moleg","법제처 해석"],["civil","민원 답변"]].filter(([k])=>k==="all"||items.some(x=>KOF(x)===k)).map(([k,n])=>`<button type="button" class="chip" data-ik="${k}" aria-pressed="${IKIND===k}">${n} ${k==="all"?items.length:items.filter(x=>KOF(x)===k).length}</button>`).join("")}</div>`:""}
   ${hasViews?`<div class="chips wrap"><button type="button" class="chip" data-is="recent" aria-pressed="${ISORT==="recent"}">최신순</button><button type="button" class="chip" data-is="views" aria-pressed="${ISORT==="views"}">조회순</button></div>`:""}
   <div id="ilist" style="display:grid;gap:10px"></div>
   <p class="foot">※ 행정해석은 행정기관의 법령 해석으로 법원을 기속하지 않습니다. 구체적 사안은 회시 원문과 최신 판례로 확인합니다.</p></section>`;
   const draw=()=>{const s=sval("iq").trim();store.set("iq",s);const toks=s?s.toLowerCase().split(/\s+/).filter(Boolean).map(expand):[];
-    let list=items.filter(x=>(IKIND==="all"||(IKIND==="civil")===(x.kind==="civil"))&&(ITOPIC==="전체"||x.topic===ITOPIC)&&(!toks.length||interpMatch(x,toks)));
+    let list=items.filter(x=>(IKIND==="all"||KOF(x)===IKIND)&&(ITOPIC==="전체"||x.topic===ITOPIC)&&(!toks.length||interpMatch(x,toks)));
     const fresh=x=>x.added&&(new Date(todayStr())-new Date(x.added))/864e5<=7;
     const base=ISORT==="views"?(a,b)=>(b.views||0)-(a.views||0):(a,b)=>a.date<b.date?1:a.date>b.date?-1:0;
     list.sort((a,b)=>{const fa=fresh(a)?1:0,fb=fresh(b)?1:0;if(fa!==fb)return fb-fa;if(fa&&a.added!==b.added)return a.added<b.added?1:-1;return base(a,b);});
-    $("#ilist").innerHTML=`<p class="note">${list.length}건</p>`+(list.map(x=>`<details class="gcard" data-iid="${esc(x.id)}"><summary><div class="ghead"><span class="pill p-type">${esc(x.topic)}</span>${x.kind==="civil"?'<span class="pill p-no">민원 답변</span>':""}${fresh(x)?'<span class="pill p-warn">새로 추가</span>':""}<span class="note">${esc(x.date)} · ${x.no?esc(x.no):"문서번호 없음"}${typeof x.views==="number"?" · 조회 "+x.views.toLocaleString("ko-KR"):""}</span></div><span class="gname">${toks.length?hl(x.title,toks):esc(x.title)}</span></summary>
+    $("#ilist").innerHTML=`<p class="note">${list.length}건</p>`+(list.map(x=>`<details class="gcard" data-iid="${esc(x.id)}"><summary><div class="ghead"><span class="pill p-type">${esc(x.topic)}</span>${x.kind==="civil"?'<span class="pill p-no">민원 답변</span>':x.kind==="moleg"?'<span class="pill p-now">법제처 해석</span>':""}${fresh(x)?'<span class="pill p-warn">새로 추가</span>':""}<span class="note">${esc(x.date)} · ${x.no?esc(x.no):"문서번호 없음"}${typeof x.views==="number"?" · 조회 "+x.views.toLocaleString("ko-KR"):""}</span></div><span class="gname">${toks.length?hl(x.title,toks):esc(x.title)}</span></summary>
       <div class="gbody">${(x.orig&&x.orig.length?x.orig:[{h:"질의 요지",t:x.q},{h:"회시 요지",t:x.a}]).map(sec=>`<div class="osec"><div class="oh">${esc(secName(sec.h,x))}</div><div class="ot">${toks.length?hl(sec.t,toks):esc(sec.t)}</div></div>`).join("")}
       ${x.note?`<p class="note">※ ${esc(x.note)}</p>`:""}${x.date<"2020-01-01"?`<p class="note">※ ${esc(x.date.slice(0,4))}년 회시로, 그 뒤 법령이 바뀌었을 수 있으니 현행 법령을 함께 확인하세요.</p>`:""}
-      <div class="basis">출처: ${x.kind==="civil"?"고용노동부 국민신문고 민원 답변":"고용노동부 질의회시"}${x.no?" "+esc(x.no):""}, ${esc(x.date)}${/law\.go\.kr/.test(x.src||"")?" (법제처 국가법령정보센터 수록)":""}</div></div></details>`).join("")||`<p class="note">${items.length?"찾는 행정해석이 없습니다. 다른 표현으로 검색하거나 분야를 전체로 바꿔 보세요.":(IV?"행정해석 자료를 준비 중입니다. 확인된 회시부터 순차로 게시됩니다.":"행정해석 자료를 불러오지 못했습니다. 오늘 버튼을 눌러 다시 불러오세요.")}</p>`);
+      ${x.kind==="moleg"?`<p class="note">※ 법제처 법령해석은 행정부 내부의 법령해석 지침으로 법원의 확정판결과 같은 법적 기속력은 없으며, 해석 당시 법령을 대상으로 합니다.</p>`:""}<div class="basis">출처: ${x.kind==="civil"?"고용노동부 국민신문고 민원 답변":x.kind==="moleg"?"법제처 법령해석":"고용노동부 질의회시"}${x.no?" "+esc(x.no.replace(/^법제처 /,"")):""}, ${esc(x.date)}${/law\.go\.kr/.test(x.src||"")?" (법제처 국가법령정보센터 수록)":""}</div></div></details>`).join("")||`<p class="note">${items.length?"찾는 행정해석이 없습니다. 다른 표현으로 검색하거나 분야를 전체로 바꿔 보세요.":(IV?"행정해석 자료를 준비 중입니다. 확인된 회시부터 순차로 게시됩니다.":"행정해석 자료를 불러오지 못했습니다. 오늘 버튼을 눌러 다시 불러오세요.")}</p>`);
     if(IOPEN){const d=$("#ilist").querySelector(`[data-iid="${CSS.escape(IOPEN)}"]`);IOPEN=null;if(d){d.open=true;setTimeout(()=>d.scrollIntoView({block:"start"}),30);}}};
   $("#iq").addEventListener("input",draw);
   app.querySelectorAll("[data-it]").forEach(b=>b.addEventListener("click",()=>{ITOPIC=b.dataset.it;rInterp();}));

@@ -19,8 +19,9 @@
 <meta property="og:type" content="website">
 <meta property="og:title" content="청아 노무수첩 | 청아노무법인">
 <meta property="og:description" content="기준금액·계산기·지원금·행정해석을 한곳에">
-<meta property="og:url" content="https://sagoclaim-tech.github.io/cheonga-labor/">
-<meta property="og:image" content="https://sagoclaim-tech.github.io/cheonga-labor/icons/icon-512.png?v=3">
+<meta property="og:url" content="https://app.xn--o80bq8pj4a8ztxwcn2k.com/">
+<link rel="canonical" href="https://app.xn--o80bq8pj4a8ztxwcn2k.com/">
+<meta property="og:image" content="https://app.xn--o80bq8pj4a8ztxwcn2k.com/icons/icon-512.png?v=3">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Gowun+Batang:wght@700&family=IBM+Plex+Sans+KR:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600&display=swap">
 <style>
@@ -1057,7 +1058,7 @@ loadData().then(()=>render())
 })();
 
 document.addEventListener("click",async e=>{const b=e.target.closest("[data-share]");if(!b)return;
-  const url="https://sagoclaim-tech.github.io/cheonga-labor/";const text="[청아노무법인] 청아 노무수첩\n기준금액·계산기·지원금·행정해석을 한곳에\n※ 링크를 열면 첫 화면 맨 위에 휴대폰·PC 설치 방법이 나옵니다.";
+  const url="https://app.청아노무법인.com/";const text="[청아노무법인] 청아 노무수첩\n기준금액·계산기·지원금·행정해석을 한곳에\n※ 링크를 열면 첫 화면 맨 위에 휴대폰·PC 설치 방법이 나옵니다.";
   try{gtag("event","share",{method:navigator.share?"native":"copy"});}catch(_){}
   if(navigator.share){try{await navigator.share({title:"청아 노무수첩",text,url});}catch(_){}return;}
   try{await navigator.clipboard.writeText(text+"\n"+url);b.lastChild.textContent="링크 복사됨";setTimeout(()=>{b.lastChild.textContent="앱 공유하기";},2000);}catch(_){prompt("아래 주소를 복사해 주세요.",url);}

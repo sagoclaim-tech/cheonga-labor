@@ -1052,7 +1052,9 @@ if("serviceWorker" in navigator){window.addEventListener("load",()=>{navigator.s
 /* 시작 */
 syncHeader();
 const h=(location.hash||"").replace("#","");let H0=["calc","grants","interp","search"].includes(h)?h:h==="table"?"search":"summary";
-try{history.replaceState({tab:"summary"},"","#summary");if(H0!=="summary")history.pushState({tab:H0},"","#"+H0);}catch(e){}TAB=H0;
+/* 바로가기 주소: #calc-mw(계산기별), ?c=mw 도 허용. 노동뉴스 브리핑 등 외부 연결용 */
+{const m=h.match(/^calc[-/]([a-z]+)$/);const q=new URLSearchParams(location.search).get("c");const cid=m?m[1]:q;if(cid&&CALCS.some(c=>c[0]===cid)){CALC=cid;H0="calc";}}
+try{history.replaceState({tab:"summary"},"","#summary");if(H0!=="summary")history.pushState({tab:H0,calc:CALC},"","#"+H0);}catch(e){}TAB=H0;
 document.querySelectorAll("nav.tabs button").forEach(b=>b.setAttribute("aria-current",b.dataset.tab===TAB?"page":"false"));
 loadData().then(()=>render())
  .catch(e=>{app.innerHTML=`<div class="err">기준 데이터를 불러오지 못했습니다(${esc(e.message)}). 새로고침해 주세요.</div>`;});

@@ -14,7 +14,7 @@
 <link rel="apple-touch-icon" href="icons/apple-touch-icon.png?v=3">
 <title>청아 노무수첩</title>
 <meta name="description" content="청아노무법인이 만든 무료 노무 실무 앱. 2026년 최저임금, 4대보험 요율, 실업급여·출산전후휴가·육아휴직·배우자 출산전후휴가 급여, 산재 보험급여, 퇴직금, 연차, 장애인 고용부담금 계산기와 고용지원금, 고용노동부 행정해석을 한곳에서 확인합니다.">
-<meta name="keywords" content="최저임금 계산기,실업급여 계산기,퇴직금 계산기,연차 계산기,육아휴직급여,출산전후휴가급여,배우자 출산전후휴가,산재 휴업급여,장애인 고용부담금,4대보험 요율,고용지원금,행정해석,노무사,청아노무법인">
+<meta name="keywords" content="최저임금 계산기,급여 실수령액 계산기,실업급여 계산기,퇴직금 계산기,연차 계산기,육아휴직급여,출산전후휴가급여,배우자 출산전후휴가,산재 휴업급여,장애인 고용부담금,4대보험 요율,고용지원금,행정해석,노무사,청아노무법인">
 <script type="application/ld+json">{"@context":"https://schema.org","@type":"WebApplication","name":"청아 노무수첩","applicationCategory":"BusinessApplication","operatingSystem":"Android, iOS, Windows, macOS","inLanguage":"ko","isAccessibleForFree":true,"offers":{"@type":"Offer","price":"0","priceCurrency":"KRW"},"description":"최저임금, 4대보험 요율, 실업급여·모성보호 급여, 산재 보험급여, 퇴직금, 연차 계산기와 고용지원금, 고용노동부 행정해석을 한곳에 모은 무료 노무 실무 앱","publisher":{"@type":"Organization","name":"청아노무법인","url":"https://www.청아노무법인.com/","telephone":"051-853-4421"}}</script>
 <meta property="og:type" content="website">
 <meta property="og:title" content="청아 노무수첩 | 청아노무법인">
@@ -470,13 +470,13 @@ function rSummary(){
 }
 
 /* ---------- 계산기 ---------- */
-const CALCS=[["mw","최저임금"],["ui","실업급여"],["pl","육아휴직급여"],["mat","출산전후휴가급여"],["sp","배우자 출산전후휴가급여"],["sj","산재보상"],["ins","4대보험료"],["sev","퇴직금"],["al","연차일수"],["dg","대지급금"],["dis","장애인 고용"]];
+const CALCS=[["mw","최저임금"],["ui","실업급여"],["pl","육아휴직급여"],["mat","출산전후휴가급여"],["sp","배우자 출산전후휴가급여"],["sj","산재보상"],["ins","4대보험료"],["net","급여 실수령액"],["sev","퇴직금"],["al","연차일수"],["dg","대지급금"],["dis","장애인 고용"]];
 function rCalc(){
   app.innerHTML=`<section class="view"><div><span class="eyebrow">${esc(asofText())} 기준 적용</span><h2>계산기</h2><p class="lede">입력값은 이 기기에만 저장됩니다.</p></div>
   <div class="cgrid" role="tablist">${CALCS.map(([k,n])=>`<button type="button" class="chip" data-c="${k}" aria-pressed="${k===CALC}">${n}</button>`).join("")}</div>
   <div id="cbody"></div></section>`;
   app.querySelectorAll("[data-c]").forEach(b=>b.addEventListener("click",()=>{saveY();CALC=b.dataset.c;rCalc();pushNav(null,true);}));
-  ({mw:cMW,ui:cUI,pl:cPL,mat:cMAT,sp:cSP,sj:cSJ,dis:cDIS,ins:cINS,sev:cSEV,al:cAL,dg:cDG}[CALC])($("#cbody"));
+  ({mw:cMW,ui:cUI,pl:cPL,mat:cMAT,sp:cSP,sj:cSJ,dis:cDIS,ins:cINS,net:cNET,sev:cSEV,al:cAL,dg:cDG}[CALC])($("#cbody"));
 }
 function labHtml(id,label){const h=HELP[id];return `<div class="lab"><label for="${id}">${label}</label>${h?`<button type="button" class="q" data-q="${id}" aria-expanded="false" aria-label="${esc(label)} 입력 방법">?</button>`:""}</div>`;}
 function helpHtml(id){const h=HELP[id];return h?`<div class="help" id="h_${id}" hidden>${esc(h)}</div>`:"";}
@@ -541,6 +541,13 @@ const HELP={
  sv_bonus:"퇴직 전 1년간 지급된 상여금 총액입니다. 3/12 금액이 평균임금에 반영됩니다.",
  sv_al:"퇴직 전 1년간 지급된 연차수당입니다. 3/12 금액이 평균임금에 반영됩니다. 퇴직으로 새로 발생한 미사용 연차수당은 넣지 않습니다.",
  sv_ord:"평균임금이 통상임금보다 적으면 통상임금을 평균임금으로 합니다(근로기준법 제2조 제2항). 비교가 필요할 때만 입력합니다.",
+ net_kind:"월급은 매월 받는 세전 급여, 연봉은 1년 세전 급여입니다. 연봉은 12로 나눈 금액을 월 급여로 봅니다.",
+ net_pay:"세금과 4대보험료를 빼기 전 금액입니다. 비과세 급여(식대 등)도 포함해 입력합니다.",
+ net_free:"매월 받는 비과세 급여입니다. 식대는 월 20만원 이하가 비과세이고(소득세법 제12조 제3호 러목), 자가운전보조금 등 다른 비과세 급여가 있으면 더해서 입력합니다.",
+ net_fam:"본인을 포함한 기본공제 대상 가족 수입니다. 본인과 배우자를 각각 1명으로 셉니다.",
+ net_kid:"공제대상가족 중 8세 이상 20세 이하 자녀 수입니다. 이 자녀도 가족 수에 포함해 입력합니다.",
+ net_rate:"근로자가 신청하면 간이세액의 80% 또는 120%로 원천징수할 수 있습니다(소득세법 시행령 제194조 제1항). 신청하지 않았으면 100%입니다.",
+ net_np:"국민연금은 만 60세가 되면 납부하지 않습니다. 해당하면 제외를 선택합니다.",
  al_in:"입사일을 입력합니다.",
  al_at:"연차 발생 여부를 확인할 날짜입니다.",
  al_rate:"직전 1년간 소정근로일수의 80% 이상 출근했는지 선택합니다. 80% 미만이면 개근한 달 수만큼 연차가 발생합니다.",
@@ -817,6 +824,57 @@ function cSEV(root){
     ${useOrd?`<p class="note">※ 평균임금이 통상임금보다 적어 통상임금을 평균임금으로 합니다(근로기준법 제2조 제2항).</p>`:""}
     <p class="note">※ 1년 이상 계속근로하고 4주 평균 1주 소정근로시간 15시간 이상인 경우 지급합니다. 상여금·연차수당은 3/12 가산했습니다. 평균임금 산정 제외기간(수습, 휴업, 산재 요양 등)은 반영하지 않았습니다.</p>`},"sev");}
 
+// 근로소득 간이세액(소득세법 시행령 별표 2)
+function itTax(x,fam,kids,T){
+  if(!T||x<770000)return 0;
+  if(!T._rows)T._rows=T.rows.map(s=>s.split(",").map(Number));
+  const col=v=>{const f=Math.max(1,Math.floor(fam));if(f<=11)return v[f-1];return Math.max(0,v[10]-(v[9]-v[10])*(f-11));};
+  let t;
+  if(x<10000000){const k=x/1000;const r=T._rows.find(r=>r[0]<=k&&k<r[1]);t=r?col(r.slice(2)):0;}
+  else{const b=col(T.at10000);if(x===10000000)t=b;else{const o=T.over.find(o=>o[0]==null||x<=o[0]);t=b+o[4]+(x-o[1])*(o[3]?0.98:1)*o[2];}}
+  const k=Math.max(0,Math.floor(kids));const kd=k===0?0:k===1?T.kid.one:T.kid.two+T.kid.extra*(k-2);
+  return Math.max(0,t-kd);
+}
+function cNET(root){
+  const T=tbl("it_simple");
+  root.innerHTML=`<div class="panel"><h3>급여 실수령액(월)</h3>
+  <div class="form">${field("net_kind","입력 기준","m","select",{opts:[["m","월급"],["y","연봉"]]})}${money("net_pay","급여액(세전, 원)",3000000)}
+  ${money("net_free","월 비과세액(원)",200000)}${field("net_fam","공제대상가족 수(본인 포함)",1,"number")}
+  ${field("net_kid","8세 이상 20세 이하 자녀 수",0,"number")}${field("net_rate","원천징수 비율",100,"select",{opts:[[100,"100%"],[80,"80%"],[120,"120%"]]})}
+  ${field("net_np","국민연금","1","select",{opts:[["1","납부"],["0","제외(만 60세 이상 등)"]]})}</div>
+  <div class="result" id="net_out"></div>
+  ${srcLine(["np_rate","np_upper","np_lower","hi_rate","hi_cap_upper","hi_cap_lower","ltc_rate","ei_ui_worker"])}
+  ${T?`<div class="basis">※ 소득세: ${esc(T.basis)}${okSrc(T.src)?` <a href="${esc(T.src)}" target="_blank" rel="noopener">출처</a>`:""} (확인 ${esc(T.checked||"")})</div>`:""}</div>`;
+  const f10=n=>Math.floor(n/10)*10;
+  bind(root,()=>{const out=$("#net_out");
+    if(!T){out.innerHTML="선택한 기준일에 적용할 근로소득 간이세액표 자료가 없습니다(2026.3.1. 이후 자료만 수록).";return;}
+    const yearly=sval("net_kind")==="y";const gross=yearly?num("net_pay")/12:num("net_pay");
+    if(!(gross>0)){out.innerHTML="급여액을 입력해 주세요.";return;}
+    const free=Math.min(Math.max(0,num("net_free")),gross),base=gross-free;
+    const npOn=sval("net_np")==="1";const npr=v("np_rate")/100,up=v("np_upper"),lo=v("np_lower");const npBase=Math.min(Math.max(base,lo),up);
+    const np=npOn?f10(npBase*npr/2):0;
+    const hiR=v("hi_rate")/100;const hiTot=Math.min(Math.max(base*hiR,v("hi_cap_lower")||0),v("hi_cap_upper")||Infinity);const hi=f10(hiTot/2);
+    const ltc=f10(hi*(v("ltc_rate")/100)/hiR);const ui=f10(base*v("ei_ui_worker")/100);
+    const fam=Math.max(1,Math.floor(num("net_fam"))),kids=Math.max(0,Math.floor(num("net_kid")));
+    const tax=f10(itTax(base,fam,kids,T)*(+sval("net_rate")||100)/100);const local=f10(tax*0.1);
+    const ded=np+hi+ltc+ui+tax+local,net=gross-ded;
+    out.innerHTML=`<div class="ghead"><span class="big">${won(net)}</span><span class="pill p-now">월 실수령액</span><span class="pill p-no">공제 ${won(ded)}</span></div>
+    <div class="tw"><table style="min-width:0"><thead><tr><th>구분</th><th style="text-align:right">금액</th></tr></thead><tbody>
+    <tr><td>월 급여(세전)${yearly?" (연봉 / 12)":""}</td><td class="n">${won(gross)}</td></tr>
+    <tr><td>비과세</td><td class="n">${won(free)}</td></tr>
+    <tr><td>국민연금${npOn&&npBase!==base?" (기준소득월액 "+won(npBase)+")":""}</td><td class="n">${npOn?won(np):"제외"}</td></tr>
+    <tr><td>건강보험</td><td class="n">${won(hi)}</td></tr>
+    <tr><td>장기요양보험</td><td class="n">${won(ltc)}</td></tr>
+    <tr><td>고용보험</td><td class="n">${won(ui)}</td></tr>
+    <tr><td>근로소득세(간이세액${sval("net_rate")!=="100"?" "+sval("net_rate")+"%":""})</td><td class="n">${won(tax)}</td></tr>
+    <tr><td>지방소득세(소득세의 10%)</td><td class="n">${won(local)}</td></tr>
+    <tr><td><b>공제 합계</b></td><td class="n"><b>${won(ded)}</b></td></tr>
+    <tr><td><b>월 실수령액</b></td><td class="n"><b>${won(net)}</b></td></tr></tbody></table></div>
+    <dl class="kv"><dt>연 실수령액(12개월)</dt><dd>${won(net*12)}</dd></dl>
+    <p class="note">※ 소득세는 매월 원천징수하는 근로소득 간이세액표 금액입니다. 실제 1년 세액은 연말정산으로 확정되므로 환급되거나 추가 납부할 수 있습니다.</p>
+    <p class="note">※ 공제대상가족 수는 본인과 배우자를 각각 1명으로 셉니다. 8세 이상 20세 이하 자녀는 가족 수에 포함하고, 자녀 수에 따라 1명 20,830원, 2명 45,830원, 3명 이상은 2명 초과 1명당 33,330원을 더 뺍니다(소득세법 시행령 별표 2 제2호, 제3호). 원천징수 비율 80% 또는 120%는 근로자가 신청한 경우에 적용합니다(같은 영 제194조 제1항).</p>
+    <p class="note">※ 4대보험료는 비과세 급여를 뺀 금액을 보수로 보아 계산했고, 국민연금은 기준소득월액 상·하한을, 건강보험은 보수월액보험료 상·하한을 적용했습니다. 식대는 월 20만원 이하가 비과세입니다(소득세법 제12조 제3호 러목). 연봉은 12개월로 나눈 금액으로 계산하므로 상여금을 따로 지급하거나 퇴직금을 연봉에 포함한 경우와 다를 수 있습니다.</p>`},"net");}
+
 function cAL(root){
   root.innerHTML=`<div class="panel"><h3>연차유급휴가 일수</h3>
   <div class="form">${field("al_mode","계산 목적","now","select",{opts:[["now","현재 연차 확인"],["settle","퇴직 시 정산(입사일 기준과 회계연도 기준 비교)"]],full:true})}
@@ -1054,7 +1112,7 @@ function buildDocs(){const docs=[];const add=(type,title,text,go,val)=>docs.push
   add("계산기","산재 휴업급여 계산","휴업급여 평균임금 70% 90% 저소득 최저임금액 최저보상기준 최고보상기준 부분휴업 요양",{calc:"sj",kind:"rest"});
   const pl=tbl("pl_caps");if(pl)add("기준표","육아휴직급여 기간별 상한",pl.bands.map(b=>b.label+" 상한 "+b.cap.toLocaleString()+"원").join(", ")+" 6+6 부모육아휴직제 특례 "+pl.basis,{calc:"pl"});
   const dg=tbl("dg_caps");if(dg)add("기준표","대지급금 연령별 상한액",dg.rows.map(r=>r[0]+" "+r[1].toLocaleString()+"원").join(", ")+" "+(dg.notes||[]).join(" "),{calc:"dg"});
-  [["mw","최저임금 계산기","최저임금 위반 산입범위 월 환산 209시간 수습 감액 포괄임금 고정연장 역산 단시간 주휴 미달 차액 체불 소멸시효 내년 인상"],["ui","실업급여 계산기","구직급여 일액 상한 하한 소정급여일수 수급요건 이직사유"],["pl","육아휴직급여 계산기","육아휴직 6+6 통상임금 상한"],["mat","출산전후휴가급여 계산기","출산휴가 다태아 미숙아 우선지원대상기업 상한"],["ins","4대보험료 계산기","국민연금 건강보험 장기요양 고용보험 산재보험 요율 보험료"],["sev","퇴직금 계산기","퇴직금 평균임금 상여금 연차수당 계속근로"],["al","연차일수 계산기","연차유급휴가 출근율 가산휴가 퇴직 정산 회계연도 입사일 기준 비교 미사용 연차수당 재산정"],["dg","대지급금 계산기","체당금 도산 간이 상한"],["sp","배우자 출산전후휴가급여 계산기","배우자 출산전후휴가 배우자 출산휴가 20일 남편 아빠 출산 출산예정일 50일 전 급여 우선지원대상기업 배우자 유산 사산휴가"],["dis","장애인 고용 계산기","장애인 의무고용 부담금 부담기초액 고용장려금 중증 2배"]].forEach(([c,t,k])=>add("계산기",t,k,{calc:c}));
+  [["mw","최저임금 계산기","최저임금 위반 산입범위 월 환산 209시간 수습 감액 포괄임금 고정연장 역산 단시간 주휴 미달 차액 체불 소멸시효 내년 인상"],["ui","실업급여 계산기","구직급여 일액 상한 하한 소정급여일수 수급요건 이직사유"],["pl","육아휴직급여 계산기","육아휴직 6+6 통상임금 상한"],["mat","출산전후휴가급여 계산기","출산휴가 다태아 미숙아 우선지원대상기업 상한"],["ins","4대보험료 계산기","국민연금 건강보험 장기요양 고용보험 산재보험 요율 보험료"],["net","급여 실수령액 계산기","실수령액 실수령 월급 연봉 세후 근로소득세 간이세액표 지방소득세 원천징수 공제대상가족 비과세 식대 4대보험 공제"],["sev","퇴직금 계산기","퇴직금 평균임금 상여금 연차수당 계속근로"],["al","연차일수 계산기","연차유급휴가 출근율 가산휴가 퇴직 정산 회계연도 입사일 기준 비교 미사용 연차수당 재산정"],["dg","대지급금 계산기","체당금 도산 간이 상한"],["sp","배우자 출산전후휴가급여 계산기","배우자 출산전후휴가 배우자 출산휴가 20일 남편 아빠 출산 출산예정일 50일 전 급여 우선지원대상기업 배우자 유산 사산휴가"],["dis","장애인 고용 계산기","장애인 의무고용 부담금 부담기초액 고용장려금 중증 2배"]].forEach(([c,t,k])=>add("계산기",t,k,{calc:c}));
   (D.notices||[]).forEach(n=>add("제도 동향",n.date+" 동향",n.text,{notice:n.src}));
   ((IV&&IV.items)||[]).forEach(x=>add("행정해석",x.title,`${x.no} ${x.date} ${x.topic} ${(x.orig||[]).map(o=>o.t).join(" ")||(x.q+" "+x.a)} ${x.basis||""}`,{interp:x.id}));
   return docs;}

@@ -7,4 +7,7 @@
 - 설치·오프라인: `manifest.webmanifest`, `sw.js`, `icons/`
 
 ※ 본 앱은 1차 검토용이며, 최종 판단은 원문 법령·고시·지침으로 확인합니다.
-- 법령 개정 감시: `tools/law_watch.py`가 `law_watch.json`의 감시 법령(법률·시행령·시행규칙) 연혁을 국가법령정보센터에서 읽어, 아직 검토하지 않은 개정(시행 2026.1.1. 이후)을 NEW로 보여 줍니다. 평일 자동 점검이 NEW 항목을 검토해 `data.json`의 scheduled에 반영하고, 검토 결과를 `law_watch.json`의 reviewed에 기록합니다.
+- 법령·고시 개정 감시: `tools/law_watch.py`가 `law_watch.json`의 감시 법령(법률·시행령·시행규칙, laws)과 금액·요율 고시 검색어(admrul)로 국가법령정보센터를 조회해, 아직 검토하지 않은 개정(시행 또는 발령 2026.1.1. 이후)을 NEW로 보여 줍니다. 평일 자동 점검이 NEW 항목을 검토해 `data.json`에 반영하고, 결과를 `law_watch.json`의 reviewed(법령), reviewed_admrul(고시)에 기록합니다.
+- 계산기 산식 감시: 산식·기간·비율이 화면 코드에 들어 있는 조문은 `law_watch.json`의 calc_deps에 있습니다. 해당 조문이 바뀌면 자동 점검은 화면을 고치지 않고 calc_pending에 기록해 보고하며, 화면 수정은 별도로 합니다.
+- 데이터 점검: `python3 tools/check_data.py` (구조, 출처 도메인, 최저임금 연동 수치, 간이세액표 구간, 매년 갱신 기준 누락, 표기 원칙). 오류가 있으면 커밋하지 않습니다.
+- 화면 점검: `python3 tools/smoke.py` (계산기 전부를 오늘과 다음 해 1월 기준으로 열어 오류·NaN 표시 확인, Playwright 필요).

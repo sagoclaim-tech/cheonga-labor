@@ -1078,7 +1078,7 @@ function rInterp(){
   const hasViews=items.some(x=>typeof x.views==="number");if(!hasViews)ISORT="recent";
   const cnt={};items.forEach(x=>cnt[x.topic]=(cnt[x.topic]||0)+1);
   app.innerHTML=`<section class="view"><div><span class="eyebrow">고용노동부 질의회시${IV&&IV.meta&&IV.meta.updated?" · 최종 갱신 "+esc(IV.meta.updated):""}</span><h2>행정해석</h2>
-  <p class="lede">금전 기준과 연차휴가에 관련된 고용노동부 질의회시, 법제처 법령해석, 판례, 국민신문고 민원 답변, 고용노동부 설명자료를 분야별로 모았습니다. 평일 아침마다 새로 나온 회시를 확인해 추가합니다. 항목을 누르면 질의와 회시 원문이 바로 보입니다.</p></div>
+  <p class="lede">임금·근로시간·휴일·연차휴가·모성보호·퇴직금·근로관계 종료에 관한 고용노동부 질의회시, 법제처 법령해석, 판례, 국민신문고 민원 답변, 고용노동부 설명자료를 분야별로 모았습니다. 평일 아침마다 새로 나온 금전 관련 회시를 확인해 추가합니다. 항목을 누르면 질의와 회시 원문이 바로 보입니다.</p></div>
   <div class="search"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="6.5"/><path d="M16 16l4.5 4.5"/></svg><input id="iq" type="search" placeholder="예: 연차수당 퇴직, 통상임금 상여금" value="${esc(q)}" autocomplete="off"></div>
   <div class="chips wrap">${["전체",...ITOPICS.filter(t=>cnt[t])].map(t=>`<button type="button" class="chip" data-it="${esc(t)}" aria-pressed="${ITOPIC===t}">${esc(t)}<span class="cnt">${t==="전체"?items.length:cnt[t]}</span></button>`).join("")}</div>
   ${items.some(x=>KOF(x)!=="interp")?`<div class="seg">${[["all","전체"],["interp","노동부 회시"],["moleg","법제처 해석"],["prec","판례"],["civil","민원 답변"],["guide","설명자료"]].filter(([k])=>k==="all"||items.some(x=>KOF(x)===k)).map(([k,n])=>`<button type="button" data-ik="${k}" aria-pressed="${IKIND===k}">${n}<span class="cnt">${k==="all"?items.length:items.filter(x=>KOF(x)===k).length}</span></button>`).join("")}</div>`:""}

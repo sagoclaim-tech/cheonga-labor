@@ -217,6 +217,26 @@ def check_interp(j):
             text_check(f"{w}.{f}", x.get(f), ctx)
 
 
+def check_guides(g):
+    its = g.get("items", [])
+    if g.get("meta", {}).get("count") != len(its):
+        ERR.append("guides: meta.count 불일치")
+    for x in its:
+        w = f"guides {x.get('id')}"
+        if x.get("topic") not in TOPICS:
+            ERR.append(f"{w}: topic 허용값 아님")
+        if not re.match(r"^\d{4}-\d{2}(-\d{2})?$", str(x.get("date", ""))):
+            ERR.append(f"{w}: date 형식 오류")
+        f = x.get("file")
+        if f and not os.path.exists(os.path.join(ROOT, f)):
+            ERR.append(f"{w}: 파일 없음 {f}")
+        if not src_ok(x.get("src")):
+            ERR.append(f"{w}: 허용되지 않은 출처")
+        for i, t in enumerate(x.get("points") or []):
+            text_check(f"{w}.points[{i}]", t)
+        text_check(f"{w}.note", x.get("note"))
+
+
 def check_watch(w):
     for k, v in w.get("reviewed", {}).items():
         if not v.get("decision"):
@@ -231,6 +251,9 @@ def main():
     if d: check_data(d)
     if j: check_interp(j)
     if w: check_watch(w)
+    if os.path.exists(os.path.join(ROOT, "guides.json")):
+        g = load("guides.json")
+        if g: check_guides(g)
     for e in ERR: print("오류", e)
     for e in WARN: print("경고", e)
     print(f"점검 완료: 오류 {len(ERR)}건, 경고 {len(WARN)}건")

@@ -1187,7 +1187,7 @@ function installPanel(){if(STANDALONE)return"";
     body=`<p class="isub">삼성 인터넷으로 추가하면 아이콘에 인터넷 표시가 붙습니다. 크롬에서 설치하시는 것을 권합니다.</p><a class="ibtn" href="${esc(chrome)}">크롬으로 열기</a>`;}
   else if(android){body=`<ol class="isteps"><li>크롬 오른쪽 위 <b>점 세 개 메뉴</b></li><li><b>앱 설치</b>(또는 홈 화면에 추가)</li><li><b>설치</b></li></ol>`;}
   else{body=`<ol class="isteps"><li>크롬·엣지 주소창 오른쪽 <b>설치 아이콘</b></li><li><b>설치</b></li></ol><p class="isub">※ 아이콘이 없으면 점 세 개 메뉴, "저장 및 공유", "페이지를 앱으로 설치" 순서로 누르세요.</p>`;}
-  const moved=`<p class="isub">※ 예전 주소(sagoclaim-tech.github.io)로 설치한 앱이 있으면 여기서 새로 설치한 뒤 예전 아이콘은 삭제해 주세요. 입력값은 새 앱에서 다시 입력해야 합니다.</p>`;
+  const moved=FROM_HP?"":`<p class="isub">※ 예전 주소(sagoclaim-tech.github.io)로 설치한 앱이 있으면 여기서 새로 설치한 뒤 예전 아이콘은 삭제해 주세요. 입력값은 새 앱에서 다시 입력해야 합니다.</p>`;
   return `<div class="instb">${head}${body}${moved}</div>`;}
 document.addEventListener("click",e=>{if(e.target.closest&&e.target.closest("[data-insthide]")){try{localStorage.setItem("instHide",String(Date.now()));}catch(_){}const el=document.querySelector(".instb");if(el)el.remove();}});
 document.addEventListener("click",e=>{if(e.target&&e.target.id==="btnInstall"&&DEFER){DEFER.prompt();DEFER.userChoice.finally(()=>{DEFER=null;render();});}});

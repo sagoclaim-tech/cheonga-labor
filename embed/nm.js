@@ -1,5 +1,6 @@
 /* 청아 노무수첩 홈페이지 연동 스크립트
-   사용법: <div class="nm-embed" data-nm="figures|changes|grants|calc|interp" data-limit="5"></div>
+   사용법: <div class="nm-embed nm-figures"></div> (nm-figures, nm-changes, nm-grants, nm-calc, nm-interp, 행정해석 건수는 nm-limit-5)
+           ※ 그누보드 내용관리는 data- 속성을 지우므로 class로 지정합니다.
            <script src="https://app.xn--o80bq8pj4a8ztxwcn2k.com/embed/nm.js" defer></script>
    ※ 앱의 data.json, interp.json을 실시간으로 읽으므로 앱이 갱신되면 홈페이지도 함께 갱신됩니다. */
 (function(){
@@ -103,11 +104,11 @@
       var k=x.kind==="civil"?"민원 답변":x.kind==="moleg"?"법제처 해석":"노동부 회시";
       return '<div class="nm-item"><div class="nm-ih"><span class="nm-date">'+esc(x.date)+'</span><span class="nm-pill">'+k+'</span>'+(x.topic?'<span class="nm-pill">'+esc(x.topic)+'</span>':"")+'</div><div class="nm-t" style="margin-top:4px">'+esc(x.title)+'</div><div class="nm-note">'+esc(x.a||"")+'</div><div class="nm-note">'+esc(x.no||"")+srcA(x.src)+'</div></div>';}).join("");}
 
-  function run(){var els=document.querySelectorAll(".nm-embed[data-nm]");if(!els.length)return;addCss();
-    var needD=false,needI=false;Array.prototype.forEach.call(els,function(el){if(el.dataset.nm==="interp")needI=true;else needD=true;el.innerHTML='<p class="nm-msg">청아 노무수첩 자료를 불러오는 중입니다.</p>';});
+  function run(){var els=Array.prototype.filter.call(document.querySelectorAll(".nm-embed"),function(el){el.__nm=el.getAttribute("data-nm")||((el.className.match(/\bnm-(figures|changes|grants|calc|interp)\b/)||[])[1]);var l=(el.className.match(/\bnm-limit-(\d+)\b/)||[])[1];if(l)el.__lim=+l;return !!el.__nm;});if(!els.length)return;addCss();
+    var needD=false,needI=false;Array.prototype.forEach.call(els,function(el){if(el.__nm==="interp")needI=true;else needD=true;el.innerHTML='<p class="nm-msg">청아 노무수첩 자료를 불러오는 중입니다.</p>';});
     Promise.all([needD?load("data.json"):null,needI?load("interp.json"):null]).then(function(r){var D=r[0],I=r[1];
-      Array.prototype.forEach.call(els,function(el){var m=el.dataset.nm;try{
-        el.innerHTML=m==="figures"?rFigures(D):m==="changes"?rChanges(D):m==="grants"?rGrants(D):m==="calc"?rCalc(D):m==="interp"?rInterp(I,+el.dataset.limit||5):"";}catch(e){el.innerHTML='<p class="nm-msg">자료를 표시하지 못했습니다. '+appBtn("")+'</p>';}});
+      Array.prototype.forEach.call(els,function(el){var m=el.__nm;try{
+        el.innerHTML=m==="figures"?rFigures(D):m==="changes"?rChanges(D):m==="grants"?rGrants(D):m==="calc"?rCalc(D):m==="interp"?rInterp(I,el.__lim||+el.getAttribute("data-limit")||5):"";}catch(e){el.innerHTML='<p class="nm-msg">자료를 표시하지 못했습니다. '+appBtn("")+'</p>';}});
     }).catch(function(){Array.prototype.forEach.call(els,function(el){el.innerHTML='<p class="nm-msg">자료를 불러오지 못했습니다. 잠시 후 다시 시도하시거나 앱에서 확인해 주세요.</p>'+appBtn("");});});}
   document.addEventListener("click",function(e){var b=e.target.closest&&e.target.closest("[data-nm-more]");if(!b)return;var r=document.getElementById(b.getAttribute("data-nm-more"));if(r){r.hidden=false;b.remove();}});
   if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",run);else run();

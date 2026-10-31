@@ -5,7 +5,7 @@
    ※ 앱의 data.json, interp.json을 실시간으로 읽으므로 앱이 갱신되면 홈페이지도 함께 갱신됩니다. */
 (function(){
   if(window.__NM_EMBED__)return;window.__NM_EMBED__=1;
-  var BASE="https://app.xn--o80bq8pj4a8ztxwcn2k.com/";
+  var BASE="https://app.xn--o80bq8pj4a8ztxwcn2k.com/";var HP="?from=hp";
   var APP_LABEL="청아 노무수첩 앱으로 열기";
   var CSS=".nm-embed{--nm-c:#0b4f96;--nm-ink:#1d2b3d;--nm-mu:#5d6d80;--nm-ln:#dbe3ed;--nm-bg:#f4f7fb;color:var(--nm-ink);font-size:17px;line-height:1.7;word-break:keep-all;overflow-wrap:break-word;text-align:left}"+
   ".nm-embed *{box-sizing:border-box}.nm-embed a{color:var(--nm-c)}"+
@@ -16,7 +16,7 @@
   ".nm-card h3{margin:0 0 10px;font-size:20px;color:var(--nm-c);font-weight:700}.nm-card h3 small{font-size:14px;color:var(--nm-mu);font-weight:400;margin-left:6px}"+
   ".nm-row{display:flex;justify-content:space-between;gap:12px;padding:8px 0;border-top:1px solid var(--nm-ln)}.nm-row:first-of-type{border-top:0}"+
   ".nm-k{color:var(--nm-ink)}.nm-v{font-weight:700;white-space:nowrap;text-align:right}.nm-nx{display:block;font-weight:400;font-size:14px;color:#b5480c}"+
-  ".nm-calc{display:inline-block;margin-top:10px;font-size:15px;text-decoration:none;border:1px solid var(--nm-c);border-radius:999px;padding:4px 12px}"+
+  ".nm-cbtn{display:inline-block;margin-top:10px;font-size:15px;text-decoration:none;border:1px solid var(--nm-c);border-radius:999px;padding:4px 12px}"+
   ".nm-sec{margin:0 0 28px}.nm-sec>h3{font-size:22px;margin:0 0 10px;color:var(--nm-ink)}.nm-sec>h3 .nm-cnt{color:var(--nm-c);margin-left:6px}"+
   ".nm-item{background:#fff;border:1px solid var(--nm-ln);border-radius:12px;padding:14px 18px;margin:0 0 10px}"+
   ".nm-ih{display:flex;flex-wrap:wrap;gap:6px 8px;align-items:center}.nm-date{font-weight:700;color:var(--nm-c);margin-right:4px}.nm-t{font-weight:700}"+
@@ -48,7 +48,7 @@
   function entry(D,id,date){var it=D.items[id];if(!it)return null;var cur=null;sorted(it.hist).forEach(function(e){if(e.from<=(date||TODAY))cur=e;});return cur;}
   function nextEntry(D,id){var it=D.items[id];if(!it)return null;var h=sorted(it.hist);for(var i=0;i<h.length;i++)if(h[i].from>TODAY)return h[i];return null;}
   function showVal(it,e){if(!e)return"-";if(typeof e.value==="number")return it.unit==="원"?won(e.value):fmt(e.value)+(it.unit?(it.unit==="%"?"%":" "+it.unit):"");return esc(e.value);}
-  function appBtn(hash,label){return '<a class="nm-app" href="'+BASE+(hash?"#"+hash:"")+'" target="_blank" rel="noopener">'+esc(label||APP_LABEL)+'</a>';}
+  function appBtn(hash,label){return '<a class="nm-app" href="'+BASE+HP+(hash?"#"+hash:"")+'" target="_blank" rel="noopener">'+esc(label||APP_LABEL)+'</a>';}
   function top(D,hash,label){return '<div class="nm-top"><span class="nm-asof">'+esc(TODAY)+' 기준 · 평일 자동 갱신</span>'+appBtn(hash,label)+'</div>';}
   var FOOT='<p class="nm-foot">※ 법제처, 정책브리핑, 고용노동부 등 공식 자료를 바탕으로 정리한 일반 정보이며 개별 사안의 자문을 대신하지 않습니다. 중요한 결정 전에는 원문을 확인하거나 상담해 주시기 바랍니다.</p>';
   function load(name){return fetch(BASE+name+"?t="+Math.floor(Date.now()/6e5),{cache:"no-store"}).then(function(r){if(!r.ok)throw new Error(r.status);return r.json();});}
@@ -65,7 +65,7 @@
   function rFigures(D){
     var h=GROUPS.map(function(g){var rows=g.rows.map(function(r){var it=D.items[r[0]];if(!it)return"";var e=entry(D,r[0]),n=nextEntry(D,r[0]);
         return '<div class="nm-row"><span class="nm-k">'+esc(r[1])+'</span><span class="nm-v">'+showVal(it,e)+(n?'<span class="nm-nx">'+esc(n.from)+'부터 '+(e&&n.value===e.value?"변동 없음":showVal(it,n))+'</span>':"")+'</span></div>';}).join("");
-      return '<div class="nm-card"><h3>'+esc(g.t)+(g.sub?'<small>'+esc(g.sub)+'</small>':"")+'</h3>'+rows+(g.calc?'<a class="nm-calc" href="'+BASE+'#calc-'+g.calc[0]+'" target="_blank" rel="noopener">'+esc(g.calc[1])+'</a>':"")+'</div>';}).join("");
+      return '<div class="nm-card"><h3>'+esc(g.t)+(g.sub?'<small>'+esc(g.sub)+'</small>':"")+'</h3>'+rows+(g.calc?'<a class="nm-cbtn" href="'+BASE+'?from=hp#calc-'+g.calc[0]+'" target="_blank" rel="noopener">'+esc(g.calc[1])+'</a>':"")+'</div>';}).join("");
     return top(D,"summary")+'<div class="nm-grid">'+h+'</div>'+FOOT;}
 
   var ST={"확정":"nm-ok","입법예고":"nm-warn"};
@@ -96,7 +96,7 @@
       '<p class="nm-foot">※ 지원금은 연도별 사업운영지침과 예산 소진 여부에 따라 달라집니다. 신청 전 고용24 공고로 최종 확인하시기 바랍니다.</p>';}
 
   var CALC_INFO=[["mw","최저임금","시간급·월급·주급 등 5가지 방식 위반 여부"],["ui","실업급여","구직급여 일액과 총액"],["pl","육아휴직급여","기간별 상한을 반영한 월 급여"],["mat","출산전후휴가급여","우선지원대상기업 여부별 지급액"],["sp","배우자 출산전후휴가급여","단시간근로자 포함 지급액"],["sj","산재보상","휴업·장해·유족급여와 장례비"],["ins","4대보험료","근로자·사업주 부담분"],["net","급여 실수령액","4대보험과 소득세 공제 후 금액"],["sev","퇴직금","평균임금과 통상임금 비교"],["al","연차일수","입사일·회계연도 기준 발생일수"],["dg","대지급금 상한액","간이·도산 대지급금 항목별 상한 조회"],["dis","장애인 고용","의무고용 인원과 고용부담금"]];
-  function rCalc(D){return top(D,"calc","전체 계산기 앱에서 열기")+'<div class="nm-cg">'+CALC_INFO.map(function(c){return '<a class="nm-cb" href="'+BASE+'#calc-'+c[0]+'" target="_blank" rel="noopener"><b>'+esc(c[1])+(c[0]==="dg"?"":" 계산기")+'</b><span>'+esc(c[2])+'</span></a>';}).join("")+'</div>'+
+  function rCalc(D){return top(D,"calc","전체 계산기 앱에서 열기")+'<div class="nm-cg">'+CALC_INFO.map(function(c){return '<a class="nm-cb" href="'+BASE+HP+'#calc-'+c[0]+'" target="_blank" rel="noopener"><b>'+esc(c[1])+(c[0]==="dg"?"":" 계산기")+'</b><span>'+esc(c[2])+'</span></a>';}).join("")+'</div>'+
     '<p class="nm-foot">※ 계산기를 누르면 청아 노무수첩 앱이 새 창으로 열립니다. 입력값은 이용자의 기기에만 저장되며 결과는 일반 요건에 따른 추정치입니다.</p>';}
 
   function rInterp(I,lim){var it=(I.items||[]).slice().sort(function(a,b){return (a.date||"")<(b.date||"")?1:-1;}).slice(0,lim||5);

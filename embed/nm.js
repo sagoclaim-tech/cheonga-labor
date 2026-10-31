@@ -103,7 +103,7 @@
       var k=x.kind==="civil"?"민원 답변":x.kind==="moleg"?"법제처 해석":"노동부 회시";
       return '<div class="nm-item"><div class="nm-ih"><span class="nm-date">'+esc(x.date)+'</span><span class="nm-pill">'+k+'</span>'+(x.topic?'<span class="nm-pill">'+esc(x.topic)+'</span>':"")+'</div><div class="nm-t" style="margin-top:4px">'+esc(x.title)+'</div><div class="nm-note">'+esc(x.a||"")+'</div><div class="nm-note">'+esc(x.no||"")+srcA(x.src)+'</div></div>';}).join("");}
 
-  function run(){addCss();var els=document.querySelectorAll(".nm-embed[data-nm]");if(!els.length)return;
+  function run(){var els=document.querySelectorAll(".nm-embed[data-nm]");if(!els.length)return;addCss();
     var needD=false,needI=false;Array.prototype.forEach.call(els,function(el){if(el.dataset.nm==="interp")needI=true;else needD=true;el.innerHTML='<p class="nm-msg">청아 노무수첩 자료를 불러오는 중입니다.</p>';});
     Promise.all([needD?load("data.json"):null,needI?load("interp.json"):null]).then(function(r){var D=r[0],I=r[1];
       Array.prototype.forEach.call(els,function(el){var m=el.dataset.nm;try{

@@ -6,8 +6,10 @@
    모두 나열한다. law_watch.json의 reviewed(키: lsiSeq)에 없는 버전은 NEW로 표시한다.
 2) 행정규칙(고시·공고): 금액·요율을 정하는 고시(최저임금, 최고·최저 보상기준금액,
    대지급금 상한, 출산전후휴가 급여 상한, 산재보험료율, 두루누리, 국민연금 기준소득월액,
-   장애인 고용부담금 등)를 국가법령정보센터 오픈API(target=admrul)로 찾아, 지정한 날짜
-   이후 발령된 것 중 reviewed_admrul(키: 행정규칙일련번호)에 없는 것을 NEW로 표시한다.
+   장애인 고용부담금 등)를 국가법령정보센터 행정규칙 웹 검색(발령일자 내림차순, 안 되면
+   오픈API target=admrul)으로 찾아, 지정한 날짜 이후 발령된 것 중
+   reviewed_admrul(키: 행정규칙일련번호)에 없는 것을 NEW로 표시한다.
+   고시 원문: https://www.law.go.kr/LSW/admRulInfoR.do?admRulSeq={행정규칙일련번호}
 
 사용: python3 tools/law_watch.py [--since 2026-01-01] [--json] [--only law|admrul]
 종료코드: 0 정상, 2 일부 조회 실패(실패 목록 출력)
@@ -18,6 +20,7 @@ ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 WATCH = os.path.join(ROOT, "law_watch.json")
 URL = "https://www.law.go.kr/LSW/lsScListR.do?menuId=1&subMenuId=15&tabMenuId=81"
 API = "https://www.law.go.kr/DRF/lawSearch.do"
+ADM_URL = "https://www.law.go.kr/LSW/admRulScListR.do?menuId=5&subMenuId=41&tabMenuId=183"
 PAT = re.compile(r"lsViewWideAll\('(\d+)','(\d+)'.*?title=\"([^\"]+)\"", re.S)
 TITLE = re.compile(r"^(.*?) \[시행 ([0-9. ]+)\] \[([^\]]+)\]$")
 EMPTY = re.compile(r"총\s*(<[^>]*>\s*)*0\s*(<[^>]*>\s*)*건")
@@ -43,11 +46,62 @@ def fetch_law(q):
     return None
 
 
-def fetch_admrul(q):
-    """행정규칙 검색(오픈API JSON). 접속 실패면 None."""
+def _cell(x):
+    return re.sub(r"\s+", " ", html.unescape(re.sub(r"<[^>]+>", "", x))).strip()
+
+
+def _d8(s):
+    p = [x for x in re.split(r"[. ]+", s or "") if x]
+    return f"{int(p[0]):04d}{int(p[1]):02d}{int(p[2]):02d}" if len(p) >= 3 else ""
+
+
+def fetch_admrul_html(q, since="2026-01-01", pages=3):
+    """행정규칙 검색(국가법령정보센터 웹 검색 화면, 발령일자 내림차순).
+    오픈API와 같은 키(소관부처명, 행정규칙종류, 발령일자 등)의 dict 목록을 돌려준다.
+    결과 0건이면 [], 접속 실패면 None."""
+    lim = since.replace("-", "")
+    rows = []
+    for pg in range(1, pages + 1):
+        got = None
+        for t in curl(["-X", "POST", ADM_URL, "--data-urlencode", f"q={q}",
+                       "--data", f"outmax=50&pg={pg}&p6=1,2,3&fsort=61,21,11,31&section=admRulNm"
+                                 "&admRulSeq=0&dtlYn=N&admType=N&p15=1,3"]):
+            if "showDefAdmRul" in t or "showAdmRulCts" in t:
+                got = t; break
+            if EMPTY.search(t) or "검색결과가 없습니다" in t or "검색결과 가 없습니다" in t:
+                got = ""; break
+        if got is None:
+            return None if pg == 1 else rows
+        older = False
+        for tr in re.findall(r"<tr>(.*?)</tr>", got, re.S):
+            sn = re.search(r"(?:showDefAdmRul|showAdmRulCts)\('(\d+)'", tr)
+            tds = [_cell(x) for x in re.findall(r"<td[^>]*>(.*?)</td>", tr, re.S)]
+            if not sn or len(tds) < 8:
+                continue
+            org, kindfull = tds[7], tds[2]
+            kind = next((k for k in ("고시", "공고", "훈령", "예규", "지침") if kindfull.endswith(k)), kindfull)
+            issued = _d8(tds[4])
+            if issued and issued < lim:
+                older = True
+            rows.append({"행정규칙일련번호": sn.group(1), "행정규칙명": tds[1], "행정규칙종류": kind,
+                         "발령번호": re.sub(r"^제|호$", "", tds[3]), "발령일자": issued,
+                         "시행일자": _d8(tds[5]), "제개정구분명": tds[6], "소관부처명": org})
+        if older or got.count("<tr>") < 50:
+            break
+        time.sleep(1)
+    return rows
+
+
+def fetch_admrul(q, since="2026-01-01"):
+    """행정규칙 검색. 웹 검색 화면을 먼저 쓰고, 안 되면 오픈API(JSON)를 쓴다.
+    ※ 오픈API는 OC=test 계정이 2026.11.2.부터 '사용자 정보 검증 실패'로 거절되어 보조 경로로만 둔다.
+    접속 실패면 None."""
+    r = fetch_admrul_html(q, since)
+    if r is not None:
+        return r
     for t in curl(["-G", API, "--data-urlencode", "OC=test", "--data-urlencode", "target=admrul",
                    "--data-urlencode", "type=JSON", "--data-urlencode", f"query={q}",
-                   "--data-urlencode", "display=100", "--data-urlencode", "sort=ddes"]):
+                   "--data-urlencode", "display=100", "--data-urlencode", "sort=ddes"], tries=2):
         try:
             d = json.loads(t)["AdmRulSearch"]
         except Exception:
@@ -95,7 +149,7 @@ def watch_admrul(w, since, out, fail):
     seen = set(w.get("reviewed_admrul", {}).keys())
     got = {}
     for q in cfg.get("queries", []):
-        rows = fetch_admrul(q)
+        rows = fetch_admrul(q, since)
         if rows is None:
             fail.append(f"고시:{q}"); continue
         for x in rows:

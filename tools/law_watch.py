@@ -192,6 +192,8 @@ def main():
                 print(f'{flag}{x["eff"]} {x["law"]} [{x["meta"]}] lsiSeq={x["lsiSeq"]}')
             else:
                 print(f'{flag}[고시] 시행 {x["eff"]} {x["law"]} [{x["meta"]}, 발령 {x["issued"]}] serial={x["serial"]}')
+                if x["new"]:
+                    print(f'      원문: https://www.law.go.kr/LSW/admRulInfoR.do?admRulSeq={x["serial"]}')
         print(f'NEW 법령 {sum(1 for x in out if x["new"] and x["kind"]=="law")}건, NEW 고시 {sum(1 for x in out if x["new"] and x["kind"]=="admrul")}건')
         if fail:
             print("조회 실패:", ", ".join(fail))

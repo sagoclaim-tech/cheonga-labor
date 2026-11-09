@@ -247,10 +247,24 @@ details.more[open]+button.fold{display:none}
 /* 하단 탭 */
 nav.tabs{position:fixed;left:0;right:0;bottom:0;z-index:6;background:var(--surface);border-top:1px solid var(--line);
   padding-left:max(8px,env(safe-area-inset-left,0px));padding-right:max(8px,env(safe-area-inset-right,0px));padding-bottom:env(safe-area-inset-bottom,0px)}
-nav.tabs .in{max-width:760px;margin:0 auto;display:grid;grid-template-columns:repeat(5,1fr)}
+nav.tabs .in{max-width:760px;margin:0 auto;display:grid;grid-template-columns:repeat(6,1fr)}
 nav.tabs button{background:none;border:0;padding:10px 4px 9px;font-size:12px;color:var(--muted);cursor:pointer;display:grid;justify-items:center;gap:2px}
 nav.tabs button svg{width:22px;height:22px;stroke:currentColor;fill:none;stroke-width:1.7}
 nav.tabs button[aria-current="page"]{color:var(--accent-2);font-weight:600;box-shadow:inset 0 3px 0 var(--accent-2)}
+.nwk{display:flex;gap:6px;overflow-x:auto;padding-bottom:4px;scrollbar-width:none}.nwk::-webkit-scrollbar{display:none}
+.nwl{display:grid;gap:10px}
+.nwi{display:flex;align-items:center;gap:14px;width:100%;text-align:left;background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:14px;cursor:pointer;font:inherit;color:inherit}
+.nwi:hover{border-color:var(--accent-2)}
+.nwd{flex:0 0 52px;text-align:center;color:var(--accent);font-weight:700;font-size:19px;line-height:1.2;font-family:var(--f-num)}
+.nwd em{display:block;font-style:normal;font-family:var(--f-body);font-size:12px;color:var(--muted);font-weight:500;margin-top:3px}
+.nwd .nwt{display:inline-block;margin-top:4px;font-family:var(--f-body);font-size:10.5px;font-weight:700;color:#fff;background:var(--seal);border-radius:999px;padding:1px 7px}
+.nwf{flex:1;margin:0;padding:0;list-style:none;display:grid;gap:4px;min-width:0}
+.nwf li{position:relative;padding-left:12px;font-size:14px;line-height:1.55}
+.nwf li::before{content:"";position:absolute;left:0;top:9px;width:5px;height:5px;border-radius:50%;background:var(--accent-2)}
+.nwg{flex:0 0 auto;color:var(--muted)}.nwg svg{width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:2}
+.nwbar{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.nwback{border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:6px 14px;font:inherit;font-size:13px;font-weight:600;color:var(--accent);cursor:pointer}
+.nwv{background:#f5f4f0;border-radius:var(--r);overflow:hidden;color:#1a1a1a}
 .err{padding:16px;border-radius:8px;background:var(--seal-soft);color:var(--seal)}
 .foot{font-size:11px;color:var(--muted);text-align:center;padding-top:8px}
 @media (prefers-reduced-motion:no-preference){.view{animation:fade .18s ease-out}@keyframes fade{from{opacity:.4}to{opacity:1}}}
@@ -325,6 +339,7 @@ img{max-width:100%}
     <button type="button" data-tab="calc"><svg viewBox="0 0 24 24"><rect x="5" y="3" width="14" height="18" rx="2"/><path d="M8 7h8M8 12h2M14 12h2M8 16h2M14 16h2"/></svg>계산기</button>
     <button type="button" data-tab="grants"><svg viewBox="0 0 24 24"><path d="M3.5 5.5l4 13 4.5-11 4.5 11 4-13M2.5 10.5h19M2.5 14h19"/></svg>지원금</button>
     <button type="button" data-tab="interp"><svg viewBox="0 0 24 24"><path d="M6 3h9l4 4v14H6z"/><path d="M14 3v5h5M9 12h7M9 16h7"/></svg>행정해석</button>
+    <button type="button" data-tab="news"><svg viewBox="0 0 24 24"><rect x="3.5" y="4.5" width="17" height="15" rx="2"/><path d="M7 9h10M7 12.5h10M7 16h6"/></svg>노동뉴스</button>
     <button type="button" data-tab="search"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="6.5"/><path d="M16 16l4.5 4.5"/></svg>검색</button>
   </div>
 </nav>
@@ -367,17 +382,17 @@ function srcLine(ids){const out=[];for(const id of ids){const it=D.items[id],e=e
 const FROM_HP=(()=>{try{if(new URLSearchParams(location.search).get("from")==="hp")sessionStorage.setItem("fromHp","1");return sessionStorage.getItem("fromHp")==="1";}catch(e){return /from=hp/.test(location.search);}})();
 /* 탭 */
 /* 뒤로가기: 요약 외 탭에서 휴대폰 뒤로가기를 누르면 요약으로 돌아감 */
-function showTab(t){TAB=t;try{const nm={summary:"요약",calc:"계산기",grants:"지원금",interp:"행정해석",search:"검색"}[t]||t;gtag("event","page_view",{page_title:""+nm,page_location:location.origin+location.pathname+"#"+t});}catch(e){}document.querySelectorAll("nav.tabs button").forEach(b=>b.setAttribute("aria-current",b.dataset.tab===t?"page":"false"));render();window.scrollTo(0,0);}
+function showTab(t){TAB=t;try{const nm={summary:"요약",calc:"계산기",grants:"지원금",interp:"행정해석",news:"노동뉴스",search:"검색"}[t]||t;gtag("event","page_view",{page_title:""+nm,page_location:location.origin+location.pathname+"#"+t});}catch(e){}document.querySelectorAll("nav.tabs button").forEach(b=>b.setAttribute("aria-current",b.dataset.tab===t?"page":"false"));render();window.scrollTo(0,0);}
 let NAVLOCK=false;
-function navState(extra){return Object.assign({tab:TAB,calc:CALC,it:ITOPIC,ik:IKIND,gf:GFILTER,open:null,y:0},extra||{});}
+function navState(extra){return Object.assign({tab:TAB,calc:CALC,it:ITOPIC,ik:IKIND,gf:GFILTER,nw:NW,nd:ND,open:null,y:0},extra||{});}
 function saveY(){try{history.replaceState(Object.assign({},history.state||{tab:TAB},{y:window.scrollY}),"",location.hash);}catch(e){}}
 function pushNav(extra,noSave){if(NAVLOCK)return;if(!noSave)saveY();try{history.pushState(navState(extra),"","#"+TAB);}catch(e){}}
 function cardKey(d){return d.dataset.iid?"i:"+d.dataset.iid:d.dataset.gid?"g:"+d.dataset.gid:d.dataset.gi!=null?"s:"+d.dataset.gi:null;}
 function cardBy(k){if(!k)return null;const [t,v]=[k.slice(0,1),k.slice(2)];const a=t==="i"?"data-iid":t==="g"?"data-gid":"data-gi";return document.querySelector(`[${a}="${CSS.escape(v)}"]`);}
-function setTab(t){if(t===TAB){showTab(t);return;}saveY();showTab(t);pushNav(null,true);}
+function setTab(t){if(t==='news')ND=null;if(t===TAB){showTab(t);return;}saveY();showTab(t);pushNav(null,true);}
 window.addEventListener("popstate",e=>{const st=e.state||{tab:"summary"};NAVLOCK=true;
-  const same=st.tab===TAB&&(st.calc||CALC)===CALC&&(st.it||ITOPIC)===ITOPIC&&(st.ik||IKIND)===IKIND&&(st.gf||GFILTER)===GFILTER;
-  if(!same){if(st.calc)CALC=st.calc;if(st.it)ITOPIC=st.it;if(st.ik)IKIND=st.ik;if(st.gf)GFILTER=st.gf;showTab(st.tab||"summary");}
+  const same=st.tab===TAB&&(st.calc||CALC)===CALC&&(st.it||ITOPIC)===ITOPIC&&(st.ik||IKIND)===IKIND&&(st.gf||GFILTER)===GFILTER&&(st.nw||0)===NW&&(st.nd||null)===ND;
+  if(!same){if(st.calc)CALC=st.calc;if(st.it)ITOPIC=st.it;if(st.ik)IKIND=st.ik;if(st.gf)GFILTER=st.gf;NW=st.nw||0;ND=st.nd||null;showTab(st.tab||"summary");}
   document.querySelectorAll("details.gcard[open],details.fgrp[open]").forEach(d=>{if(cardKey(d)!==st.open)d.open=false;});
   if(st.open){const d=cardBy(st.open);if(d)d.open=true;}
   if(!same){const go=()=>{if(st.open){const d=cardBy(st.open);if(d&&!d.open)d.open=true;}window.scrollTo(0,st.y||0);};setTimeout(go,80);setTimeout(go,250);}
@@ -410,7 +425,7 @@ $("#mnext").addEventListener("click",()=>shiftMonth(1));
 $("#today").addEventListener("click",()=>{MODE="today";ASOF=todayStr();syncHeader();const b=$("#today");b.textContent="갱신 중";
   loadData().then(()=>{render();b.textContent="오늘";}).catch(e=>{b.textContent="오늘";render();});});
 
-function render(){if(!D)return;({summary:rSummary,calc:rCalc,grants:rGrants,interp:rInterp,search:rSearch,table:rSearch}[TAB]||rSummary)();}
+function render(){if(!D)return;({summary:rSummary,calc:rCalc,grants:rGrants,interp:rInterp,news:rNews,search:rSearch,table:rSearch}[TAB]||rSummary)();}
 
 /* ---------- 요약 ---------- */
 function rSummary(){
@@ -1103,6 +1118,50 @@ function rInterp(){
   draw();
 }
 
+/* ---------- 노동뉴스 ----------
+   노무사님이 labor-briefing 저장소 daily/YYYY-MM-DD.html에 올린 데일리 브리핑을 그대로 불러온다(홈페이지 노동뉴스와 같은 방식).
+   이번 주와 지난 4주, 모두 5주를 주 단위로 보여 준다. 구독 안내, 사무소 연락처, 간단 소식(지역 소식)은 홈페이지와 같이 뺀다. */
+const NB="https://sagoclaim-tech.github.io/labor-briefing/daily/",NDAY=864e5,NKO=["일","월","화","수","목","금","토"],NCACHE={};
+let NW=0,ND=null,NSEQ=0;
+const nYmd=d=>d.toISOString().slice(0,10),nMd=d=>(d.getUTCMonth()+1)+"."+d.getUTCDate();
+function nToday(){return new Date(todayStr()+"T00:00:00Z");}
+function nMon(){const t=nToday();return new Date(t.getTime()-((t.getUTCDay()+6)%7)*NDAY);}
+function nGet(s){if(!NCACHE[s])NCACHE[s]=fetch(NB+s+".html",{cache:"no-cache"}).then(r=>r.ok?r.text():null).catch(()=>{delete NCACHE[s];return undefined;});return NCACHE[s];}
+function nFocus(t){const m=/class="summary-bar"[^>]*>([\s\S]*?)<\/div>/.exec(t||"");if(!m)return [];return m[1].replace(/<strong>[\s\S]*?<\/strong>/,"").replace(/<[^>]+>/g,"").replace(/&amp;/g,"&").replace(/\s+/g," ").trim().split(" · ").filter(Boolean);}
+const NCHEV='<span class="nwg"><svg viewBox="0 0 16 16"><path d="M6 3l5 5-5 5"/></svg></span>';
+function rNews(){if(ND)return rNewsView(ND);
+  const seq=++NSEQ,mon=nMon(),today=nToday();
+  const wk=[0,1,2,3,4].map(k=>{const m0=new Date(mon.getTime()-k*7*NDAY);return `<button type="button" class="chip" data-nw="${k}" aria-pressed="${NW===k}">${k===0?"이번 주":nMd(m0)+" ~ "+nMd(new Date(m0.getTime()+4*NDAY))}</button>`;}).join("");
+  app.innerHTML=`<section class="view"><div><span class="eyebrow">청아노무법인 데일리 브리핑</span><h2>노동뉴스</h2>
+  <p class="lede">평일 아침마다 주요 노동 판례, 행정해석, 노동정책, 노사관계 소식을 정리합니다. 최근 5주 동안의 브리핑을 주 단위로 볼 수 있으며, 날짜를 누르면 그날 브리핑 전체가 열립니다.</p></div>
+  <div class="nwk">${wk}</div><div id="nwlist" class="nwl"><p class="note">브리핑을 불러오는 중입니다.</p></div>
+  <p class="foot">※ 기사 원문은 각 언론사와 기관 사이트로 연결됩니다. 개별 사안은 원문과 법령을 함께 확인해 주세요.</p></section>`;
+  const ds=[];for(let i=4;i>=0;i--){const d=new Date(mon.getTime()-NW*7*NDAY+i*NDAY);if(d<=today)ds.push(d);}
+  Promise.all(ds.map(d=>nGet(nYmd(d)))).then(ts=>{if(seq!==NSEQ||TAB!=="news"||ND)return;const box=$("#nwlist");if(!box)return;
+    const rows=ts.map((t,j)=>{if(!t)return "";const d=ds[j],s=nYmd(d),f=nFocus(t).slice(0,3);
+      return `<button type="button" class="nwi" data-nd="${s}"><span class="nwd">${nMd(d)}<em>${NKO[d.getUTCDay()]}요일</em>${s===todayStr()?'<span class="nwt">오늘</span>':""}</span><ul class="nwf">${f.length?f.map(x=>`<li>${esc(x)}</li>`).join(""):"<li>데일리 브리핑</li>"}</ul>${NCHEV}</button>`;}).join("");
+    const off=ts.some(t=>t===undefined);
+    box.innerHTML=rows||`<p class="note">${off?"브리핑을 불러오지 못했습니다. 인터넷 연결을 확인한 뒤 다시 눌러 주세요.":NW===0?"이번 주에는 아직 발행된 브리핑이 없습니다.":"이 주에는 발행된 브리핑이 없습니다."}</p>`;});}
+function rNewsView(s){const seq=++NSEQ,d=new Date(s+"T00:00:00Z");
+  app.innerHTML=`<section class="view"><div class="nwbar"><button type="button" class="nwback" data-nback>목록으로</button><span class="note">${nMd(d)} ${NKO[d.getUTCDay()]}요일</span></div>
+  <div id="nwv" class="nwv"><p class="note" style="padding:16px">브리핑을 불러오는 중입니다.</p></div>
+  <div class="nwbar" style="justify-content:center"><button type="button" class="nwback" data-nback>목록으로</button></div></section>`;
+  nGet(s).then(t=>{if(seq!==NSEQ||TAB!=="news"||ND!==s)return;const box=$("#nwv");if(!box)return;
+    if(!t){box.innerHTML=`<p class="note" style="padding:16px">${t===undefined?"브리핑을 불러오지 못했습니다. 인터넷 연결을 확인해 주세요.":"해당 날짜의 브리핑이 없습니다."}</p>`;return;}
+    const doc=new DOMParser().parseFromString(t,"text/html");let css="";doc.querySelectorAll("style").forEach(x=>css+=x.textContent);
+    css=css.replace(/(^|[},\s])body(?=[\s{,.:])/g,"$1.bfr").replace(/:root/g,":host");
+    doc.querySelectorAll("script,.contact-block,.subscribe-cta,.app-chip,.app-banner").forEach(x=>x.remove());
+    doc.querySelectorAll(".section-title").forEach(x=>{if(x.textContent.indexOf("간단 소식")>-1&&x.isConnected)(x.closest(".section")||x.parentNode).remove();});
+    doc.querySelectorAll("a[href]").forEach(a=>{a.target="_blank";a.rel="noopener";a.removeAttribute("onclick");});
+    doc.querySelectorAll("[onclick],[onload],[onerror]").forEach(x=>{x.removeAttribute("onclick");x.removeAttribute("onload");x.removeAttribute("onerror");});
+    box.innerHTML="";const host=document.createElement("div");box.appendChild(host);const root=host.attachShadow?host.attachShadow({mode:"open"}):host;
+    root.innerHTML="<style>"+css+":host{display:block}.bfr{margin:0!important;min-height:0!important;padding:20px 14px 28px!important}</style><div class=\"bfr\">"+doc.body.innerHTML+"</div>";
+    try{gtag("event","page_view",{page_title:"노동뉴스 "+s,page_location:location.origin+location.pathname+"#news/"+s});}catch(e){}});}
+document.addEventListener("click",e=>{if(TAB!=="news"||!e.target.closest)return;
+  const w=e.target.closest("[data-nw]");if(w){NW=+w.dataset.nw;ND=null;rNews();try{history.replaceState(Object.assign({},history.state||{},{nw:NW,nd:null}),"",location.hash);}catch(_){}return;}
+  const it=e.target.closest(".nwi[data-nd]");if(it){const s=it.dataset.nd;saveY();ND=s;pushNav({nd:s},true);rNews();window.scrollTo(0,0);return;}
+  if(e.target.closest("[data-nback]")){if(history.state&&history.state.nd)history.back();else{ND=null;rNews();window.scrollTo(0,0);}}});
+
 /* ---------- 통합 검색 ---------- */
 const SYN=[["실업급여","구직급여","실업"],["대지급금","체당금"],["장례비","장의비"],["산재","산업재해","재해"],["육아휴직","육휴"],["최저임금","최저시급","최임"],["건강보험","건보"],["국민연금","연금보험"],["장기요양","요양보험"],["고용보험","고보"],["지원금","장려금","보조금"],["출산휴가","출산전후휴가"],["두루누리","사회보험료 지원"],["괴롭힘","갑질"],["질병","부상","질환"],["퇴직금","퇴직급여"],["연차","연차휴가"],["4대보험","사대보험"],["고령자","고령","정년"],["청년","청년도약"],["장애인","장애"],["휴업급여","휴업"],["상한","상한액","최고"],["하한","하한액","최저"]];
 function expand(tok){const out=new Set([tok]);SYN.forEach(g=>{if(g.some(w=>w.includes(tok)||tok.includes(w)))g.forEach(w=>out.add(w));});return [...out];}
@@ -1194,7 +1253,7 @@ document.addEventListener("click",e=>{if(e.target&&e.target.id==="btnInstall"&&D
 if("serviceWorker" in navigator){window.addEventListener("load",()=>{navigator.serviceWorker.register("sw.js").catch(()=>{});});}
 /* 시작 */
 syncHeader();
-const h=(location.hash||"").replace("#","");let H0=["calc","grants","interp","search"].includes(h)?h:h==="table"?"search":"summary";
+const h=(location.hash||"").replace("#","");let H0=["calc","grants","interp","news","search"].includes(h)?h:h==="table"?"search":"summary";
 /* 바로가기 주소: #calc-mw(계산기별), ?c=mw 도 허용. 노동뉴스 브리핑 등 외부 연결용 */
 {const m=h.match(/^calc[-/]([a-z]+)$/);const q=new URLSearchParams(location.search).get("c");const cid=m?m[1]:q;if(cid&&CALCS.some(c=>c[0]===cid)){CALC=cid;H0="calc";}}
 try{history.replaceState({tab:"summary"},"","#summary");if(H0!=="summary")history.pushState({tab:H0,calc:CALC},"","#"+H0);}catch(e){}TAB=H0;

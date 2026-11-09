@@ -1128,7 +1128,7 @@ function rInterp(){
 
 /* ---------- 노동뉴스 ----------
    노무사님이 labor-briefing 저장소 daily/YYYY-MM-DD.html에 올린 데일리 브리핑을 그대로 불러온다(홈페이지 노동뉴스와 같은 방식).
-   이번 주와 지난 4주, 모두 5주를 주 단위로 보여 준다. 사무소 연락처와 간단 소식(부산·울산·경남 지역 소식)은 그대로 보여 주고, 카카오 채널 구독 안내만 뺀다(홈페이지 게시본과 기준이 다름). */
+   이번 주와 지난 4주, 모두 5주를 주 단위로 보여 준다. 카카오 채널 구독 안내, 사무소 연락처, 간단 소식(부산·울산·경남 지역 소식)을 모두 그대로 보여 준다(홈페이지 게시본과 기준이 다름). 노무수첩 배너만 앱 안이라 뺀다. */
 const NB="https://sagoclaim-tech.github.io/labor-briefing/daily/",NDAY=864e5,NKO=["일","월","화","수","목","금","토"],NCACHE={};
 let NW=0,ND=null,NSEQ=0;
 const nYmd=d=>d.toISOString().slice(0,10),nMd=d=>(d.getUTCMonth()+1)+"."+d.getUTCDate();
@@ -1160,7 +1160,7 @@ function rNewsView(s){const seq=++NSEQ,d=new Date(s+"T00:00:00Z");
     if(!t){box.innerHTML=`<p class="note" style="padding:16px">${t===undefined?"브리핑을 불러오지 못했습니다. 인터넷 연결을 확인해 주세요.":"해당 날짜의 브리핑이 없습니다."}</p>`;return;}
     const doc=new DOMParser().parseFromString(t,"text/html");let css="";doc.querySelectorAll("style").forEach(x=>css+=x.textContent);
     css=css.replace(/(^|[},\s])body(?=[\s{,.:])/g,"$1.bfr").replace(/:root/g,":host");
-    doc.querySelectorAll("script,.subscribe-cta,.app-chip,.app-banner").forEach(x=>x.remove());
+    doc.querySelectorAll("script,.app-note-banner,.app-chip,.app-banner").forEach(x=>x.remove());
     doc.querySelectorAll("a[href]").forEach(a=>{if(/^https?:/i.test(a.getAttribute("href"))){a.target="_blank";a.rel="noopener";}a.removeAttribute("onclick");});
     doc.querySelectorAll("[onclick],[onload],[onerror]").forEach(x=>{x.removeAttribute("onclick");x.removeAttribute("onload");x.removeAttribute("onerror");});
     box.innerHTML="";const host=document.createElement("div");box.appendChild(host);const root=host.attachShadow?host.attachShadow({mode:"open"}):host;

@@ -14,8 +14,9 @@
 - 화면 점검: `python3 tools/smoke.py` (계산기 전부를 오늘과 다음 해 1월 기준으로 열어 오류·NaN 표시 확인, Playwright 필요).
 
 ## 포털 검색용 페이지
-- 앱은 자바스크립트로 그리는 한 페이지라 포털이 내용을 읽지 못합니다. 그래서 `tools/build_pages.py`가 같은 데이터로 글이 들어 있는 페이지를 만듭니다: `interp/`(행정해석 한 건씩과 분야별 목록), `figures/`(기준 수치와 연도별 이력), `grants/`(고용지원금), `changes.html`(제도 변경·입법 동향), `sitemap.xml`.
-- 자동 갱신: `.github/workflows/pages.yml`이 data.json, interp.json이 main에 올라올 때와 매일 0시 10분(한국시간)에 도구를 돌려 바뀐 페이지와 사이트맵만 커밋합니다. 손으로 고칠 필요가 없습니다. ※ 이 세 폴더와 changes.html, sitemap.xml은 도구 전용이니 직접 고치지 않습니다.
+- 앱은 자바스크립트로 그리는 한 페이지라 포털이 내용을 읽지 못합니다. 그래서 `tools/build_pages.py`가 같은 데이터로 글이 들어 있는 페이지를 만듭니다: `interp/`(행정해석 한 건씩과 분야별 목록), `figures/`(기준 수치와 연도별 이력), `grants/`(고용지원금), `changes.html`(제도 변경·입법 동향), `news/`(노동뉴스 데일리 브리핑 날짜별 페이지와 목록), `sitemap.xml`.
+- 자동 갱신: `.github/workflows/pages.yml`이 data.json, interp.json이 main에 올라올 때, 평일 오전(07:00~11:40) 20분마다, 평일 낮·저녁 매시, 매일 0시 10분(한국시간)에 도구를 돌려 바뀐 페이지와 사이트맵만 커밋합니다. 손으로 고칠 필요가 없습니다. ※ interp/, figures/, grants/, news/ 폴더와 changes.html, sitemap.xml은 도구 전용이니 직접 고치지 않습니다.
+- 노동뉴스 원본은 labor-briefing 저장소 daily/입니다. 그쪽 브리핑 파일 head에는 이 앱의 news/ 주소를 가리키는 canonical이 자동으로 들어갑니다(labor-briefing의 tools/inject_app.py). 포털이 같은 브리핑을 github.io 주소가 아니라 청아노무법인 도메인으로 모으게 하기 위함입니다.
 - lastmod: 페이지 내용이 바뀐 날만 `tools/pages_lastmod.json`에 기록해 사이트맵에 씁니다.
 - 앱 연결: 페이지의 "앱에서 보기"는 `?i=<행정해석 id>`, `?g=<지원금 id>`, `#calc-<계산기>`로 앱의 해당 항목을 엽니다.
 

@@ -1,5 +1,7 @@
 # 포털 검색용 페이지와 sitemap.xml 자동 갱신
 # - data.json, interp.json이 바뀌어 main에 올라오면 tools/build_pages.py를 돌려 interp/, figures/, grants/, changes.html, sitemap.xml을 다시 만든다.
+# - 노동뉴스(news/)는 labor-briefing 저장소의 daily/ 브리핑으로 만든다. 다른 저장소의 변경은 여기서 바로 감지할 수 없어
+#   평일 07:00~11:40(한국시간)에는 20분마다, 12:00~23:00에는 매시 정각에 확인한다. 바뀐 것이 없으면 커밋하지 않는다.
 # - 날짜가 바뀌면 "시행 예정"이 "현행"으로 넘어가므로 매일 0시 10분(한국시간)에도 한 번 실행한다.
 # - 바뀐 페이지가 없으면 커밋하지 않는다.
 name: 검색용 페이지 갱신
@@ -14,6 +16,9 @@ on:
       - .github/workflows/pages.yml
   schedule:
     - cron: "10 15 * * *"
+    - cron: "*/20 22-23 * * 0-4"
+    - cron: "*/20 0-2 * * 1-5"
+    - cron: "0 3-14 * * 1-5"
   workflow_dispatch:
 
 permissions:
@@ -28,16 +33,23 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - name: 노동뉴스 원본(labor-briefing) 받기
+        uses: actions/checkout@v4
+        with:
+          repository: sagoclaim-tech/labor-briefing
+          path: _briefing
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
       - name: 페이지 생성
+        env:
+          BRIEFING_DIR: _briefing
         run: python3 tools/build_pages.py
       - name: 바뀐 페이지 커밋
         run: |
           git config user.name "sagoclaim-tech"
           git config user.email "sagoclaim@hanmail.net"
-          git add -A interp figures grants changes.html sitemap.xml tools/pages_lastmod.json
+          git add -A interp figures grants news changes.html sitemap.xml tools/pages_lastmod.json
           if git diff --cached --quiet; then echo "바뀐 페이지 없음"; exit 0; fi
           git commit -m "검색용 페이지·사이트맵 자동 갱신"
           for i in 1 2 3; do

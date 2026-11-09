@@ -11,12 +11,17 @@
   grants/<id>.html     고용지원금 한 건씩
   grants/index.html    지원금 목록
   changes.html         시행 예정·최근 시행 제도 변경과 입법 동향
+  news/<날짜>.html      노동뉴스 데일리 브리핑(labor-briefing 저장소 daily/ 원본에 앱 주소·내비게이션만 덧붙임)
+  news/index.html      노동뉴스 전체 목록(주 단위)
   sitemap.xml          위 페이지 전체(내용이 바뀐 날을 lastmod로 기록)
 
 - 페이지 내용이 이전과 같으면 파일을 다시 쓰지 않고 lastmod도 그대로 둔다(tools/pages_lastmod.json).
 - 데이터에서 빠진 항목의 페이지는 지운다(위 세 폴더는 이 도구 전용).
 - 출처 링크는 앱과 같은 허용 도메인만 넣는다.
 - GitHub Actions(.github/workflows/pages.yml)가 data.json, interp.json이 바뀔 때마다 자동으로 실행한다.
+
+- 노동뉴스는 labor-briefing 저장소 경로를 환경변수 BRIEFING_DIR(기본 ../labor-briefing)로 받는다.
+  경로가 없으면 노동뉴스 페이지는 건드리지 않고 기존 것을 그대로 둔다.
 
 사용: python3 tools/build_pages.py
 """
@@ -33,7 +38,9 @@ BASE = "https://app.xn--o80bq8pj4a8ztxwcn2k.com/"
 APP_NAME = "청아 노무수첩"
 FIRM = "청아노무법인"
 STATE = os.path.join(ROOT, "tools", "pages_lastmod.json")
-OWNED_DIRS = ["interp", "figures", "grants"]
+OWNED_DIRS = ["interp", "figures", "grants", "news"]
+GA = "G-KV19SM34XJ"
+GA_HTML = f'<script async src="https://www.googletagmanager.com/gtag/js?id={GA}"></script><script>window.dataLayer=window.dataLayer||[];function gtag(){{dataLayer.push(arguments);}}gtag("js",new Date());gtag("config","{GA}");</script>'
 OK_SRC = re.compile(r"^https?://([a-z0-9-]+\.)*(law\.go\.kr|lawmaking\.go\.kr|korea\.kr|moel\.go\.kr|work24\.go\.kr|ei\.go\.kr|comwel\.or\.kr|nhis\.or\.kr|nps\.or\.kr|kead\.or\.kr|bokjiro\.go\.kr|mohw\.go\.kr|minimumwage\.go\.kr|assembly\.go\.kr|4insure\.or\.kr|kosha\.or\.kr)([/?#]|$)", re.I)
 
 KST = timezone(timedelta(hours=9))
@@ -165,6 +172,7 @@ def page(path, title, desc, body, crumbs, ld=None):
 <link rel="icon" href="{up}icons/favicon-32.png">
 <style>{CSS}</style>
 {ld_html}
+{GA_HTML}
 </head>
 <body>
 <header class="top"><div class="in"><a class="brand" href="{up}">{APP_NAME}<small>{FIRM} 무료 노무 실무 앱</small></a><a class="open" href="{up}">앱 열기</a></div></header>
@@ -391,6 +399,79 @@ def build_changes(sched, notices, out):
                                body, [(APP_NAME, ""), ("제도 변경", None)])
 
 
+# ---------------- 노동뉴스 ----------------
+KO_WD = ["월", "화", "수", "목", "금", "토", "일"]
+
+
+def news_focus(t):
+    m = re.search(r'class="summary-bar"[^>]*>([\s\S]*?)</div>', t)
+    if not m:
+        return []
+    x = re.sub(r"<strong>[\s\S]*?</strong>", "", m.group(1), count=1)
+    x = html.unescape(re.sub(r"<[^>]+>", "", x))
+    return [y.strip() for y in re.sub(r"\s+", " ", x).strip().split(" · ") if y.strip()]
+
+
+def wd(s):
+    return KO_WD[datetime.strptime(s, "%Y-%m-%d").weekday()]
+
+
+def build_news(bdir, out):
+    ddir = os.path.join(bdir, "daily")
+    days = sorted(fn[:-5] for fn in os.listdir(ddir) if re.fullmatch(r"\d{4}-\d{2}-\d{2}\.html", fn))
+    days = [d for d in days if d <= TODAY]
+    info = {}
+    for i, day in enumerate(days):
+        t = open(os.path.join(ddir, day + ".html"), encoding="utf-8").read()
+        foc = news_focus(t)
+        info[day] = foc
+        path = f"news/{day}.html"
+        url = BASE + path
+        dot = day.replace("-", ".")
+        title = f"노동뉴스 {dot}({wd(day)}) | " + clip(" · ".join(foc), 70) + f" | {APP_NAME}" if foc else f"노동뉴스 데일리 브리핑 {dot}({wd(day)}) | {APP_NAME}"
+        desc = clip(f"{FIRM} 노동뉴스 데일리 브리핑 {dot}. " + " / ".join(foc), 160)
+        # 원본 정리: 스크립트(브리핑용 분석·배너 스크립트) 제거, 기존 제목·설명·canonical·og:url 교체
+        t = re.sub(r"<script\b[\s\S]*?</script>", "", t, flags=re.I)
+        t = re.sub(r"<!--\s*(Google tag|APP-LINK)[^>]*-->", "", t)
+        t = re.sub(r"<title>[\s\S]*?</title>", f"<title>{E(title)}</title>", t, count=1)
+        t = re.sub(r'<meta\s+name="description"[^>]*>', "", t, flags=re.I)
+        t = re.sub(r'<link\s+rel="canonical"[^>]*>', "", t, flags=re.I)
+        t = re.sub(r'<meta\s+property="og:url"[^>]*>', "", t, flags=re.I)
+        t = re.sub(r"<a\b([^>]*)\bonclick=\"[^\"]*\"", r"<a\1", t)
+        ld = {"@context": "https://schema.org", "@type": "Article", "headline": clip(f"노동뉴스 데일리 브리핑 {dot}: " + " · ".join(foc), 110),
+              "description": desc, "datePublished": day, "inLanguage": "ko", "author": {"@type": "Organization", "name": FIRM},
+              "publisher": {"@type": "Organization", "name": FIRM}, "mainEntityOfPage": url}
+        head = (f'<meta name="description" content="{E(desc)}">\n<link rel="canonical" href="{E(url)}">\n<meta property="og:url" content="{E(url)}">\n'
+                '<meta name="naver-site-verification" content="32184885c8b561ba6dcf743867eb9a5fd3523963">\n<link rel="icon" href="../icons/favicon-32.png">\n'
+                '<script type="application/ld+json">' + json.dumps(ld, ensure_ascii=False).replace("</", "<\\/") + "</script>\n" + GA_HTML + "\n"
+                '<style>.cnb-bar{margin:-32px -16px 24px;background:#1a4c8c;color:#fff;font-family:"Apple SD Gothic Neo","Malgun Gothic",sans-serif}.cnb-in{max-width:520px;margin:0 auto;padding:12px 16px;display:flex;align-items:center;justify-content:space-between;gap:10px;font-size:13px}'
+                '.cnb-bar a{color:#fff;text-decoration:none}.cnb-bar b{font-size:15px}.cnb-open{background:#fff;color:#1a4c8c!important;border-radius:999px;padding:6px 12px;font-weight:700;white-space:nowrap}'
+                '.cnb-nav{max-width:520px;margin:20px auto 0;padding:0 0 8px;display:flex;flex-wrap:wrap;gap:8px;justify-content:center;font-family:"Apple SD Gothic Neo","Malgun Gothic",sans-serif}'
+                '.cnb-nav a{display:inline-block;border:1px solid #c9d3df;background:#fff;border-radius:999px;padding:8px 14px;font-size:13px;color:#1a4c8c;text-decoration:none;font-weight:600}</style>\n')
+        t = re.sub(r"</head>", head + "</head>", t, count=1, flags=re.I)
+        top = (f'<div class="cnb-bar"><div class="cnb-in"><span><a href="../"><b>{APP_NAME}</b></a> &gt; <a href="./">노동뉴스</a> &gt; {E(dot)}</span>'
+               f'<a class="cnb-open" href="../#news">앱 열기</a></div></div>')
+        prev_d = days[i - 1] if i > 0 else None
+        next_d = days[i + 1] if i + 1 < len(days) else None
+        nav = '<nav class="cnb-nav" aria-label="다른 브리핑">' + (f'<a href="{prev_d}.html">이전 브리핑 {prev_d[5:].replace("-", ".")}({wd(prev_d)})</a>' if prev_d else "") + '<a href="./">노동뉴스 전체 목록</a>' + (f'<a href="{next_d}.html">다음 브리핑 {next_d[5:].replace("-", ".")}({wd(next_d)})</a>' if next_d else "") + "</nav>"
+        t = re.sub(r"(<body[^>]*>)", r"\1" + top.replace("\\", "\\\\"), t, count=1, flags=re.I)
+        t = re.sub(r"</body>", nav + "\n</body>", t, count=1, flags=re.I)
+        out[path] = t
+    # 목록: 월별, 최신순
+    months = {}
+    for day in reversed(days):
+        months.setdefault(day[:7], []).append(day)
+    secs = "".join(f'<div class="box"><h2>{int(m[:4])}년 {int(m[5:])}월</h2><ul class="list">'
+                   + "".join(f'<li><a href="{d}.html">{E(d.replace("-", "."))}({wd(d)}) 노동뉴스 브리핑</a>' + "".join(f"<small>{E(f)}</small>" for f in info[d][:3]) + "</li>" for d in ds)
+                   + "</ul></div>" for m, ds in months.items())
+    body = (f'<h1>노동뉴스 데일리 브리핑</h1><p>{FIRM}이 평일 아침마다 주요 노동 판례, 행정해석, 노동정책·입법, 노사관계, 산재·안전 소식을 정리한 브리핑 {len(days)}건입니다.</p>'
+            + secs + cta("../", "#news", "앱에서 노동뉴스 보기"))
+    out["news/index.html"] = page("news/index.html", f"노동뉴스 데일리 브리핑 (판례·행정해석·노동정책) | {APP_NAME}",
+                                  f"{FIRM}이 평일 아침마다 주요 노동 판례, 행정해석, 노동정책·입법, 노사관계 소식을 정리한 노동뉴스 데일리 브리핑 목록입니다.",
+                                  body, [(APP_NAME, ""), ("노동뉴스", None)])
+    return True
+
+
 def main():
     d = json.load(open(os.path.join(ROOT, "data.json"), encoding="utf-8"))
     iv = json.load(open(os.path.join(ROOT, "interp.json"), encoding="utf-8"))
@@ -399,11 +480,19 @@ def main():
     build_figures(d["items"], out)
     build_grants(d.get("grants", []), d.get("meta", {}).get("grantsYear", ""), out)
     build_changes(d.get("scheduled", []), d.get("notices", []), out)
+    bdir = os.environ.get("BRIEFING_DIR") or os.path.join(os.path.dirname(ROOT), "labor-briefing")
+    news_ok = os.path.isdir(os.path.join(bdir, "daily"))
+    if news_ok:
+        build_news(bdir, out)
+    else:
+        print("노동뉴스: 브리핑 저장소가 없어 기존 페이지를 그대로 둡니다.")
 
     state = {}
     if os.path.exists(STATE):
         state = json.load(open(STATE, encoding="utf-8"))
     new_state, written = {}, 0
+    if not news_ok:
+        new_state.update({k: v for k, v in state.items() if k.startswith("news/")})
     for path, content in sorted(out.items()):
         hsh = hashlib.sha1(content.encode("utf-8")).hexdigest()[:16]
         prev = state.get(path)
@@ -423,6 +512,8 @@ def main():
             continue
         for fn in os.listdir(dp):
             rel = f"{dname}/{fn}"
+            if dname == "news" and not news_ok:
+                continue
             if fn.endswith(".html") and rel not in out:
                 os.remove(os.path.join(dp, fn))
                 removed += 1
@@ -430,7 +521,7 @@ def main():
     # sitemap: 앱 첫 화면과 개인정보 처리방침 + 생성 페이지
     app_mod = max([v[1] for v in new_state.values()] + [d.get("meta", {}).get("checked", TODAY)])
     urls = [(BASE, app_mod, "daily", "1.0")]
-    pri = {"interp/index.html": "0.9", "figures/index.html": "0.9", "grants/index.html": "0.8", "changes.html": "0.8"}
+    pri = {"interp/index.html": "0.9", "figures/index.html": "0.9", "grants/index.html": "0.8", "changes.html": "0.8", "news/index.html": "0.8"}
     for path in sorted(new_state):
         loc = BASE + path.replace("index.html", "")
         p = pri.get(path, "0.7" if path.startswith("figures/") else "0.6")

@@ -251,7 +251,15 @@ nav.tabs .in{max-width:760px;margin:0 auto;display:grid;grid-template-columns:re
 nav.tabs button{background:none;border:0;padding:10px 4px 9px;font-size:12px;color:var(--muted);cursor:pointer;display:grid;justify-items:center;gap:2px}
 nav.tabs button svg{width:22px;height:22px;stroke:currentColor;fill:none;stroke-width:1.7}
 nav.tabs button[aria-current="page"]{color:var(--accent-2);font-weight:600;box-shadow:inset 0 3px 0 var(--accent-2)}
-.nwk{display:flex;gap:6px;overflow-x:auto;padding-bottom:4px;scrollbar-width:none}.nwk::-webkit-scrollbar{display:none}
+.nwk{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:6px}
+.nwc{display:grid;gap:3px;justify-items:center;align-content:center;min-height:58px;padding:9px 2px;border:1px solid var(--line);border-radius:12px;background:var(--surface);color:var(--ink);font:inherit;cursor:pointer;transition:background .15s,border-color .15s}
+.nwc b{font-size:12.5px;font-weight:700;line-height:1.2;color:var(--accent)}
+.nwc span{font-size:11px;line-height:1.2;color:var(--muted);font-variant-numeric:tabular-nums;white-space:nowrap;letter-spacing:-.2px}
+.nwc:hover{border-color:var(--accent-2)}
+.nwc[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);box-shadow:0 2px 8px rgba(18,57,110,.18)}
+.nwc[aria-pressed="true"] b,.nwc[aria-pressed="true"] span{color:var(--surface)}
+.nwc[aria-pressed="true"] span{opacity:.85}
+@media (min-width:600px){.nwk{gap:8px}.nwc{min-height:64px}.nwc b{font-size:14px}.nwc span{font-size:12.5px}}
 .nwl{display:grid;gap:10px}
 .nwi{display:flex;align-items:center;gap:14px;width:100%;text-align:left;background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:14px;cursor:pointer;font:inherit;color:inherit}
 .nwi:hover{border-color:var(--accent-2)}
@@ -1131,7 +1139,9 @@ function nFocus(t){const m=/class="summary-bar"[^>]*>([\s\S]*?)<\/div>/.exec(t||
 const NCHEV='<span class="nwg"><svg viewBox="0 0 16 16"><path d="M6 3l5 5-5 5"/></svg></span>';
 function rNews(){if(ND)return rNewsView(ND);
   const seq=++NSEQ,mon=nMon(),today=nToday();
-  const wk=[0,1,2,3,4].map(k=>{const m0=new Date(mon.getTime()-k*7*NDAY);return `<button type="button" class="chip" data-nw="${k}" aria-pressed="${NW===k}">${k===0?"이번 주":nMd(m0)+" ~ "+nMd(new Date(m0.getTime()+4*NDAY))}</button>`;}).join("");
+  const wk=[0,1,2,3,4].map(k=>{const m0=new Date(mon.getTime()-k*7*NDAY),f0=new Date(m0.getTime()+4*NDAY);
+    const rng=nMd(m0)+"~"+(m0.getUTCMonth()===f0.getUTCMonth()?f0.getUTCDate():nMd(f0));
+    return `<button type="button" class="nwc" data-nw="${k}" aria-pressed="${NW===k}" aria-label="${k===0?"이번 주":k+"주 전"} ${nMd(m0)}부터 ${nMd(f0)}까지"><b>${k===0?"이번 주":k+"주 전"}</b><span>${rng}</span></button>`;}).join("");
   app.innerHTML=`<section class="view"><div><span class="eyebrow">청아노무법인 데일리 브리핑</span><h2>노동뉴스</h2>
   <p class="lede">평일 아침마다 주요 노동 판례, 행정해석, 노동정책, 노사관계 소식을 정리합니다. 최근 5주 동안의 브리핑을 주 단위로 볼 수 있으며, 날짜를 누르면 그날 브리핑 전체가 열립니다.</p></div>
   <div class="nwk">${wk}</div><div id="nwlist" class="nwl"><p class="note">브리핑을 불러오는 중입니다.</p></div>

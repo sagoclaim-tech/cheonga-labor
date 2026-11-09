@@ -14,6 +14,7 @@
   news/<날짜>.html      노동뉴스 데일리 브리핑(labor-briefing 저장소 daily/ 원본에 앱 주소·내비게이션만 덧붙임)
   news/index.html      노동뉴스 전체 목록(주 단위)
   sitemap.xml          위 페이지 전체(내용이 바뀐 날을 lastmod로 기록)
+  rss.xml              새 노동뉴스와 새로 추가된 행정해석(네이버 서치어드바이저 RSS 제출용)
 
 - 페이지 내용이 이전과 같으면 파일을 다시 쓰지 않고 lastmod도 그대로 둔다(tools/pages_lastmod.json).
 - 데이터에서 빠진 항목의 페이지는 지운다(위 세 폴더는 이 도구 전용).
@@ -540,6 +541,31 @@ def main():
         with open(STATE, "w", encoding="utf-8") as f:
             json.dump(new_state, f, ensure_ascii=False, indent=1, sort_keys=True)
             f.write("\n")
+    # RSS: 최근 노동뉴스 20건 + 최근 90일 안에 추가된 행정해석
+    lim90 = (datetime.strptime(TODAY, "%Y-%m-%d") - timedelta(days=90)).strftime("%Y-%m-%d")
+    feed = []
+    for path in new_state:
+        m = re.fullmatch(r"news/(\d{4}-\d{2}-\d{2})\.html", path)
+        if m:
+            day = m.group(1)
+            foc = news_focus(open(os.path.join(ROOT, path), encoding="utf-8").read())
+            feed.append((day, f"노동뉴스 {day.replace('-', '.')}({wd(day)}) 데일리 브리핑", BASE + path, " / ".join(foc)))
+    feed = sorted(feed, reverse=True)[:20]
+    for x in iv["items"]:
+        if x.get("added") and x["added"] >= lim90:
+            feed.append((x["added"], f"[{KSHORT[kind(x)]}] {x['title']}", BASE + f"interp/{x['id']}.html", f"{KNAME[kind(x)]} {x.get('no') or ''} ({ymd_dot(x.get('date'))}). {x.get('q') or ''}"))
+    feed.sort(reverse=True)
+
+    def rfc(day):
+        return datetime.strptime(day, "%Y-%m-%d").replace(hour=7, tzinfo=KST).strftime("%a, %d %b %Y %H:%M:%S +0900")
+    items_xml = "".join(f"<item><title>{html.escape(t)}</title><link>{html.escape(u)}</link><guid>{html.escape(u)}</guid><pubDate>{rfc(d)}</pubDate><description>{html.escape(clip(desc, 300))}</description></item>\n" for d, t, u, desc in feed)
+    rss = ('<?xml version="1.0" encoding="UTF-8"?>\n<rss version="2.0"><channel>\n'
+           f"<title>{APP_NAME} | {FIRM}</title><link>{BASE}</link><description>노동뉴스 데일리 브리핑과 새로 정리한 노동 행정해석</description><language>ko</language>\n"
+           + items_xml + "</channel></rss>\n")
+    rp = os.path.join(ROOT, "rss.xml")
+    if not os.path.exists(rp) or open(rp, encoding="utf-8").read() != rss:
+        open(rp, "w", encoding="utf-8").write(rss)
+    print(f"RSS 항목 {len(feed)}건")
     print(f"페이지 {len(out)}개(새로 씀 {written}, 삭제 {removed}), sitemap URL {len(urls)}개")
 
 

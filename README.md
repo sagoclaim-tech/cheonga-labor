@@ -13,6 +13,12 @@
 - 노동뉴스 탭: `sagoclaim-tech/labor-briefing` 저장소의 `daily/YYYY-MM-DD.html`을 화면에서 직접 읽어 이번 주와 지난 4주를 주 단위로 보여 줍니다(홈페이지 노동뉴스와 같은 방식). 브리핑을 올리면 별도 작업 없이 반영되며, 목록의 요약은 브리핑의 `summary-bar`(Today's Focus)에서 가져옵니다. 사무소 연락처와 간단 소식(부산·울산·경남 지역 소식)은 그대로 표시하고, 카카오 채널 구독 안내만 표시하지 않습니다. ※ 홈페이지 게시본은 연락처와 간단 소식을 빼는 기준이라 서로 다릅니다.
 - 화면 점검: `python3 tools/smoke.py` (계산기 전부를 오늘과 다음 해 1월 기준으로 열어 오류·NaN 표시 확인, Playwright 필요).
 
+## 포털 검색용 페이지
+- 앱은 자바스크립트로 그리는 한 페이지라 포털이 내용을 읽지 못합니다. 그래서 `tools/build_pages.py`가 같은 데이터로 글이 들어 있는 페이지를 만듭니다: `interp/`(행정해석 한 건씩과 분야별 목록), `figures/`(기준 수치와 연도별 이력), `grants/`(고용지원금), `changes.html`(제도 변경·입법 동향), `sitemap.xml`.
+- 자동 갱신: `.github/workflows/pages.yml`이 data.json, interp.json이 main에 올라올 때와 매일 0시 10분(한국시간)에 도구를 돌려 바뀐 페이지와 사이트맵만 커밋합니다. 손으로 고칠 필요가 없습니다. ※ 이 세 폴더와 changes.html, sitemap.xml은 도구 전용이니 직접 고치지 않습니다.
+- lastmod: 페이지 내용이 바뀐 날만 `tools/pages_lastmod.json`에 기록해 사이트맵에 씁니다.
+- 앱 연결: 페이지의 "앱에서 보기"는 `?i=<행정해석 id>`, `?g=<지원금 id>`, `#calc-<계산기>`로 앱의 해당 항목을 엽니다.
+
 ## 홈페이지 연동(embed)
 - embed/nm.js: 청아노무법인 홈페이지(그누보드) 「노무수첩」 메뉴가 앱의 data.json, interp.json을 실시간으로 읽어 표시합니다. 앱 데이터가 갱신되면 홈페이지도 함께 바뀝니다.
 - 홈페이지 내용관리 페이지: nm_figures(자주 찾는 숫자), nm_changes(개정·시행 예정), nm_grants(지원금 안내), nm_calc(노동 계산기). 본문에 `<div class="nm-embed nm-figures">` 형식으로 지정합니다. ※ 그누보드가 data- 속성을 지우므로 class로 지정합니다.

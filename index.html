@@ -321,7 +321,7 @@ img{max-width:100%}
 <script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag("js",new Date());gtag("config","G-KV19SM34XJ",{page_title:"시작"});</script>
 </head>
 <body>
-<noscript><h1>청아 노무수첩 | 청아노무법인</h1><p>2026년 최저임금, 4대보험 요율, 구직급여 상·하한, 산재 보상기준 등 자주 찾는 숫자와 최저임금·실업급여·출산전후휴가급여·배우자 출산전후휴가급여·육아휴직급여·산재 보험급여·4대보험료·퇴직금·연차·대지급금·장애인 고용부담금 계산기, 고용지원금 요건, 고용노동부 행정해석 원문을 제공하는 무료 노무 실무 앱입니다. 이 앱은 자바스크립트를 사용합니다.</p></noscript>
+<noscript><h1>청아 노무수첩 | 청아노무법인</h1><p>2026년 최저임금, 4대보험 요율, 구직급여 상·하한, 산재 보상기준 등 자주 찾는 숫자와 최저임금·실업급여·출산전후휴가급여·배우자 출산전후휴가급여·육아휴직급여·산재 보험급여·4대보험료·퇴직금·연차·대지급금·장애인 고용부담금 계산기, 고용지원금 요건, 고용노동부 행정해석 원문을 제공하는 무료 노무 실무 앱입니다. 이 앱은 자바스크립트를 사용합니다.</p><p><a href="figures/">기준 수치</a> · <a href="interp/">행정해석 모음</a> · <a href="grants/">고용지원금</a> · <a href="changes.html">제도 변경</a></p></noscript>
 
 
 <header class="top">
@@ -1265,6 +1265,8 @@ syncHeader();
 const h=(location.hash||"").replace("#","");let H0=["calc","grants","interp","news","search"].includes(h)?h:h==="table"?"search":"summary";
 /* 바로가기 주소: #calc-mw(계산기별), ?c=mw 도 허용. 노동뉴스 브리핑 등 외부 연결용 */
 {const m=h.match(/^calc[-/]([a-z]+)$/);const q=new URLSearchParams(location.search).get("c");const cid=m?m[1]:q;if(cid&&CALCS.some(c=>c[0]===cid)){CALC=cid;H0="calc";}}
+/* 검색용 페이지(interp/, grants/)에서 연결: ?i=행정해석 id, ?g=지원금 id */
+{const sp=new URLSearchParams(location.search),iid=sp.get("i"),gid=sp.get("g");if(iid&&/^[A-Za-z0-9_-]+$/.test(iid)){ITOPIC="전체";IKIND="all";IOPEN=iid;store.set("iq","");H0="interp";}else if(gid&&/^[A-Za-z0-9_-]+$/.test(gid)){GFILTER="all";GOPEN=gid;H0="grants";}}
 try{history.replaceState({tab:"summary"},"","#summary");if(H0!=="summary")history.pushState({tab:H0,calc:CALC},"","#"+H0);}catch(e){}TAB=H0;
 document.querySelectorAll("nav.tabs button").forEach(b=>b.setAttribute("aria-current",b.dataset.tab===TAB?"page":"false"));
 loadData().then(()=>render())

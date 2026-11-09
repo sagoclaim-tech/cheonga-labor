@@ -1,0 +1,47 @@
+# 포털 검색용 페이지와 sitemap.xml 자동 갱신
+# - data.json, interp.json이 바뀌어 main에 올라오면 tools/build_pages.py를 돌려 interp/, figures/, grants/, changes.html, sitemap.xml을 다시 만든다.
+# - 날짜가 바뀌면 "시행 예정"이 "현행"으로 넘어가므로 매일 0시 10분(한국시간)에도 한 번 실행한다.
+# - 바뀐 페이지가 없으면 커밋하지 않는다.
+name: 검색용 페이지 갱신
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - data.json
+      - interp.json
+      - tools/build_pages.py
+      - .github/workflows/pages.yml
+  schedule:
+    - cron: "10 15 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: build-pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: 페이지 생성
+        run: python3 tools/build_pages.py
+      - name: 바뀐 페이지 커밋
+        run: |
+          git config user.name "sagoclaim-tech"
+          git config user.email "sagoclaim@hanmail.net"
+          git add -A interp figures grants changes.html sitemap.xml tools/pages_lastmod.json
+          if git diff --cached --quiet; then echo "바뀐 페이지 없음"; exit 0; fi
+          git commit -m "검색용 페이지·사이트맵 자동 갱신"
+          for i in 1 2 3; do
+            git pull --rebase origin main && git push origin main && exit 0
+            sleep 10
+          done
+          exit 1

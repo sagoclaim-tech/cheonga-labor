@@ -137,6 +137,7 @@ h2{font-size:17px;margin:0 0 10px;color:#12396e}
 .meta li.k{background:#12396e;border-color:#12396e;color:#fff;font-weight:700}
 .box{background:#fff;border:1px solid #ccd9e8;border-radius:12px;padding:18px;margin:0 0 14px}
 .box p{margin:0 0 8px}.box p:last-child{margin:0}
+.cmt{background:#fff8e6;border-color:#f0d9a0}.cmt h2{color:#8a5a00}.cmt .sig{margin-top:8px;font-size:13px;color:#8a5a00;text-align:right}
 .qa dt{font-weight:700;color:#12396e;margin:0 0 4px}.qa dd{margin:0 0 12px}.qa dd:last-child{margin:0}
 .orig h3{font-size:15px;margin:14px 0 6px;color:#12396e}.orig h3:first-child{margin-top:0}
 .orig .t{white-space:pre-wrap;font-size:15px}
@@ -225,6 +226,14 @@ def src_html(u, extra=""):
     return f'<p class="src">출처: {FIRM} 보관 원문{extra}</p>' if extra == "" else f'<p class="src">{extra.lstrip(", ")}</p>'
 
 
+def comment_box(c, up):
+    """노무사 실무 코멘트(data.json·interp.json의 comment 필드). 노무사님이 확인한 문장만 들어 있다."""
+    if not c:
+        return ""
+    return (f'<div class="box cmt"><h2>노무사 실무 코멘트</h2><p>{E(c)}</p>'
+            f'<p class="sig"><a href="{up}about.html">공인노무사 {AUTHOR_NAME}</a> ({AUTHOR_TITLE})</p></div>')
+
+
 # ---------------- 행정해석 ----------------
 def interp_title(x):
     return f"{x['title']} | {KNAME[kind(x)]} {x.get('no','')}".strip()
@@ -276,7 +285,7 @@ def build_interp(items, out):
         rel_html = ""
         if rel:
             rel_html = '<div class="box"><h2>같은 분야 다른 해석</h2><ul class="list">' + "".join(f'<li><a href="{E(y["id"])}.html">{E(y["title"])}</a><small>{E(KSHORT[kind(y)])} {E(y.get("no") or "")} | {E(ymd_dot(y.get("date")))}</small></li>' for y in rel) + f'</ul><p class="note" style="margin-top:8px"><a href="index.html#t-{E(x.get("topic") or "기타")}">{E(x.get("topic") or "기타")} 분야 전체 보기</a></p></div>'
-        body = (f'<article><h1>{E(x["title"])}</h1><ul class="meta">{"".join(meta)}</ul>{qa}{orig}{notes}'
+        body = (f'<article><h1>{E(x["title"])}</h1><ul class="meta">{"".join(meta)}</ul>{qa}{comment_box(x.get("comment"), up)}{orig}{notes}'
                 f'<div class="box">{basis}{srcp}<p class="note">{cav}</p></div></article>'
                 + cta(up, f"?i={x['id']}", "앱에서 이 해석 보기", TOPIC_CALC.get(x.get("topic"))) + rel_html)
         desc = clip(f"{KNAME[k]} {no} ({ymd_dot(x.get('date'))}). " + (x.get("q") or "") + " " + (x.get("a") or ""), 160)
@@ -349,7 +358,7 @@ def build_figures(items, out):
         rel_html = ('<div class="box"><h2>' + E(it["group"]) + ' 관련 기준</h2><ul class="list">' + "".join(f'<li><a href="{E(j)}.html">{E(fig_title(items[j]))}</a></li>' for j in rel) + "</ul></div>") if rel else ""
         calc = ITEM_CALC.get(k) or GROUP_CALC.get(it["group"])
         title = fig_title(it)
-        body = (f'<article><h1>{E(title)}</h1><ul class="meta"><li class="k">{E(it["group"])}</li><li>{E(it["name"])}</li></ul>{top}{hist}'
+        body = (f'<article><h1>{E(title)}</h1><ul class="meta"><li class="k">{E(it["group"])}</li><li>{E(it["name"])}</li></ul>{top}{comment_box(it.get("comment"), "../")}{hist}'
                 + (f'<div class="box">{srcp}</div>' if srcp else "") + "</article>"
                 + cta("../", "#summary", "앱에서 전체 기준 보기", calc) + rel_html)
         desc = clip(f"{title}. " + (f"근거: {last.get('basis')}. " if last.get("basis") else "") + "연도별 변경 이력과 근거 법령·고시를 함께 정리했습니다.", 160)

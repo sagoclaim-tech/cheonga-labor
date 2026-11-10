@@ -15,6 +15,7 @@
   news/index.html      노동뉴스 전체 목록(주 단위)
   sitemap.xml          위 페이지 전체(내용이 바뀐 날을 lastmod로 기록)
   rss.xml              새 노동뉴스와 새로 추가된 행정해석(네이버 서치어드바이저 RSS 제출용)
+  about.html           작성·감수자(공인노무사 이진우) 소개. 모든 페이지의 작성·감수 표시와 구조화 데이터 author가 이 페이지를 가리킨다.
 
 - 페이지 내용이 이전과 같으면 파일을 다시 쓰지 않고 lastmod도 그대로 둔다(tools/pages_lastmod.json).
 - 데이터에서 빠진 항목의 페이지는 지운다(위 세 폴더는 이 도구 전용).
@@ -41,6 +42,21 @@ FIRM = "청아노무법인"
 STATE = os.path.join(ROOT, "tools", "pages_lastmod.json")
 OWNED_DIRS = ["interp", "figures", "grants", "news"]
 GA = "G-KV19SM34XJ"
+AUTHOR_NAME = "이진우"
+AUTHOR_TITLE = "청아노무법인 부산 대표"
+AUTHOR_URL = "https://app.xn--o80bq8pj4a8ztxwcn2k.com/about.html"
+AUTHOR_LD = {"@type": "Person", "name": AUTHOR_NAME, "jobTitle": "공인노무사, " + AUTHOR_TITLE, "url": AUTHOR_URL,
+             "worksFor": {"@type": "Organization", "name": "청아노무법인", "url": "https://www.xn--o80bq8pj4a8ztxwcn2k.com/"}}
+CAREER = [
+    "청아노무법인 부산 대표, 청아손해사정사무소 대표",
+    "부산지방고용노동청 부산북부지청 직장 내 괴롭힘 전문위원회 위원",
+    "부산관광공사 제6대 인사위원회 위원",
+    "근로복지공단 부산지역본부 고객권익보호담당관",
+    "부산지방노동위원회 국선노무사",
+    "거제 삼성중공업 노동자협의회(14·16·19대) 자문노무사",
+    "경남정보대학교 의무행정학과 겸임교수",
+    "삼성화재해상보험(주) 근무",
+]
 GA_HTML = f'<script async src="https://www.googletagmanager.com/gtag/js?id={GA}"></script><script>window.dataLayer=window.dataLayer||[];function gtag(){{dataLayer.push(arguments);}}gtag("js",new Date());gtag("config","{GA}");</script>'
 OK_SRC = re.compile(r"^https?://([a-z0-9-]+\.)*(law\.go\.kr|lawmaking\.go\.kr|korea\.kr|moel\.go\.kr|work24\.go\.kr|ei\.go\.kr|comwel\.or\.kr|nhis\.or\.kr|nps\.or\.kr|kead\.or\.kr|bokjiro\.go\.kr|mohw\.go\.kr|minimumwage\.go\.kr|assembly\.go\.kr|4insure\.or\.kr|kosha\.or\.kr)([/?#]|$)", re.I)
 
@@ -112,6 +128,7 @@ header.top .in{display:flex;align-items:center;justify-content:space-between;gap
 header.top a.brand{color:#fff;text-decoration:none;font-weight:700;font-size:18px}
 header.top a.brand small{display:block;font-weight:400;font-size:12px;opacity:.85}
 header.top a.open{color:#1a4c8c;background:#fff;border-radius:999px;padding:7px 14px;font-size:13px;font-weight:700;text-decoration:none;white-space:nowrap}
+.by{font-size:13px;color:#56687f;margin:-4px 0 12px}.by a{color:#12396e;font-weight:600}
 nav.crumb{font-size:13px;color:#56687f;margin:18px 0 6px}nav.crumb a{color:#56687f}
 h1{font-size:23px;line-height:1.4;margin:4px 0 10px;letter-spacing:-.4px}
 h2{font-size:17px;margin:0 0 10px;color:#12396e}
@@ -154,6 +171,8 @@ def page(path, title, desc, body, crumbs, ld=None):
     lds.append({"@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": bl})
     if ld:
         lds.append(ld)
+    if path != "about.html" and "</h1>" in body:
+        body = body.replace("</h1>", f'</h1><p class="by">작성·감수: <a href="{up}about.html">공인노무사 {AUTHOR_NAME}</a> ({AUTHOR_TITLE})</p>', 1)
     ld_html = "".join('<script type="application/ld+json">' + json.dumps(x, ensure_ascii=False).replace("</", "<\\/") + "</script>" for x in lds)
     return f"""<!DOCTYPE html>
 <html lang="ko">
@@ -183,6 +202,7 @@ def page(path, title, desc, body, crumbs, ld=None):
 </main>
 <footer><div class="in">
 <p>이 페이지는 {FIRM}이 노동·사회보험 기준과 행정해석을 업무 참고용으로 정리한 일반 정보입니다. 개별 사안에 대한 법률 자문을 대신하지 않으며, 최종 판단은 원문 법령·고시·지침과 최신 판례로 확인해 주세요.</p>
+<p>작성·감수: <a href="{up}about.html">공인노무사 {AUTHOR_NAME}</a> ({AUTHOR_TITLE})</p>
 <p>{FIRM} | 부산 <a href="tel:0518534421">051-853-4421</a> | 거제 <a href="tel:0556374421">055-637-4421</a> | <a href="https://www.xn--o80bq8pj4a8ztxwcn2k.com/">홈페이지</a> | <a href="{up}privacy.html">개인정보 처리방침</a></p>
 </div></footer>
 </body>
@@ -261,7 +281,7 @@ def build_interp(items, out):
                 + cta(up, f"?i={x['id']}", "앱에서 이 해석 보기", TOPIC_CALC.get(x.get("topic"))) + rel_html)
         desc = clip(f"{KNAME[k]} {no} ({ymd_dot(x.get('date'))}). " + (x.get("q") or "") + " " + (x.get("a") or ""), 160)
         ld = {"@context": "https://schema.org", "@type": "Article", "headline": clip(x["title"], 110), "description": desc, "inLanguage": "ko",
-              "about": KNAME[k], "author": {"@type": "Organization", "name": FIRM}, "publisher": {"@type": "Organization", "name": FIRM},
+              "about": KNAME[k], "author": AUTHOR_LD, "publisher": {"@type": "Organization", "name": FIRM},
               "mainEntityOfPage": BASE + path}
         if x.get("added"):
             ld["datePublished"] = x["added"]
@@ -334,7 +354,7 @@ def build_figures(items, out):
                 + cta("../", "#summary", "앱에서 전체 기준 보기", calc) + rel_html)
         desc = clip(f"{title}. " + (f"근거: {last.get('basis')}. " if last.get("basis") else "") + "연도별 변경 이력과 근거 법령·고시를 함께 정리했습니다.", 160)
         ld = {"@context": "https://schema.org", "@type": "Article", "headline": clip(title, 110), "description": desc, "inLanguage": "ko",
-              "author": {"@type": "Organization", "name": FIRM}, "publisher": {"@type": "Organization", "name": FIRM}, "mainEntityOfPage": BASE + path}
+              "author": AUTHOR_LD, "publisher": {"@type": "Organization", "name": FIRM}, "mainEntityOfPage": BASE + path}
         out[path] = page(path, f"{title} | {APP_NAME}", desc, body, [(APP_NAME, ""), ("기준 수치", "figures/index.html"), (it["name"], None)], ld)
     secs = "".join(f'<div class="box"><h2>{E(g)}</h2><ul class="list">' + "".join(f'<li><a href="{E(j)}.html">{E(fig_title(items[j]))}</a></li>' for j in ks) + "</ul></div>" for g, ks in groups.items())
     body = (f'<h1>노동·사회보험 기준 수치 {TODAY[:4]}</h1><p>최저임금, 구직급여 상·하한액, 출산전후휴가·육아휴직 급여 상한, 산재보험 보상기준, 4대보험 요율과 상·하한 등 자주 찾는 기준 수치를 근거 법령·고시와 함께 정리했습니다. 확정된 다음 연도 수치도 함께 표시합니다.</p>'
@@ -361,7 +381,7 @@ def build_grants(grants, year_note, out):
                 + cta("../", f"?g={g['id']}", "앱에서 우리 회사 해당 여부 확인"))
         desc = clip(f"{g['name']}: {g.get('headline') or ''}. 대상 {g.get('target') or ''}. {g.get('amount') or ''}", 160)
         ld = {"@context": "https://schema.org", "@type": "Article", "headline": clip(g["name"], 110), "description": desc, "inLanguage": "ko",
-              "author": {"@type": "Organization", "name": FIRM}, "publisher": {"@type": "Organization", "name": FIRM}, "mainEntityOfPage": BASE + path}
+              "author": AUTHOR_LD, "publisher": {"@type": "Organization", "name": FIRM}, "mainEntityOfPage": BASE + path}
         out[path] = page(path, f"{g['name']} 지원 요건과 금액 | {APP_NAME}", desc, body, [(APP_NAME, ""), ("고용지원금", "grants/index.html"), (clip(g["name"], 40), None)], ld)
     fams = {}
     for g in grants:
@@ -441,7 +461,7 @@ def build_news(bdir, out):
         t = re.sub(r'<meta\s+property="og:url"[^>]*>', "", t, flags=re.I)
         t = re.sub(r"<a\b([^>]*)\bonclick=\"[^\"]*\"", r"<a\1", t)
         ld = {"@context": "https://schema.org", "@type": "Article", "headline": clip(f"노동뉴스 데일리 브리핑 {dot}: " + " · ".join(foc), 110),
-              "description": desc, "datePublished": day, "inLanguage": "ko", "author": {"@type": "Organization", "name": FIRM},
+              "description": desc, "datePublished": day, "inLanguage": "ko", "author": AUTHOR_LD,
               "publisher": {"@type": "Organization", "name": FIRM}, "mainEntityOfPage": url}
         head = (f'<meta name="description" content="{E(desc)}">\n<link rel="canonical" href="{E(url)}">\n<meta property="og:url" content="{E(url)}">\n'
                 '<meta name="naver-site-verification" content="32184885c8b561ba6dcf743867eb9a5fd3523963">\n<link rel="icon" href="../icons/favicon-32.png">\n'
@@ -449,13 +469,13 @@ def build_news(bdir, out):
                 '<style>.cnb-bar{margin:-32px -16px 24px;background:#1a4c8c;color:#fff;font-family:"Apple SD Gothic Neo","Malgun Gothic",sans-serif}.cnb-in{max-width:520px;margin:0 auto;padding:12px 16px;display:flex;align-items:center;justify-content:space-between;gap:10px;font-size:13px}'
                 '.cnb-bar a{color:#fff;text-decoration:none}.cnb-bar b{font-size:15px}.cnb-open{background:#fff;color:#1a4c8c!important;border-radius:999px;padding:6px 12px;font-weight:700;white-space:nowrap}'
                 '.cnb-nav{max-width:520px;margin:20px auto 0;padding:0 0 8px;display:flex;flex-wrap:wrap;gap:8px;justify-content:center;font-family:"Apple SD Gothic Neo","Malgun Gothic",sans-serif}'
-                '.cnb-nav a{display:inline-block;border:1px solid #c9d3df;background:#fff;border-radius:999px;padding:8px 14px;font-size:13px;color:#1a4c8c;text-decoration:none;font-weight:600}</style>\n')
+                '.cnb-by{text-align:center;font-size:12.5px;color:#56687f;margin:10px 0 0}.cnb-by a{color:#1a4c8c;font-weight:600}.cnb-nav a{display:inline-block;border:1px solid #c9d3df;background:#fff;border-radius:999px;padding:8px 14px;font-size:13px;color:#1a4c8c;text-decoration:none;font-weight:600}</style>\n')
         t = re.sub(r"</head>", head + "</head>", t, count=1, flags=re.I)
         top = (f'<div class="cnb-bar"><div class="cnb-in"><span><a href="../"><b>{APP_NAME}</b></a> &gt; <a href="./">노동뉴스</a> &gt; {E(dot)}</span>'
                f'<a class="cnb-open" href="../#news">앱 열기</a></div></div>')
         prev_d = days[i - 1] if i > 0 else None
         next_d = days[i + 1] if i + 1 < len(days) else None
-        nav = '<nav class="cnb-nav" aria-label="다른 브리핑">' + (f'<a href="{prev_d}.html">이전 브리핑 {prev_d[5:].replace("-", ".")}({wd(prev_d)})</a>' if prev_d else "") + '<a href="./">노동뉴스 전체 목록</a>' + (f'<a href="{next_d}.html">다음 브리핑 {next_d[5:].replace("-", ".")}({wd(next_d)})</a>' if next_d else "") + "</nav>"
+        nav = '<nav class="cnb-nav" aria-label="다른 브리핑">' + (f'<a href="{prev_d}.html">이전 브리핑 {prev_d[5:].replace("-", ".")}({wd(prev_d)})</a>' if prev_d else "") + '<a href="./">노동뉴스 전체 목록</a>' + (f'<a href="{next_d}.html">다음 브리핑 {next_d[5:].replace("-", ".")}({wd(next_d)})</a>' if next_d else "") + "</nav>" + f'<p class="cnb-by">작성·감수: <a href="../about.html">공인노무사 {AUTHOR_NAME}</a> ({AUTHOR_TITLE})</p>'
         t = re.sub(r"(<body[^>]*>)", r"\1" + top.replace("\\", "\\\\"), t, count=1, flags=re.I)
         t = re.sub(r"</body>", nav + "\n</body>", t, count=1, flags=re.I)
         out[path] = t
@@ -474,6 +494,26 @@ def build_news(bdir, out):
     return True
 
 
+def build_about(out):
+    lis = "".join(f"<li>{E(c)}</li>" for c in CAREER)
+    body = (f'<article><h1>공인노무사 {AUTHOR_NAME}</h1><ul class="meta"><li class="k">{AUTHOR_TITLE}</li><li>공인노무사</li><li>신체손해사정사</li></ul>'
+            f'<div class="box"><p>{APP_NAME}의 기준 수치, 행정해석, 고용지원금, 제도 변경, 노동뉴스 브리핑은 공인노무사 {AUTHOR_NAME}이 작성하고 감수합니다. '
+            '기준 수치와 행정해석은 국가법령정보센터, 고용노동부, 정책브리핑 등 공식 원문과 대조한 것만 싣고, 법령 개정이나 판례 변경으로 기준이 바뀌면 이력과 함께 고칩니다.</p></div>'
+            f'<div class="box"><h2>약력</h2><ul class="list">{lis}</ul></div>'
+            '<div class="box"><h2>업무 분야</h2><p>노동관계법령 자문 의견서, 산재보험 업무상 재해 검토와 심사·재심사 청구, 부당해고·징계·임금체불·직장 내 괴롭힘 등 노동사건, '
+            '취업규칙·인사노무 제도 설계, 노사발전재단 일터혁신 컨설팅, 근재보험·상해보험 등 신체손해사정</p><p>공인노무사·신체손해사정사 실무 경력 20년 이상</p></div>'
+            '<div class="box"><h2>사무소</h2><p>청아노무법인 부산 <a href="tel:0518534421">051-853-4421</a></p>'
+            '<p>청아노무법인 거제 <a href="tel:0556374421">055-637-4421</a> | 경상남도 거제시 거제중앙로 1930-10, 씨동 1207호(거제아틀란티스)</p>'
+            '<p><a href="https://www.xn--o80bq8pj4a8ztxwcn2k.com/">청아노무법인 홈페이지</a></p></div></article>'
+            + cta("./", "", "청아 노무수첩 열기"))
+    ld = {"@context": "https://schema.org", "@type": "ProfilePage", "url": AUTHOR_URL, "mainEntity": dict(AUTHOR_LD, **{
+        "hasCredential": ["공인노무사", "신체손해사정사"], "description": f"공인노무사, {AUTHOR_TITLE}",
+        "knowsAbout": ["노동법", "산재보험", "임금", "퇴직금", "직장 내 괴롭힘", "인사노무관리", "신체손해사정"]})}
+    out["about.html"] = page("about.html", f"공인노무사 {AUTHOR_NAME} ({AUTHOR_TITLE}) | {APP_NAME}",
+                             f"공인노무사 {AUTHOR_NAME}, {AUTHOR_TITLE}. 근로복지공단 부산지역본부 고객권익보호담당관, 부산지방노동위원회 국선노무사, 부산북부지청 직장 내 괴롭힘 전문위원회 위원 등.",
+                             body, [(APP_NAME, ""), ("작성·감수자 소개", None)], ld)
+
+
 def main():
     d = json.load(open(os.path.join(ROOT, "data.json"), encoding="utf-8"))
     iv = json.load(open(os.path.join(ROOT, "interp.json"), encoding="utf-8"))
@@ -482,6 +522,7 @@ def main():
     build_figures(d["items"], out)
     build_grants(d.get("grants", []), d.get("meta", {}).get("grantsYear", ""), out)
     build_changes(d.get("scheduled", []), d.get("notices", []), out)
+    build_about(out)
     bdir = os.environ.get("BRIEFING_DIR") or os.path.join(os.path.dirname(ROOT), "labor-briefing")
     news_ok = os.path.isdir(os.path.join(bdir, "daily"))
     if news_ok:
@@ -523,7 +564,7 @@ def main():
     # sitemap: 앱 첫 화면과 개인정보 처리방침 + 생성 페이지
     app_mod = max([v[1] for v in new_state.values()] + [d.get("meta", {}).get("checked", TODAY)])
     urls = [(BASE, app_mod, "daily", "1.0")]
-    pri = {"interp/index.html": "0.9", "figures/index.html": "0.9", "grants/index.html": "0.8", "changes.html": "0.8", "news/index.html": "0.8"}
+    pri = {"interp/index.html": "0.9", "figures/index.html": "0.9", "grants/index.html": "0.8", "changes.html": "0.8", "news/index.html": "0.8", "about.html": "0.7"}
     for path in sorted(new_state):
         loc = BASE + path.replace("index.html", "")
         p = pri.get(path, "0.7" if path.startswith("figures/") else "0.6")

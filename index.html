@@ -434,7 +434,13 @@ $("#mnext").addEventListener("click",()=>shiftMonth(1));
 $("#today").addEventListener("click",()=>{MODE="today";ASOF=todayStr();syncHeader();const b=$("#today");b.textContent="갱신 중";
   loadData().then(()=>{render();b.textContent="오늘";}).catch(e=>{b.textContent="오늘";render();});});
 
-function render(){if(!D)return;({summary:rSummary,calc:rCalc,grants:rGrants,interp:rInterp,news:rNews,search:rSearch,table:rSearch}[TAB]||rSummary)();}
+function render(){if(!D)return;({summary:rSummary,calc:rCalc,grants:rGrants,interp:rInterp,news:rNews,search:rSearch,table:rSearch}[TAB]||rSummary)();
+  /* 검색용 페이지·브리핑 바로가기(?i, ?g, #calc-)로 처음 들어온 경우: 요약이 아닌 탭에도 설치 안내를 맨 위에 보여 줌 */
+  if(ENTRY_EXT&&TAB!=="summary"){const v=app.querySelector("section.view");if(v&&!v.querySelector(".instb")){const h=installPanel();
+    if(h){const t=ENTRY_FIRST?v.querySelector("details[open][data-iid],details[open][data-gid]"):null;if(t){t.insertAdjacentHTML("beforebegin",h);const go=()=>{const pn=v.querySelector(".instb"),hd=document.querySelector("header.top");if(pn)window.scrollTo(0,pn.getBoundingClientRect().top+window.scrollY-(hd?Math.max(0,hd.getBoundingClientRect().bottom):0)-10);};setTimeout(go,120);setTimeout(go,400);}else v.insertAdjacentHTML("afterbegin",h);}}}
+  ENTRY_FIRST=false;}
+let ENTRY_FIRST=true;
+const ENTRY_EXT=(()=>{try{const sp=new URLSearchParams(location.search);return sp.has("i")||sp.has("g")||sp.has("c")||/^#calc[-/]/.test(location.hash);}catch(e){return false;}})();
 
 /* ---------- 요약 ---------- */
 function rSummary(){

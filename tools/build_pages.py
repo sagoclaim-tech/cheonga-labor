@@ -195,7 +195,8 @@ def cta(up, app_link, app_text, calc=None):
     if calc:
         btns.append(f'<a href="{up}#calc-{calc}">{E(CALC_NAME[calc])} 계산기</a>')
     btns.append('<a class="tel" href="tel:0518534421">상담 051-853-4421</a>')
-    return f'<div class="cta"><p>{APP_NAME}에서 기준 수치, 계산기, 지원금, 행정해석을 한곳에서 확인할 수 있습니다. 구체적 사안은 {FIRM}에 문의해 주세요.</p><div class="btns">{"".join(btns)}</div></div>'
+    return (f'<div class="cta"><p>{APP_NAME}에서 기준 수치, 계산기, 지원금, 행정해석을 한곳에서 확인할 수 있습니다. 구체적 사안은 {FIRM}에 문의해 주세요.</p><div class="btns">{"".join(btns)}</div>'
+            f'<p style="margin:12px 0 0;font-size:13px;opacity:.9">※ {APP_NAME}은 무료 앱으로 휴대폰과 PC에 설치해 바로 열 수 있습니다. 앱을 처음 열면 맨 위에 기기별 설치 방법이 나옵니다.</p></div>')
 
 
 def src_html(u, extra=""):

@@ -4,6 +4,9 @@
 #   평일 07:00~11:40(한국시간)에는 20분마다, 12:00~23:00에는 매시 정각에 확인한다. 바뀐 것이 없으면 커밋하지 않는다.
 # - 날짜가 바뀌면 "시행 예정"이 "현행"으로 넘어가므로 매일 0시 10분(한국시간)에도 한 번 실행한다.
 # - 바뀐 페이지가 없으면 커밋하지 않는다.
+# - 새 소식 알림: 페이지를 만든 뒤 tools/push_notify.py가 새 노동뉴스, 새 행정해석, 기준 수치·제도 변경을 찾아
+#   알림을 켠 기기에 웹 푸시를 보낸다(Secret PUSH_CONFIG 필요, 없으면 기록만). 이미 알린 목록은 tools/push_state.json.
+#   수동 실행(workflow_dispatch)에서 test_push에 문구를 넣으면 시험 알림만 보낸다.
 name: 검색용 페이지 갱신
 
 on:
@@ -13,6 +16,7 @@ on:
       - data.json
       - interp.json
       - tools/build_pages.py
+      - tools/push_notify.py
       - .github/workflows/pages.yml
   schedule:
     - cron: "10 15 * * *"
@@ -20,6 +24,11 @@ on:
     - cron: "*/20 0-2 * * 1-5"
     - cron: "0 3-14 * * 1-5"
   workflow_dispatch:
+    inputs:
+      test_push:
+        description: "시험 알림 문구(넣으면 시험 알림만 발송)"
+        required: false
+        default: ""
 
 permissions:
   contents: write
@@ -45,11 +54,18 @@ jobs:
         env:
           BRIEFING_DIR: _briefing
         run: python3 tools/build_pages.py
+      - name: 새 소식 알림 발송
+        env:
+          PUSH_CONFIG: ${{ secrets.PUSH_CONFIG }}
+          TEST_PUSH: ${{ github.event.inputs.test_push }}
+        run: |
+          pip install --quiet pywebpush requests
+          if [ -n "$TEST_PUSH" ]; then python3 tools/push_notify.py --test "$TEST_PUSH"; else python3 tools/push_notify.py; fi
       - name: 바뀐 페이지 커밋
         run: |
           git config user.name "sagoclaim-tech"
           git config user.email "sagoclaim@hanmail.net"
-          git add -A interp figures grants news changes.html sitemap.xml rss.xml tools/pages_lastmod.json
+          git add -A interp figures grants news changes.html sitemap.xml rss.xml tools/pages_lastmod.json tools/push_state.json
           if git diff --cached --quiet; then echo "바뀐 페이지 없음"; exit 0; fi
           git commit -m "검색용 페이지·사이트맵 자동 갱신"
           for i in 1 2 3; do

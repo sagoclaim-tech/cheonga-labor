@@ -1274,7 +1274,7 @@ if("serviceWorker" in navigator){window.addEventListener("load",()=>{navigator.s
    안드로이드는 읽지 않은 알림이 있는 동안 앱 아이콘에 배지가 붙고, 아이폰은 숫자 배지를 직접 붙인다.
    앱을 열면 알림과 배지를 지우고, 대신 해당 탭 아이콘에 빨간 점을 남긴다. 탭을 열면 점이 사라진다.
    PUSH.url: 구독 저장소(Apps Script 웹 앱) 주소, PUSH.key: VAPID 공개키. 둘 중 하나라도 비면 기능 전체가 숨는다. */
-const PUSH={url:"",key:"BKoBvNHVXSR6jMgD7uh22p0PgmKIL5bjqJHBkuWiK7FThrd2wLOCeaMOLPXTrcyN9mLfbWMQEh_rfZ81WdzhF_Q"};
+const PUSH={url:"https://script.google.com/macros/s/AKfycbzLIerNJg9LM08LLE70hg60wTEtk9XAlfPWBJwraqfMH4TDvf8SN-S97o1hhRK4Lowk/exec",key:"BKoBvNHVXSR6jMgD7uh22p0PgmKIL5bjqJHBkuWiK7FThrd2wLOCeaMOLPXTrcyN9mLfbWMQEh_rfZ81WdzhF_Q"};
 const PUSH_OK=!!(PUSH.url&&PUSH.key&&"serviceWorker" in navigator&&"PushManager" in window&&"Notification" in window);
 const PTABS=["summary","interp","news"];
 let PBUSY=false,PMSG="";

@@ -103,7 +103,7 @@ def messages(cur, seen, today):
         only_interp = len(ni) == 1 and cur["interp"][ni[0]]["kind"] == "행정해석" and re.fullmatch(r"[A-Za-z0-9_-]+", ni[0])
         out.append({"title": f"새 {'·'.join(kinds)} {len(ni)}건",
                     "body": cut(first, 110) + (f" 외 {len(ni) - 1}건" if len(ni) > 1 else ""),
-                    "url": f"./?i={ni[0]}" if only_interp else "./#interp", "tab": "interp",
+                    "url": f"./?i={ni[0]}" if only_interp else "./?new=1#interp", "tab": "interp",
                     "tag": "interp-" + stamp})
     nd = [k for k in cur["data"] if k not in seen["data"]]
     if nd:

@@ -3,7 +3,9 @@
 
 무엇을 하나
 - 저장소의 현재 내용과 tools/push_state.json(이미 알린 목록)을 비교해 새로 올라온 것을 찾는다.
-  · 노동뉴스: news/YYYY-MM-DD.html (최근 3일 안의 날짜만 알림)
+  · 노동뉴스: news/YYYY-MM-DD.html은 기록만 한다. 알림은 labor-briefing 저장소의 tools/push_news.py가
+    브리핑이 올라오는 즉시 보낸다(2026.11.17. 변경. 이 저장소의 예약 실행이 아침에 자주 빠져 알림이 늦었음).
+    NEWS_HERE를 True로 바꾸면 예전처럼 여기서 보낸다(이때는 labor-briefing 쪽 작업을 꺼야 중복이 없다).
   · 행정해석·설명자료: interp.json, guides.json의 새 id
   · 기준 수치·제도 변경: data.json의 items 이력, scheduled, notices, grants
 - 새 소식이 있으면 종류별로 알림 1건씩을 구독 기기 전체에 보낸다.
@@ -32,6 +34,7 @@ ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 STATE = os.path.join(ROOT, "tools", "push_state.json")
 KST = timezone(timedelta(hours=9))
 WD = "월화수목금토일"
+NEWS_HERE = False  # 노동뉴스 알림을 이 저장소에서 보낼지. 지금은 labor-briefing 저장소가 보낸다
 
 
 def load(name):
@@ -87,7 +90,7 @@ def messages(cur, seen, today):
     out = []
     stamp = datetime.now(KST).strftime("%Y-%m-%d-%H%M")  # 같은 날 두 번 올라와도 앞 알림을 덮어쓰지 않게
     lo = (today - timedelta(days=3)).isoformat()
-    for day in sorted(k for k in cur["news"] if k not in seen["news"] and k >= lo):
+    for day in sorted(k for k in cur["news"] if NEWS_HERE and k not in seen["news"] and k >= lo):
         dt = datetime.strptime(day, "%Y-%m-%d")
         foc = news_focus(open(cur["news"][day], encoding="utf-8").read())[:3]
         out.append({"title": f"노동뉴스 브리핑 {dt.month}.{dt.day}.({WD[dt.weekday()]})",

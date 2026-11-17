@@ -29,7 +29,7 @@
 ## 새 소식 알림과 배지(웹 푸시)
 - 설치한 앱에서 「새 소식 알림 받기」를 켠 기기에는 노동뉴스 브리핑, 새 행정해석·설명자료, 기준 수치·제도 변경이 올라올 때 알림이 갑니다. 안드로이드는 읽지 않은 알림이 있는 동안 앱 아이콘에 배지가 붙고, 아이폰(iOS 16.4 이상, 홈 화면에 추가한 앱)은 숫자 배지가 붙습니다.
 - 앱을 열면 알림과 배지는 지워지고, 해당 탭(요약, 행정해석, 노동뉴스) 아이콘에 빨간 점이 남습니다. 탭을 열면 점이 사라집니다.
-- 발송: `.github/workflows/pages.yml`의 「새 소식 알림 발송」 단계가 `tools/push_notify.py`를 돌립니다. 이미 알린 목록은 `tools/push_state.json`(도구 전용, 직접 고치지 않음)에 있고, 새로 생긴 것만 종류별로 알림 1건씩 보냅니다. 노동뉴스는 최근 3일 안의 날짜만 알립니다. ※ 자동 점검이 scheduled의 제목이나 상태를 고치면 새 변경으로 보아 알림이 갑니다.
+- 발송: `.github/workflows/pages.yml`의 「새 소식 알림 발송」 단계가 `tools/push_notify.py`를 돌립니다. 이미 알린 목록은 `tools/push_state.json`(도구 전용, 직접 고치지 않음)에 있고, 새로 생긴 것만 종류별로 알림 1건씩 보냅니다. 노동뉴스 브리핑 알림은 여기서 보내지 않고, labor-briefing 저장소의 「노동뉴스 새 소식 알림」 작업(`tools/push_news.py`)이 브리핑이 올라오는 즉시 보냅니다(이 저장소는 기록만 함). ※ 자동 점검이 scheduled의 제목이나 상태를 고치면 새 변경으로 보아 알림이 갑니다.
 - 구독 저장소: 구글 스프레드시트에 붙인 Apps Script 웹 앱(`tools/push_store.gs`). 주소는 index.html의 `PUSH.url`, 서명용 공개키는 `PUSH.key`입니다. `PUSH.url`이 비어 있으면 알림 기능 전체가 화면에서 숨습니다.
-- 비밀 값: GitHub Secret `PUSH_CONFIG`(JSON, `key`와 `vapid_private`). 저장소에는 올리지 않습니다. 없으면 발송하지 않고 기록만 합니다.
+- 비밀 값: GitHub Secret `PUSH_CONFIG`(JSON, `key`와 `vapid_private`). cheonga-labor와 labor-briefing 두 저장소에 같은 값이 등록되어 있습니다. 저장소에는 올리지 않습니다. 없으면 발송하지 않고 기록만 합니다.
 - 시험: GitHub의 Actions에서 「검색용 페이지 갱신」을 수동 실행하면서 test_push에 문구를 넣으면 시험 알림만 보냅니다. 로컬에서는 `python3 tools/push_notify.py --dry`로 보낼 내용만 확인합니다.

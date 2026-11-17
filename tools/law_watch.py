@@ -18,12 +18,15 @@ import argparse, html, json, os, re, subprocess, sys, time
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 WATCH = os.path.join(ROOT, "law_watch.json")
-URL = "https://www.law.go.kr/LSW/lsScListR.do?menuId=1&subMenuId=15&tabMenuId=81"
+# 2026. 11. 국가법령정보센터 검색 화면 개편으로 lsScListR.do, admRulScListR.do가 오류페이지만 돌려준다.
+# 새 검색 화면(lsSc.do, admRulSc.do)은 GET 요청에 결과 표를 HTML로 바로 담아 준다. 연혁 탭을 쓴다.
+URL = "https://www.law.go.kr/LSW/lsSc.do?menuId=1&subMenuId=17&tabMenuId=93"
 API = "https://www.law.go.kr/DRF/lawSearch.do"
-ADM_URL = "https://www.law.go.kr/LSW/admRulScListR.do?menuId=5&subMenuId=41&tabMenuId=183"
+ADM_URL = "https://www.law.go.kr/LSW/admRulSc.do?menuId=5&subMenuId=43&tabMenuId=193"
 PAT = re.compile(r"lsViewWideAll\('(\d+)','(\d+)'.*?title=\"([^\"]+)\"", re.S)
 TITLE = re.compile(r"^(.*?) \[시행 ([0-9. ]+)\] \[([^\]]+)\]$")
-EMPTY = re.compile(r"총\s*(<[^>]*>\s*)*0\s*(<[^>]*>\s*)*건")
+EMPTY = re.compile(r"총\s*<span>\s*0\s*</span>\s*건")
+ROWPOP = re.compile(r"lawInfoPop\('(\d+)','(\d+)','(\d*)',\s*'(\d+)'")
 
 
 def curl(args, tries=6):
@@ -36,13 +39,25 @@ def curl(args, tries=6):
 
 
 def fetch_law(q):
-    """검색 결과 HTML. 결과 0건이면 빈 문자열, 접속 실패면 None."""
-    for t in curl(["-X", "POST", URL, "--data-urlencode", f"q={q}",
-                   "--data", "outmax=50&pg=1&section=lawNm&fsort=10,41,21,31"]):
-        if "lsViewWideAll" in t:
-            return t
-        if EMPTY.search(t) or "검색결과 가 없습니다" in t or "검색결과가 없습니다" in t:
-            return ""
+    """법령 연혁 검색 결과 행 목록. 결과 0건이면 [], 접속 실패면 None.
+    각 행: {"seq", "name", "anc"(공포일 YYYY. M. D.), "kind", "no", "eff"(YYYY-MM-DD), "rv"}"""
+    for t in curl(["-G", URL, "--data-urlencode", f"query={q}", "--data", "outmax=300"]):
+        if "오류페이지" in t[:3000]:
+            continue
+        rows = []
+        for tr in re.findall(r"<tr>(.*?)</tr>", t, re.S):
+            m = ROWPOP.search(tr)
+            if not m:
+                continue
+            tds = [_cell(x) for x in re.findall(r"<td[^>]*>(.*?)</td>", tr, re.S)]
+            if len(tds) < 7:
+                continue
+            rows.append({"seq": m.group(1), "name": tds[1], "anc": tds[2], "kind": tds[3], "no": tds[4],
+                         "eff": d8(m.group(4)), "rv": tds[6]})
+        if rows:
+            return rows
+        if EMPTY.search(t):
+            return []
     return None
 
 
@@ -51,7 +66,7 @@ def _cell(x):
 
 
 def _d8(s):
-    p = [x for x in re.split(r"[. ]+", s or "") if x]
+    p = [x for x in re.split(r"[. ]+", re.sub(r"[^0-9. ]", "", s or "")) if x]
     return f"{int(p[0]):04d}{int(p[1]):02d}{int(p[2]):02d}" if len(p) >= 3 else ""
 
 
@@ -63,10 +78,11 @@ def fetch_admrul_html(q, since="2026-01-01", pages=3):
     rows = []
     for pg in range(1, pages + 1):
         got = None
-        for t in curl(["-X", "POST", ADM_URL, "--data-urlencode", f"q={q}",
-                       "--data", f"outmax=50&pg={pg}&p6=1,2,3&fsort=61,21,11,31&section=admRulNm"
-                                 "&admRulSeq=0&dtlYn=N&admType=N&p15=1,3"]):
-            if "showDefAdmRul" in t or "showAdmRulCts" in t:
+        for t in curl(["-G", ADM_URL, "--data-urlencode", f"query={q}",
+                       "--data", f"outmax=100&pg={pg}"]):
+            if "오류페이지" in t[:3000]:
+                continue
+            if "lawInfPop(" in t or "showDefAdmRul" in t or "showAdmRulCts" in t:
                 got = t; break
             if EMPTY.search(t) or "검색결과가 없습니다" in t or "검색결과 가 없습니다" in t:
                 got = ""; break
@@ -74,7 +90,7 @@ def fetch_admrul_html(q, since="2026-01-01", pages=3):
             return None if pg == 1 else rows
         older = False
         for tr in re.findall(r"<tr>(.*?)</tr>", got, re.S):
-            sn = re.search(r"(?:showDefAdmRul|showAdmRulCts)\('(\d+)'", tr)
+            sn = re.search(r"(?:lawInfPop|showDefAdmRul|showAdmRulCts)\('(\d+)'", tr)
             tds = [_cell(x) for x in re.findall(r"<td[^>]*>(.*?)</td>", tr, re.S)]
             if not sn or len(tds) < 8:
                 continue
@@ -86,7 +102,7 @@ def fetch_admrul_html(q, since="2026-01-01", pages=3):
             rows.append({"행정규칙일련번호": sn.group(1), "행정규칙명": tds[1], "행정규칙종류": kind,
                          "발령번호": re.sub(r"^제|호$", "", tds[3]), "발령일자": issued,
                          "시행일자": _d8(tds[5]), "제개정구분명": tds[6], "소관부처명": org})
-        if older or got.count("<tr>") < 50:
+        if older or got.count("lawInfPop(") < 100:
             break
         time.sleep(1)
     return rows
@@ -129,16 +145,14 @@ def watch_laws(w, since, out, fail):
             t = fetch_law(name)
             if t is None:
                 fail.append(name); continue
-            for seq, ef, title in PAT.findall(t):
-                title = re.sub(r"\s+", " ", html.unescape(title)).strip()
-                m = TITLE.match(title)
-                if not m or m.group(1).replace(" ", "") != name.replace(" ", ""):
+            for r in t:
+                if r["name"].replace(" ", "") != name.replace(" ", ""):
                     continue
-                eff = ymd(m.group(2))
-                if eff < since:
+                if r["eff"] < since:
                     continue
-                out.append({"kind": "law", "law": m.group(1), "eff": eff, "meta": m.group(3),
-                            "lsiSeq": seq, "new": seq not in seen})
+                out.append({"kind": "law", "law": r["name"], "eff": r["eff"],
+                            "meta": f'{r["kind"]} {r["no"]}, {r["anc"]}, {r["rv"]}',
+                            "lsiSeq": r["seq"], "new": r["seq"] not in seen})
             time.sleep(1)
 
 

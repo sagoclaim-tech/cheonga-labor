@@ -189,6 +189,7 @@ h2{color:var(--accent)}
 .alc{width:3.8em;padding:4px 5px;border:1px solid var(--line);border-radius:6px;background:var(--surface);text-align:right;font-family:var(--f-num);font-size:13px}
 .alc.ed{border-color:var(--accent);border-width:2px}
 .basis{font-size:11px;color:var(--muted);border-top:1px dashed var(--line);padding-top:8px}
+.ishare{display:flex;flex-wrap:wrap;gap:6px}.ishare button{display:inline-flex;align-items:center;gap:5px;padding:6px 12px;border-radius:999px;border:1px solid rgba(26,76,140,.35);background:transparent;color:var(--hdr,#1a4c8c);font:inherit;font-size:12.5px;font-weight:600;cursor:pointer}.ishare button:first-child{background:var(--hdr,#1a4c8c);border-color:var(--hdr,#1a4c8c);color:#fff}.ishare svg{width:14px;height:14px;fill:none;stroke:currentColor;stroke-width:1.8}.ishare button:active{opacity:.75}.cshare{margin-top:-2px}
 
 /* 표 */
 .tw{overflow-x:auto;border:1px solid var(--line);border-radius:8px}
@@ -517,12 +518,14 @@ function rSummary(){
 
 /* ---------- 계산기 ---------- */
 const CALCS=[["mw","최저임금"],["ui","실업급여"],["pl","육아휴직급여"],["mat","출산전후휴가급여"],["sp","배우자 출산전후휴가급여"],["sj","산재보상"],["ins","4대보험료"],["net","급여 실수령액"],["sev","퇴직금"],["al","연차일수"],["dg","대지급금"],["dis","장애인 고용"]];
+const ISV={share:'<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="18" cy="5" r="2.5"/><circle cx="6" cy="12" r="2.5"/><circle cx="18" cy="19" r="2.5"/><path d="M8.2 10.8l7.6-4.4M8.2 13.2l7.6 4.4"/></svg>',copy:'<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V5a1 1 0 0 0-1-1H5a1 1 0 0 0-1 1v10a1 1 0 0 0 1 1h3"/></svg>',mail:'<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 7l9 6 9-6"/></svg>'};
 function rCalc(){
   app.innerHTML=`<section class="view"><div><span class="eyebrow">${esc(asofText())} 기준 적용</span><h2>계산기</h2><p class="lede">입력값은 이 기기에만 저장됩니다.</p></div>
   <div class="cgrid" role="tablist">${CALCS.map(([k,n])=>`<button type="button" class="chip" data-c="${k}" aria-pressed="${k===CALC}">${n}</button>`).join("")}</div>
   <div id="cbody"></div></section>`;
   app.querySelectorAll("[data-c]").forEach(b=>b.addEventListener("click",()=>{saveY();CALC=b.dataset.c;rCalc();pushNav(null,true);}));
   ({mw:cMW,ui:cUI,pl:cPL,mat:cMAT,sp:cSP,sj:cSJ,dis:cDIS,ins:cINS,net:cNET,sev:cSEV,al:cAL,dg:cDG}[CALC])($("#cbody"));
+  $("#cbody").querySelectorAll(".result[id]").forEach(r=>r.insertAdjacentHTML("afterend",`<div class="ishare cshare"><button type="button" data-cshare="${r.id}">${ISV.share}공유하기</button><button type="button" data-ccopy="${r.id}">${ISV.copy}복사</button><button type="button" data-cmail="${r.id}">${ISV.mail}메일</button></div>`));
 }
 function labHtml(id,label){const h=HELP[id];return `<div class="lab"><label for="${id}">${label}</label>${h?`<button type="button" class="q" data-q="${id}" aria-expanded="false" aria-label="${esc(label)} 입력 방법">?</button>`:""}</div>`;}
 function helpHtml(id){const h=HELP[id];return h?`<div class="help" id="h_${id}" hidden>${esc(h)}</div>`:"";}
@@ -1133,7 +1136,7 @@ function rInterp(){
     const card=(x,key)=>`<details class="gcard"${key?` data-iid="${esc(x.id)}"`:""}><summary><div class="ghead"><span class="pill p-type">${esc(x.topic)}</span>${KPILL[x.kind]||""}${fresh(x)?'<span class="pill p-warn">새로 추가</span>':""}<span class="note">${esc(x.date)} · ${x.no?esc(x.no):"문서번호 없음"}${typeof x.views==="number"?" · 조회 "+x.views.toLocaleString("ko-KR"):""}</span></div><span class="gname">${toks.length?hl(x.title,toks):esc(x.title)}</span></summary>
       <div class="gbody">${x.kind==="guide"?`<div class="osec"><div class="oh">요지</div><ul class="gpts">${(x.points||[]).map(p=>`<li>${toks.length?hl(p,toks):esc(p)}</li>`).join("")}</ul></div>${x.file?`<p><a class="dlbtn" href="${esc(x.file)}" target="_blank" rel="noopener" download>PDF 원문 받기</a></p>`:""}`:(x.orig&&x.orig.length?x.orig:[{h:"질의 요지",t:x.q},{h:"회시 요지",t:x.a}]).map(sec=>`<div class="osec"><div class="oh">${esc(secName(sec.h,x))}</div><div class="ot">${toks.length?hl(sec.t,toks):esc(sec.t)}</div></div>`).join("")}
       ${x.note?`<p class="note">※ ${esc(x.note)}</p>`:""}${KOF(x)==="interp"&&x.date<"2020-01-01"?`<p class="note">※ ${esc(x.date.slice(0,4))}년 회시로, 그 뒤 법령이 바뀌었을 수 있으니 현행 법령을 함께 확인하세요.</p>`:""}
-      ${x.kind==="moleg"?`<p class="note">※ 법제처 법령해석은 행정부 내부의 법령해석 지침으로 법원의 확정판결과 같은 법적 기속력은 없으며, 해석 당시 법령을 대상으로 합니다.</p>`:""}${x.kind==="prec"?`<p class="note">※ 판례는 해당 사건의 사실관계를 전제로 한 판단입니다.</p>`:""}<div class="basis">출처: ${KNAME[KOF(x)]}${x.no&&x.kind!=="guide"?" "+esc(x.no.replace(/^법제처 /,"")):x.kind==="guide"?" "+esc(x.no.replace(/^고용노동부 /,"")):""}, ${esc(x.date)}${/law\.go\.kr/.test(x.src||"")?" (법제처 국가법령정보센터 수록)":""}</div></div></details>`;
+      ${x.kind==="moleg"?`<p class="note">※ 법제처 법령해석은 행정부 내부의 법령해석 지침으로 법원의 확정판결과 같은 법적 기속력은 없으며, 해석 당시 법령을 대상으로 합니다.</p>`:""}${x.kind==="prec"?`<p class="note">※ 판례는 해당 사건의 사실관계를 전제로 한 판단입니다.</p>`:""}<div class="ishare"><button type="button" data-ishare="${esc(x.id)}">${ISV.share}공유하기</button><button type="button" data-icopy="${esc(x.id)}">${ISV.copy}복사</button><button type="button" data-imail="${esc(x.id)}">${ISV.mail}메일</button></div><div class="basis">출처: ${KNAME[KOF(x)]}${x.no&&x.kind!=="guide"?" "+esc(x.no.replace(/^법제처 /,"")):x.kind==="guide"?" "+esc(x.no.replace(/^고용노동부 /,"")):""}, ${esc(x.date)}${/law\.go\.kr/.test(x.src||"")?" (법제처 국가법령정보센터 수록)":""}</div></div></details>`;
     const fl=toks.length?[]:list.filter(fresh).sort((a,b)=>a.added<b.added?1:a.added>b.added?-1:a.date<b.date?1:-1);
     $("#ilist").innerHTML=(fl.length?`<details class="inew"${INEW?" open":""}><summary><span class="inew-t">이번 주 새로 추가 ${fl.length}건</span><span class="note">최근 7일 동안 수록한 해석입니다. 해석일자와 관계없이 추가한 순서로 보여 줍니다.</span></summary><div class="inew-l">${fl.map(x=>card(x,false)).join("")}</div></details>`:"")+`<p class="note">${list.length}건</p>`+(list.map(x=>card(x,true)).join("")||`<p class="note">${items.length?"찾는 행정해석이 없습니다. 다른 표현으로 검색하거나 분야를 전체로 바꿔 보세요.":(IV?"행정해석 자료를 준비 중입니다. 확인된 회시부터 순차로 게시됩니다.":"행정해석 자료를 불러오지 못했습니다. 오늘 버튼을 눌러 다시 불러오세요.")}</p>`);
     if(IOPEN){const d=$("#ilist").querySelector(`[data-iid="${CSS.escape(IOPEN)}"]`);IOPEN=null;if(d){d.open=true;setTimeout(()=>d.scrollIntoView({block:"start"}),30);}}
@@ -1361,6 +1364,39 @@ try{history.replaceState({tab:"summary"},"","#summary");if(H0!=="summary")histor
 document.querySelectorAll("nav.tabs button").forEach(b=>b.setAttribute("aria-current",b.dataset.tab===TAB?"page":"false"));
 loadData().then(()=>render())
  .catch(e=>{app.innerHTML=`<div class="err">기준 데이터를 불러오지 못했습니다(${esc(e.message)}). 새로고침해 주세요.</div>`;});
+/* 행정해석 개별 공유: 휴대폰은 공유 시트(카카오톡·문자·메일 등), PC는 복사·메일. 링크는 검색용 개별 페이지(interp/<id>.html)로 보내 미리보기 제목이 뜨게 한다. */
+function interpShare(id){const x=allInterp().find(v=>v.id===id);if(!x)return null;
+  const url="https://app.청아노무법인.com/interp/"+encodeURIComponent(x.id)+".html";
+  const src=KNAME[KOF(x)]+(x.no?" "+x.no.replace(/^(법제처|고용노동부) /,""):"")+" ("+x.date+")";
+  const cut=t=>{t=String(t||"").replace(/\s+/g," ").trim();return t.length>300?t.slice(0,300)+"…":t;};
+  const body=x.kind==="guide"?(x.points||[]).slice(0,3).map(p=>"- "+cut(p)).join("\n"):(L=>["["+L[0]+"] "+cut(x.q),"["+L[1]+"] "+cut(x.a)])({moleg:["질의","해석"],prec:["사안","판단"],civil:["민원","답변"]}[x.kind]||["질의","회시"]).filter(l=>l.length>5).join("\n");
+  const text="[청아 노무수첩] "+x.title+"\n"+src+"\n\n"+body+"\n\n※ 원문과 유의사항은 링크에서 확인하세요.";
+  return {title:x.title,text,url};}
+/* 계산기 결과 공유: 계산기 이름, 보이는 입력값, 결과 문구를 그대로 묶는다. */
+function resText(el){const T=n=>(n.innerText||n.textContent||"").replace(/\s*\n\s*/g," / ").replace(/\s+/g," ").trim(),out=[];
+  const walk=n=>{if(n.nodeType===3){const t=n.textContent.trim();if(t)out.push(t);return;}if(n.nodeType!==1||n.hidden||getComputedStyle(n).display==="none")return;
+    if(n.matches(".ghead")){out.push([...n.children].map(T).filter(Boolean).join(" · "));return;}
+    if(n.matches("dl")){let k="";[...n.children].forEach(c=>{if(c.tagName==="DT")k=T(c);else if(c.tagName==="DD"){out.push("- "+(k?k+": ":"")+T(c));k="";}});return;}
+    if(n.matches("table")){n.querySelectorAll("tr").forEach(tr=>{const cs=[...tr.children].map(T);if(cs.some(Boolean))out.push(cs.join(" | "));});return;}
+    if(n.matches("p,li,.note,.basis,.row")){const t=T(n);if(t)out.push(t);return;}
+    [...n.childNodes].forEach(walk);};
+  walk(el);return out.filter(Boolean).join("\n").trim();}
+function calcShare(rid){const r=document.getElementById(rid);if(!r)return null;const res=resText(r);if(!res)return null;
+  const panel=r.closest(".panel")||$("#cbody"),h=panel.querySelector("h3"),title=(h?h.textContent.trim():"계산기").replace(/\s*계산$/,"");
+  const inp=[...panel.querySelectorAll(".f, .chkrow")].filter(f=>f.offsetParent!==null).map(f=>{const c=f.querySelector("input,select");if(!c)return "";const lb=f.querySelector("label");
+    if(c.type==="checkbox")return c.checked?"- "+(lb?lb.textContent.trim():""):"";
+    const val=c.tagName==="SELECT"?(c.options[c.selectedIndex]||{}).text:c.value;return val?"- "+(lb?lb.textContent.trim():"")+": "+val:"";}).filter(Boolean);
+  const text="[청아 노무수첩] "+title+" 계산 결과\n("+asofText()+" 기준)\n"+(inp.length?"\n[입력]\n"+inp.join("\n")+"\n":"")+"\n[결과]\n"+res+"\n\n※ 입력값에 따른 참고용 계산이며, 실제 금액은 사실관계와 관할 기관의 판단에 따라 달라질 수 있습니다.";
+  return {title:title+" 계산 결과",text,url:"https://app.청아노무법인.com/#calc"};}
+function iFlash(b,msg){const t=b.lastChild,o=t.textContent;t.textContent=msg;setTimeout(()=>{t.textContent=o;},1800);}
+document.addEventListener("click",async e=>{const b=e.target.closest("[data-ishare],[data-icopy],[data-imail],[data-cshare],[data-ccopy],[data-cmail]");if(!b)return;e.preventDefault();e.stopPropagation();
+  const k=b.dataset,isC=!!(k.cshare||k.ccopy||k.cmail),id=k.ishare||k.icopy||k.imail||k.cshare||k.ccopy||k.cmail,d=isC?calcShare(id):interpShare(id);if(!d){if(isC)iFlash(b,"결과 없음");return;}
+  const how=(k.ishare||k.cshare)?(navigator.share?"native":"copy"):(k.icopy||k.ccopy)?"copy":"mail";
+  try{gtag("event","share",{method:how,content_type:isC?"calc":"interp",item_id:isC?CALC:id});}catch(_){}
+  if(how==="native"){try{await navigator.share(d);}catch(_){}return;}
+  if(how==="mail"){location.href="mailto:?subject="+encodeURIComponent("[청아 노무수첩] "+d.title)+"&body="+encodeURIComponent(d.text+"\n"+d.url);return;}
+  try{await navigator.clipboard.writeText(d.text+"\n"+d.url);iFlash(b,"복사됨");}catch(_){prompt("아래 내용을 복사해 주세요.",d.text+"\n"+d.url);}
+});
 })();
 
 document.addEventListener("click",async e=>{const b=e.target.closest("[data-share]");if(!b)return;

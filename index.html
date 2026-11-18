@@ -189,7 +189,7 @@ h2{color:var(--accent)}
 .alc{width:3.8em;padding:4px 5px;border:1px solid var(--line);border-radius:6px;background:var(--surface);text-align:right;font-family:var(--f-num);font-size:13px}
 .alc.ed{border-color:var(--accent);border-width:2px}
 .basis{font-size:11px;color:var(--muted);border-top:1px dashed var(--line);padding-top:8px}
-.ishare{display:flex;flex-wrap:wrap;gap:6px}.ishare button{display:inline-flex;align-items:center;gap:5px;padding:6px 12px;border-radius:999px;border:1px solid rgba(26,76,140,.35);background:transparent;color:var(--hdr,#1a4c8c);font:inherit;font-size:12.5px;font-weight:600;cursor:pointer}.ishare button:first-child{background:var(--hdr,#1a4c8c);border-color:var(--hdr,#1a4c8c);color:#fff}.ishare svg{width:14px;height:14px;fill:none;stroke:currentColor;stroke-width:1.8}.ishare button:active{opacity:.75}.cshare{margin-top:-2px}
+.ishare{display:flex;flex-wrap:wrap;gap:6px}.ishare button{display:inline-flex;align-items:center;gap:5px;padding:6px 12px;border-radius:999px;border:1px solid rgba(26,76,140,.35);background:transparent;color:var(--hdr,#1a4c8c);font:inherit;font-size:12.5px;font-weight:600;cursor:pointer}.ishare button:first-child{background:var(--hdr,#1a4c8c);border-color:var(--hdr,#1a4c8c);color:#fff}.ishare svg{width:14px;height:14px;fill:none;stroke:currentColor;stroke-width:1.8}.ishare button:active{opacity:.75}.annbg{position:fixed;inset:0;z-index:50;background:rgba(10,20,40,.45);display:flex;align-items:center;justify-content:center;padding:20px}.annbox{background:var(--surface);color:var(--ink);border-radius:14px;max-width:360px;width:100%;padding:20px 18px 16px;box-shadow:0 10px 30px rgba(0,0,0,.25);display:grid;gap:10px}.annbox h3{margin:0;font-size:17px;color:var(--hdr,#1a4c8c)}.annbox p{margin:0;font-size:14px;line-height:1.6}.annbtns{display:flex;gap:8px;justify-content:flex-end;margin-top:4px}.annbtns button{padding:8px 14px;border-radius:999px;font:inherit;font-size:13.5px;font-weight:600;cursor:pointer;border:1px solid rgba(26,76,140,.35);background:transparent;color:var(--hdr,#1a4c8c)}.annbtns button.pri{background:var(--hdr,#1a4c8c);border-color:var(--hdr,#1a4c8c);color:#fff}.cshare{margin-top:-2px}
 
 /* 표 */
 .tw{overflow-x:auto;border:1px solid var(--line);border-radius:8px}
@@ -833,7 +833,7 @@ function cSJ(root){
     $("#sj_out").innerHTML=`<div class="ghead"><span class="big">${won(big)}</span><span class="pill p-now">${esc(tag)}</span></div>
      ${kv.length?`<dl class="kv">${kv.map(([k,x])=>`<dt>${esc(k)}</dt><dd>${x}</dd>`).join("")}</dl>`:""}
      <div class="formula">${esc(formula)}</div><ol class="steps">${steps.map(x=>`<li>${x}</li>`).join("")}</ol>
-     <p class="note">※ 적용 순서와 해석은 노무사님 검토 후 확정하는 것이 좋습니다. 장례비·간병급여 금액은 2차 자료로 확인한 값입니다.</p>`},"sj");}
+     <p class="note">※ 실제 보험급여액은 근로복지공단의 결정에 따르며, 구체적인 사안은 전문가와 상담해 확인하시기 바랍니다.</p>`},"sj");}
 
 function cINS(root){
   root.innerHTML=`<div class="panel"><h3>4대보험료(월)</h3>
@@ -1362,7 +1362,7 @@ const h=(location.hash||"").replace("#","");let H0=["calc","grants","interp","ne
 {const sp=new URLSearchParams(location.search),iid=sp.get("i"),gid=sp.get("g");if(iid&&/^[A-Za-z0-9_-]+$/.test(iid)){ITOPIC="전체";IKIND="all";IOPEN=iid;store.set("iq","");H0="interp";}else if(gid&&/^[A-Za-z0-9_-]+$/.test(gid)){GFILTER="all";GOPEN=gid;H0="grants";}else if(sp.get("new")==="1"){ITOPIC="전체";IKIND="all";INEW="go";store.set("iq","");H0="interp";}}
 try{history.replaceState({tab:"summary"},"","#summary");if(H0!=="summary")history.pushState({tab:H0,calc:CALC},"","#"+H0);}catch(e){}TAB=H0;
 document.querySelectorAll("nav.tabs button").forEach(b=>b.setAttribute("aria-current",b.dataset.tab===TAB?"page":"false"));
-loadData().then(()=>render())
+loadData().then(()=>{render();setTimeout(annShare,600);})
  .catch(e=>{app.innerHTML=`<div class="err">기준 데이터를 불러오지 못했습니다(${esc(e.message)}). 새로고침해 주세요.</div>`;});
 /* 행정해석 개별 공유: 휴대폰은 공유 시트(카카오톡·문자·메일 등), PC는 복사·메일. 링크는 검색용 개별 페이지(interp/<id>.html)로 보내 미리보기 제목이 뜨게 한다. */
 function interpShare(id){const x=allInterp().find(v=>v.id===id);if(!x)return null;
@@ -1380,7 +1380,7 @@ function resText(el){const T=n=>(n.innerText||n.textContent||"").replace(/\s*\n\
     if(n.matches("table")){n.querySelectorAll("tr").forEach(tr=>{const cs=[...tr.children].map(T);if(cs.some(Boolean))out.push(cs.join(" | "));});return;}
     if(n.matches("p,li,.note,.basis,.row")){const t=T(n);if(t)out.push(t);return;}
     [...n.childNodes].forEach(walk);};
-  walk(el);return out.filter(Boolean).join("\n").trim();}
+  walk(el);return out.map(l=>l.replace(/\s*\(확인\s*\d{4}[-.]\s*\d{1,2}[-.]\s*\d{1,2}\.?\)/g,"").replace(/\s+출처(?=\s*$|\s*[,.)])/g,"").trim()).filter(Boolean).join("\n").trim();}
 function calcShare(rid){const r=document.getElementById(rid);if(!r)return null;const res=resText(r);if(!res)return null;
   const panel=r.closest(".panel")||$("#cbody"),h=panel.querySelector("h3"),title=(h?h.textContent.trim():"계산기").replace(/\s*계산$/,"");
   const inp=[...panel.querySelectorAll(".f, .chkrow")].filter(f=>f.offsetParent!==null).map(f=>{const c=f.querySelector("input,select");if(!c)return "";const lb=f.querySelector("label");
@@ -1388,6 +1388,14 @@ function calcShare(rid){const r=document.getElementById(rid);if(!r)return null;c
     const val=c.tagName==="SELECT"?(c.options[c.selectedIndex]||{}).text:c.value;return val?"- "+(lb?lb.textContent.trim():"")+": "+val:"";}).filter(Boolean);
   const text="[청아 노무수첩] "+title+" 계산 결과\n("+asofText()+" 기준)\n"+(inp.length?"\n[입력]\n"+inp.join("\n")+"\n":"")+"\n[결과]\n"+res+"\n\n※ 입력값에 따른 참고용 계산이며, 실제 금액은 사실관계와 관할 기관의 판단에 따라 달라질 수 있습니다.";
   return {title:title+" 계산 결과",text,url:"https://app.청아노무법인.com/#calc"};}
+/* 새 기능 1회 안내: 기기(브라우저)별로 한 번만 띄운다. 다른 안내를 추가할 때는 키를 바꾼다. */
+function annShare(){const K="ann.share202611";if(store.get(K,false)||document.querySelector(".annbg"))return;store.set(K,true);
+  const bg=document.createElement("div");bg.className="annbg";bg.setAttribute("role","dialog");bg.setAttribute("aria-modal","true");bg.setAttribute("aria-labelledby","annT");
+  bg.innerHTML=`<div class="annbox"><h3 id="annT">새 기능 안내: 공유하기</h3><p>행정해석과 계산기 결과를 카카오톡·문자·메일로 바로 보낼 수 있습니다.</p><p>행정해석은 항목을 펼친 뒤, 계산기는 결과 아래의 [공유하기] 버튼을 누르세요.</p><div class="annbtns"><button type="button" data-ann="interp">행정해석 보기</button><button type="button" class="pri" data-ann="ok">확인</button></div></div>`;
+  const close=()=>bg.remove();
+  bg.addEventListener("click",e=>{const b=e.target.closest("[data-ann]");if(e.target===bg||b){close();if(b&&b.dataset.ann==="interp")setTab("interp");try{gtag("event","announce",{id:"share202611",action:b?b.dataset.ann:"dismiss"});}catch(_){}}});
+  document.addEventListener("keydown",function k(e){if(e.key==="Escape"){close();document.removeEventListener("keydown",k);}});
+  document.body.appendChild(bg);setTimeout(()=>{const o=bg.querySelector(".pri");if(o)o.focus();},50);}
 function iFlash(b,msg){const t=b.lastChild,o=t.textContent;t.textContent=msg;setTimeout(()=>{t.textContent=o;},1800);}
 document.addEventListener("click",async e=>{const b=e.target.closest("[data-ishare],[data-icopy],[data-imail],[data-cshare],[data-ccopy],[data-cmail]");if(!b)return;e.preventDefault();e.stopPropagation();
   const k=b.dataset,isC=!!(k.cshare||k.ccopy||k.cmail),id=k.ishare||k.icopy||k.imail||k.cshare||k.ccopy||k.cmail,d=isC?calcShare(id):interpShare(id);if(!d){if(isC)iFlash(b,"결과 없음");return;}

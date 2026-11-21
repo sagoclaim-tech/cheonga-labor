@@ -212,6 +212,11 @@ def check_interp(j):
             ERR.append(f"{w}: 허용되지 않은 출처 {x.get('src')}")
         if not x.get("orig"):
             WARN.append(f"{w}: orig 비어 있음")
+        elif not isinstance(x["orig"], list) or any(
+                not isinstance(o, dict) or set(o) != {"h", "t"} or not isinstance(o["h"], str) or not isinstance(o["t"], str)
+                for o in x["orig"]):
+            # 2026.11.20. 자동 점검이 orig를 ["질의요지", "..."] 배열로 넣어 검색용 페이지 생성이 멈추고 앱 원문이 깨진 일이 있었다.
+            ERR.append(f'{w}: orig 형식 오류. 각 단락은 {{"h": "제목", "t": "본문"}} 객체여야 함')
         ctx = " ".join(str(x.get(f) or "") for f in ("q", "a", "note"))
         for f in ("q", "a", "note"):
             text_check(f"{w}.{f}", x.get(f), ctx)

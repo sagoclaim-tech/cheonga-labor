@@ -265,6 +265,10 @@ def build_interp(items, out):
         if x.get("orig"):
             parts = []
             for o in x["orig"]:
+                if isinstance(o, (list, tuple)):  # 형식이 어긋난 항목 하나 때문에 전체 갱신이 멈추지 않게 한다(check_data.py가 오류로 잡는다)
+                    o = {"h": o[0] if o else "", "t": o[1] if len(o) > 1 else ""}
+                elif not isinstance(o, dict):
+                    o = {"h": "", "t": str(o)}
                 h = str(o.get("h") or "").strip()
                 if h in ("질의요지", "질의"):
                     h = "민원 내용" if k == "civil" else "질의"

@@ -183,6 +183,18 @@ def watch_admrul(w, since, out, fail):
     out.extend(got.values())
 
 
+def reachable(tries=3):
+    """국가법령정보센터 접속 사전 점검. 실행 환경에서 정부 사이트로 나가는 연결이 끊기는 날에는
+    법령마다 6회씩 재시도하느라 몇 시간을 허비하므로 1분 안에 실패로 끝낸다."""
+    for i in range(tries):
+        r = subprocess.run(["curl", "-sS", "-m", "20", "-o", "/dev/null", "-w", "%{http_code}",
+                            "https://www.law.go.kr/LSW/main.html"], capture_output=True)
+        if r.returncode == 0 and r.stdout.decode().strip().startswith(("2", "3")):
+            return True
+        time.sleep(3)
+    return False
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--since", default=None)
@@ -192,6 +204,10 @@ def main():
     w = json.load(open(WATCH, encoding="utf-8"))
     since = a.since or w.get("since", "2026-01-01")
     out, fail = [], []
+    if not reachable():
+        print("접속 불가: 이 실행 환경에서 www.law.go.kr 로 연결되지 않습니다(사이트 장애가 아닐 수 있음).")
+        print("대체 절차: 법령은 법제처 MCP search_law_bulk, 고시는 search_admin_rule로 확인하고 상세 화면은 WebFetch로 엽니다.")
+        sys.exit(3)
     if a.only in (None, "law"):
         watch_laws(w, since, out, fail)
     if a.only in (None, "admrul"):

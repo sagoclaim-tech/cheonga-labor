@@ -220,7 +220,7 @@
   "2026-11-10"
  ],
  "interp/index.html": [
-  "5dc56e2ccd6bc348",
+  "ca731a5e4c14a7e0",
   "2026-11-23"
  ],
  "interp/law-11248.html": [
@@ -260,7 +260,7 @@
   "2026-11-16"
  ],
  "interp/law-14760.html": [
-  "a3535ccec4e5237d",
+  "2a9ffeae62b28865",
   "2026-11-23"
  ],
  "interp/law-14766.html": [
@@ -268,15 +268,15 @@
   "2026-11-19"
  ],
  "interp/law-14798.html": [
-  "1eabe2e461992b53",
+  "f2e5461517fdb358",
   "2026-11-23"
  ],
  "interp/law-14818.html": [
-  "2579edee91c95a84",
+  "2bb4be2f3b432a8b",
   "2026-11-23"
  ],
  "interp/law-14840.html": [
-  "89d43e16a6a965f2",
+  "a0b602f9d492a38b",
   "2026-11-23"
  ],
  "interp/law-14898.html": [
@@ -352,7 +352,7 @@
   "2026-11-19"
  ],
  "interp/law-16456.html": [
-  "5a9d4be85d798181",
+  "08eeac7a16aa05f1",
   "2026-11-23"
  ],
  "interp/law-16460.html": [
@@ -368,12 +368,20 @@
   "2026-11-19"
  ],
  "interp/law-16508.html": [
-  "393f55d016236cb0",
+  "bde6aeae8b3bb386",
   "2026-11-23"
  ],
  "interp/law-16510.html": [
   "b028f316c30d3870",
   "2026-11-18"
+ ],
+ "interp/law-16512.html": [
+  "00a9f11dbc2fcbd6",
+  "2026-11-23"
+ ],
+ "interp/law-16524.html": [
+  "87844ad8edc5fe16",
+  "2026-11-23"
  ],
  "interp/law-16554.html": [
   "2aeca596b1d632ca",
@@ -511,6 +519,10 @@
   "0f1ac4c83d0e887f",
   "2026-11-16"
  ],
+ "interp/law-16696.html": [
+  "e30f07237b148d39",
+  "2026-11-23"
+ ],
  "interp/law-16702.html": [
   "54f60aeaa1c3605b",
   "2026-11-18"
@@ -591,6 +603,14 @@
   "ee0607c295d802f4",
   "2026-11-16"
  ],
+ "interp/law-16796.html": [
+  "4fac5578a1ac5d5e",
+  "2026-11-23"
+ ],
+ "interp/law-16798.html": [
+  "c1c68767fe8aacf2",
+  "2026-11-23"
+ ],
  "interp/law-16800.html": [
   "2c60675b2e9c07b4",
   "2026-11-16"
@@ -643,6 +663,10 @@
   "a8f95d9152aa35dd",
   "2026-11-17"
  ],
+ "interp/law-16918.html": [
+  "24314ac9162f5b69",
+  "2026-11-23"
+ ],
  "interp/law-17016.html": [
   "807c6f4a83f0dbe1",
   "2026-11-18"
@@ -659,12 +683,20 @@
   "bebd224c2fc25050",
   "2026-11-17"
  ],
+ "interp/law-17080.html": [
+  "9ca5d061e8f8f85c",
+  "2026-11-23"
+ ],
+ "interp/law-17086.html": [
+  "af365f774f70825c",
+  "2026-11-23"
+ ],
  "interp/law-17124.html": [
   "5ef0d3c5dce88d86",
   "2026-11-10"
  ],
  "interp/law-17368.html": [
-  "ddf3b3e592468554",
+  "25344057f811b840",
   "2026-11-23"
  ],
  "interp/law-18394.html": [
@@ -692,11 +724,15 @@
   "2026-11-19"
  ],
  "interp/law-18514.html": [
-  "c73729bebe2c4809",
+  "75cec744712f0582",
   "2026-11-23"
  ],
  "interp/law-18516.html": [
-  "175100365b7e7d6f",
+  "df7f64b1984d071b",
+  "2026-11-23"
+ ],
+ "interp/law-18518.html": [
+  "af753cdf1b9fe31a",
   "2026-11-23"
  ],
  "interp/law-18522.html": [
@@ -706,6 +742,18 @@
  "interp/law-18544.html": [
   "f5b53764893dc2d6",
   "2026-11-18"
+ ],
+ "interp/law-18546.html": [
+  "204d61c283d226ca",
+  "2026-11-23"
+ ],
+ "interp/law-18548.html": [
+  "df41ba18ec4e9dc5",
+  "2026-11-23"
+ ],
+ "interp/law-18552.html": [
+  "cb98119c163c3930",
+  "2026-11-23"
  ],
  "interp/law-18554.html": [
   "3f4c60e0067cd19b",
@@ -720,7 +768,7 @@
   "2026-11-16"
  ],
  "interp/law-22410.html": [
-  "5b543f6028f95e28",
+  "d784afd7d9972f1d",
   "2026-11-23"
  ],
  "interp/law-22486.html": [
@@ -744,7 +792,7 @@
   "2026-11-16"
  ],
  "interp/law-22574.html": [
-  "86de2aa1eb671f12",
+  "db74be9497e3654f",
   "2026-11-23"
  ],
  "interp/law-2260.html": [
@@ -816,11 +864,11 @@
   "2026-11-16"
  ],
  "interp/law-2314.html": [
-  "aca91feb68a51bb3",
+  "0b91cb65f042c29e",
   "2026-11-23"
  ],
  "interp/law-2370.html": [
-  "edadef7ec4963e05",
+  "105131ba1d28aee3",
   "2026-11-23"
  ],
  "interp/law-27212.html": [
@@ -935,6 +983,10 @@
   "4b62cc79df449ce3",
   "2026-11-16"
  ],
+ "interp/law-civil-2286533.html": [
+  "791be0175e7277af",
+  "2026-11-23"
+ ],
  "interp/law-civil-2287555.html": [
   "5c11da41ab429944",
   "2026-11-18"
@@ -960,7 +1012,7 @@
   "2026-11-18"
  ],
  "interp/law-civil-2724049.html": [
-  "959ff9064db6aa98",
+  "c7e5b95db54b685e",
   "2026-11-23"
  ],
  "interp/law-civil-2724161.html": [
@@ -1036,7 +1088,7 @@
   "2026-11-10"
  ],
  "interp/law-civil-360954.html": [
-  "543740c39f1bb6f2",
+  "d8d03ae6f5f9ef70",
   "2026-11-23"
  ],
  "interp/law-civil-361132.html": [
@@ -1056,7 +1108,7 @@
   "2026-11-17"
  ],
  "interp/law-civil-361256.html": [
-  "71c9cc09849c8a2b",
+  "129ba42a9dc1b0ae",
   "2026-11-23"
  ],
  "interp/law-civil-361352.html": [
@@ -1128,7 +1180,7 @@
   "2026-11-16"
  ],
  "interp/moel-1987-1992.html": [
-  "fcb20a548105080b",
+  "b6f23b2cc892743d",
   "2026-11-23"
  ],
  "interp/moel-2015113000000002.html": [
@@ -1435,6 +1487,10 @@
   "2b69a26693d66ffd",
   "2026-11-19"
  ],
+ "interp/moleg-314700.html": [
+  "9e93ea8ea04f282b",
+  "2026-11-23"
+ ],
  "interp/moleg-314855.html": [
   "35dcfd00fa85fae8",
   "2026-11-22"
@@ -1455,6 +1511,10 @@
   "991581cc1d64cc94",
   "2026-11-22"
  ],
+ "interp/moleg-323055.html": [
+  "d3bcb17209247726",
+  "2026-11-23"
+ ],
  "interp/moleg-326519.html": [
   "f5191b397afcaaf5",
   "2026-11-16"
@@ -1470,6 +1530,10 @@
  "interp/moleg-327129.html": [
   "6f42f0e28eb5fc1d",
   "2026-11-22"
+ ],
+ "interp/moleg-327389.html": [
+  "2e1e8eb1e48b4ba2",
+  "2026-11-23"
  ],
  "interp/moleg-327719.html": [
   "3a357d1f630ad5b9",
@@ -1487,6 +1551,10 @@
   "6c6d534a266aeba7",
   "2026-11-17"
  ],
+ "interp/moleg-329903.html": [
+  "62214db808a47a2e",
+  "2026-11-23"
+ ],
  "interp/moleg-329939.html": [
   "09c7e272d8a67c70",
   "2026-11-22"
@@ -1494,6 +1562,10 @@
  "interp/moleg-330463.html": [
   "4f1e71a47e7b0135",
   "2026-11-16"
+ ],
+ "interp/moleg-330811.html": [
+  "434094c2eefa7540",
+  "2026-11-23"
  ],
  "interp/moleg-331071.html": [
   "2f780bf73a4a3cbf",
@@ -1503,12 +1575,16 @@
   "3f290e01825002b6",
   "2026-11-18"
  ],
+ "interp/moleg-331231.html": [
+  "4c329a21c414a1f7",
+  "2026-11-23"
+ ],
  "interp/moleg-331819.html": [
   "8b866d0ef3110bbe",
   "2026-11-17"
  ],
  "interp/moleg-331983.html": [
-  "4e9620249e56461f",
+  "9249442146f6ff23",
   "2026-11-23"
  ],
  "interp/moleg-332229.html": [
@@ -1656,7 +1732,7 @@
   "2026-11-18"
  ],
  "interp/prec-114512.html": [
-  "22c4f17f8a4d0ed9",
+  "233c4dd4ba08893f",
   "2026-11-23"
  ],
  "interp/prec-124891.html": [
@@ -1704,7 +1780,7 @@
   "2026-11-19"
  ],
  "interp/prec-238461.html": [
-  "a747156fb0e4e90f",
+  "1b979c4d983156b6",
   "2026-11-23"
  ],
  "interp/prec-600537.html": [
@@ -1760,11 +1836,11 @@
   "2026-11-10"
  ],
  "interp/prec-scourt-2016du60508.html": [
-  "5be8f1f58b9aa847",
+  "2aa32bad8c9bd200",
   "2026-11-23"
  ],
  "interp/prec-seouladmin-2025guhap54295.html": [
-  "d4bc091f5a4aea28",
+  "d1d0cbe8891c148e",
   "2026-11-23"
  ],
  "interp/prec-seoulbukbu-2014gadan116285.html": [
@@ -1772,7 +1848,7 @@
   "2026-11-10"
  ],
  "interp/prec-seoulhigh-2017na2069008.html": [
-  "8a40feeeadb42043",
+  "46315453a6353476",
   "2026-11-23"
  ],
  "interp/prec-seoulnambu-2022gadan215177.html": [

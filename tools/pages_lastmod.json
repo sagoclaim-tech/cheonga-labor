@@ -4,7 +4,7 @@
   "2026-11-10"
  ],
  "changes.html": [
-  "eddabee7400f5ca2",
+  "25b71a116d3ba7ab",
   "2026-11-27"
  ],
  "figures/care_full_pro.html": [
@@ -220,8 +220,8 @@
   "2026-11-10"
  ],
  "interp/index.html": [
-  "37f4631dc7606d77",
-  "2026-11-26"
+  "897ce0b7ceb50396",
+  "2026-11-27"
  ],
  "interp/law-11248.html": [
   "a4a6adbcaac1409b",
@@ -1623,6 +1623,10 @@
   "d3bcb17209247726",
   "2026-11-23"
  ],
+ "interp/moleg-326489.html": [
+  "365b4802f2f5718c",
+  "2026-11-27"
+ ],
  "interp/moleg-326519.html": [
   "82c8b53af69bd98a",
   "2026-11-26"
@@ -1638,6 +1642,10 @@
  "interp/moleg-327129.html": [
   "2c3877e00c7fabd6",
   "2026-11-26"
+ ],
+ "interp/moleg-327305.html": [
+  "b5c7c207d9b7f002",
+  "2026-11-27"
  ],
  "interp/moleg-327389.html": [
   "2e1e8eb1e48b4ba2",
@@ -1694,6 +1702,10 @@
  "interp/moleg-330811.html": [
   "434094c2eefa7540",
   "2026-11-23"
+ ],
+ "interp/moleg-331063.html": [
+  "24cbdeda8d7fb338",
+  "2026-11-27"
  ],
  "interp/moleg-331071.html": [
   "42f072ba65f076dd",

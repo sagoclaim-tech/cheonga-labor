@@ -68,6 +68,10 @@ a{color:var(--accent)}
 .brand{font-family:var(--f-display);font-size:32px;letter-spacing:.04em;margin:0;line-height:1.2}
 .brand small{display:block;font-family:var(--f-body);font-size:18px;font-weight:500;opacity:.9;letter-spacing:.02em;margin-top:4px}
 .asof{display:flex;align-items:center;gap:6px;font-size:12px}
+/* 조회 월이 쓰이지 않는 탭(지원금, 행정해석, 노동뉴스, 검색)에서는 날짜 줄을 숨기고 상단 바를 줄임 */
+.top [hidden]{display:none!important}
+.asof-chip{display:flex;align-items:center;gap:8px;font-size:12px;font-family:var(--f-num);background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.35);border-radius:999px;padding:4px 4px 4px 12px}
+.asof-chip button{background:#fff;color:var(--hdr);border:0;border-radius:999px;padding:4px 10px;font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap}
 .asof input{background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.35);border-radius:8px;padding:5px 8px;color:inherit;font-family:var(--f-num);font-size:13px}
 .asof select{background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.35);border-radius:8px;padding:5px 6px;color:inherit;font-size:13px;font-family:var(--f-num)}
 .asof select option{color:#13233a;background:#fff}
@@ -346,6 +350,7 @@ img{max-width:100%}
       <button type="button" id="today" aria-pressed="true">오늘</button>
     </div>
     <div class="asof-note" id="asofNote"></div>
+    <div class="asof-chip" id="asofChip" hidden><span id="asofChipT"></span><button type="button" id="asofBack">오늘 기준으로</button></div>
     </div>
   </div>
 </header>
@@ -430,6 +435,9 @@ function isFuture(){return MODE==="month"&&ASOF.slice(0,7)>curYM();}
 function asofText(){return MODE==="today"?ASOF+" 현재":ASOF.slice(0,4)+"년 "+(+ASOF.slice(5,7))+"월 1일";}
 function syncHeader(){const ym=ASOF.slice(0,7);const sel=$("#month");sel.value=MODE==="today"?curYM():ym;$("#mprev").disabled=sel.selectedIndex<=0;$("#mnext").disabled=sel.selectedIndex>=sel.options.length-1;
   $("#today").setAttribute("aria-pressed",MODE==="today"?"true":"false");$("#asofNote").textContent=MODE==="today"?"오늘("+ASOF+") 기준":ym.slice(0,4)+"년 "+(+ym.slice(5))+"월 1일 기준";}
+/* 상단 날짜 줄은 조회 월에 따라 내용이 달라지는 요약, 계산기에서만 보임. 검색은 과거·예정 시점을 조회 중일 때만 한 줄로 알림 */
+function syncTop(){const full=TAB==="summary"||TAB==="calc",chip=!full&&(TAB==="search"||TAB==="table")&&MODE==="month";
+  $(".top .asof").hidden=!full;$("#asofNote").hidden=!full;$("#asofChip").hidden=!chip;if(chip)$("#asofChipT").textContent=asofText()+" 기준 조회 중";$(".top .ctl").hidden=!full&&!chip;}
 function setMonth(ym){if(ym===curYM()){MODE="today";ASOF=todayStr();}else{MODE="month";ASOF=ym+"-01";}syncHeader();render();}
 function shiftMonth(n){const o=monthOpts();let i=o.indexOf(MODE==="today"?curYM():ASOF.slice(0,7));if(i<0)i=o.length-1;i=Math.max(0,Math.min(o.length-1,i+n));setMonth(o[i]);}
 let IV=null,GV=null;
@@ -439,12 +447,13 @@ function allInterp(){return ((IV&&IV.items)||[]).concat(((GV&&GV.items)||[]).map
 function loadData(){return Promise.all([fetch("data.json?t="+Date.now(),{cache:"no-store"}).then(r=>{if(!r.ok)throw new Error(r.status);return r.json();}).then(j=>{D=j;}),loadInterp()]);}
 $("#month").innerHTML=monthOpts().map(v=>`<option value="${v}">${v.slice(0,4)}년 ${+v.slice(5)}월${v===curYM()?" (현재)":v>curYM()?" (예정)":""}</option>`).join("");
 $("#month").addEventListener("change",e=>setMonth(e.target.value));
+$("#asofBack").addEventListener("click",()=>setMonth(curYM()));
 $("#mprev").addEventListener("click",()=>shiftMonth(-1));
 $("#mnext").addEventListener("click",()=>shiftMonth(1));
 $("#today").addEventListener("click",()=>{MODE="today";ASOF=todayStr();syncHeader();const b=$("#today");b.textContent="갱신 중";
   loadData().then(()=>{render();b.textContent="오늘";}).catch(e=>{b.textContent="오늘";render();});});
 
-function render(){if(!D)return;({summary:rSummary,calc:rCalc,grants:rGrants,interp:rInterp,news:rNews,search:rSearch,table:rSearch}[TAB]||rSummary)();
+function render(){syncTop();if(!D)return;({summary:rSummary,calc:rCalc,grants:rGrants,interp:rInterp,news:rNews,search:rSearch,table:rSearch}[TAB]||rSummary)();
   /* 검색용 페이지·브리핑 바로가기(?i, ?g, #calc-)로 처음 들어온 경우: 요약이 아닌 탭에도 설치 안내를 맨 위에 보여 줌 */
   if(ENTRY_EXT&&TAB!=="summary"){const v=app.querySelector("section.view");if(v&&!v.querySelector(".instb")){const h=installPanel();
     if(h){const t=ENTRY_FIRST?v.querySelector("details[open][data-iid],details[open][data-gid]"):null;if(t){t.insertAdjacentHTML("beforebegin",h);const go=()=>{const pn=v.querySelector(".instb"),hd=document.querySelector("header.top");if(pn)window.scrollTo(0,pn.getBoundingClientRect().top+window.scrollY-(hd?Math.max(0,hd.getBoundingClientRect().bottom):0)-10);};setTimeout(go,120);setTimeout(go,400);}else v.insertAdjacentHTML("afterbegin",h);}}}
@@ -1087,7 +1096,7 @@ function rGrants(){
   const pc=prefCheck(p);
   const shown=ev.filter(x=>GFILTER==="all"||x.e.st===GFILTER);
   const lab={ok:["적용 가능","p-ok"],maybe:["추가 확인","p-warn"],no:["해당 없음","p-no"]};
-  app.innerHTML=`<section class="view"><div><span class="eyebrow">${esc(asofText())} 기준 · ${esc(D.meta.grantsYear||"")}</span><h2>지원금 안내와 적용 검토</h2><p class="lede">사업장 정보를 입력하면 지원금별로 1차 판정합니다. 입력값은 이 기기에만 저장됩니다.</p></div>
+  app.innerHTML=`<section class="view"><div><span class="eyebrow">${esc(D.meta.grantsYear||"")}</span><h2>지원금 안내와 적용 검토</h2><p class="lede">사업장 정보를 입력하면 지원금별로 1차 판정합니다. 입력값은 이 기기에만 저장됩니다.</p></div>
   <details class="panel" ${store.get("pOpen",true)?"open":""} id="pbox"><summary><h3 style="display:inline">사업장 정보</h3> <span class="pill ${pc.yes?"p-ok":"p-no"}">${pc.yes?"우선지원대상기업":pc.mid?"중견기업":"대규모기업"}</span></summary>
    <div class="form" style="margin-top:12px">
    ${field("p_ind","업종",p.ind,"select",{opts:INDUSTRY,full:true})}
@@ -1158,7 +1167,9 @@ const nYmd=d=>d.toISOString().slice(0,10),nMd=d=>(d.getUTCMonth()+1)+"."+d.getUT
 function nToday(){return new Date(todayStr()+"T00:00:00Z");}
 function nMon(){const t=nToday();return new Date(t.getTime()-((t.getUTCDay()+6)%7)*NDAY);}
 function nGet(s){if(!NCACHE[s])NCACHE[s]=fetch(NB+s+".html",{cache:"no-cache"}).then(r=>r.ok?r.text():null).catch(()=>{delete NCACHE[s];return undefined;});return NCACHE[s];}
-function nFocus(t){const m=/class="summary-bar"[^>]*>([\s\S]*?)<\/div>/.exec(t||"");if(!m)return [];return m[1].replace(/<strong>[\s\S]*?<\/strong>/,"").replace(/<[^>]+>/g,"").replace(/&amp;/g,"&").replace(/\s+/g," ").trim().split(" · ").filter(Boolean);}
+const NENT={amp:"&",quot:'"',apos:"'",lt:"<",gt:">",nbsp:" ",middot:"·",lsquo:"‘",rsquo:"’",ldquo:"“",rdquo:"”",hellip:"…"};
+function nEnt(m,k){k=k.toLowerCase();if(k[0]!=="#")return k in NENT?NENT[k]:m;const n=k[1]==="x"?parseInt(k.slice(2),16):+k.slice(1);try{return String.fromCodePoint(n);}catch(e){return m;}}
+function nFocus(t){const m=/class="summary-bar"[^>]*>([\s\S]*?)<\/div>/.exec(t||"");if(!m)return [];return m[1].replace(/<strong>[\s\S]*?<\/strong>/,"").replace(/<[^>]+>/g,"").replace(/&(#x[0-9a-f]+|#\d+|[a-z]+);/gi,nEnt).replace(/\s+/g," ").trim().split(" · ").filter(Boolean);}
 const NCHEV='<span class="nwg"><svg viewBox="0 0 16 16"><path d="M6 3l5 5-5 5"/></svg></span>';
 function rNews(){if(ND)return rNewsView(ND);
   const seq=++NSEQ,mon=nMon(),today=nToday();
